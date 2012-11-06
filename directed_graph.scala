@@ -5,7 +5,8 @@ import scala.collection.immutable.Set
 import scala.collection.JavaConversions._ 
 
 class Edge(_id: Int,  _from:Vertex, _to:Vertex) {
-  var active = true
+  // Remove the mutable data member
+  val id = _id
   val from = _from
   val to = _to
 }
@@ -15,49 +16,38 @@ class Vertex(_id: Int, s: Array[String]) {
   val sid = s
 
   // Mutable data members
-  var _succ = new ArrayList[Edge] ()
-  var _pre = new ArrayList[Edge] ()
+  var _out = new ArrayList[Edge] ()
+  var _in = new ArrayList[Edge] ()
 
   var mark1 = false
 
+  def in() = _in
+  def out() = _out
+
   // Access methods
-  def pre()  = _pre.map(e => e.from)
-  def succ() = _succ.map(e => e.to)
+  def pre()  = new ArrayList(_in.map(e => e.from))
+  def succ() = new ArrayList(_out.map(e => e.to))
 
-  def activePre() = {
-    new ArrayList[Vertex](_pre.filter(e => e.active).map(e => e.from))
+  def addOut(e: Edge) {
+    _out.add(e)
   }
 
-  def activeSucc() = 
-    new ArrayList[Vertex](_succ.filter(e => e.active).map(e => e.to))
-
-  def addSucc(v: Vertex) {
-    val id = _succ.size;
-    _succ.add(new Edge(id, this, v))
+  def addIn(e: Edge) {
+    _in.add(e)
   }
 
-  def addPre(v: Vertex) {
-    val id = _pre.size;
-    _pre.add(new Edge(id, v, this))
-  }
-
-  def disableIn(id: Int) {
-    val e = _pre.get(id)
-    e.active = false 
-  }
-
-  def resetIn() {
-    _pre.foreach(e => e.active = true)
-  }
 }
 
 class Graph(v: ArrayList[Vertex] ) {
   val V = v
-
+  val E = new ArrayList[Edge]
 
   def addEdge(src:Vertex, dst:Vertex) {
-    src.addSucc(dst)
-    dst.addPre(src)
+    val id = E.size()
+    val e = new Edge(id, src, dst)
+    E.add(e)
+    src.addOut(e)
+    dst.addIn(e)
   }
 
   def allSID(sids: Array[String]) = {
@@ -70,7 +60,7 @@ class Graph(v: ArrayList[Vertex] ) {
       {
         println(v.id + "[label=\"" + v.id + 
                 " sid:"+ allSID(v.sid) +"\"]")
-        v.succ().foreach(n => println(v.id + " -> " + n.id))
+        v.out.foreach(e => println(e.from.id + " -> " + e.to.id))
        }
             )
     println(" } ") 
@@ -84,12 +74,13 @@ class Graph(v: ArrayList[Vertex] ) {
         result = result + v.id + 
           "[label=\"" + v.id + 
           " sid:"+ allSID(v.sid) +"\"]\n"
-
-        v.succ().foreach(n => 
-          result = result + 
-            v.id + " -> " + n.id + "\n")
-      }
-    )
+      })
+    
+    E.foreach( e =>
+      result = result + 
+              e.from.id + " -> " + 
+	      e.to.id + 
+	      "[label=\"" + e.id + "\"]\n")
     result + (" } ") 
   }
   
@@ -116,13 +107,6 @@ class Graph(v: ArrayList[Vertex] ) {
     which.map(x => getV(x))
   }
 
-  def disableIn(which:Int, idx:Int) {
-    getV(which).disableIn(idx)
-  }
-
-  def resetActive() {
-    V.foreach( v => v.resetIn() )
-  }
 }
 
 // Alternative constructor for Graph
@@ -178,9 +162,16 @@ class BFS(V: ArrayList[Vertex],
   }
 }
 
+class Inactive(vArray: Array[Int], eArray:Array[Int])
+{
+  val v = if (vArray != null ) vArray.toSet else Set[Int]()
+  val e = if (eArray != null ) eArray.toSet else Set[Int]()
+}
+          
+
 class Reachable(graph: Graph) {
-  val next = (v:Vertex)=> v.activeSucc()
-  val prev = (v:Vertex)=> v.activePre()
+  val next = (v:Vertex)=> v.succ()
+  val prev = (v:Vertex)=> v.pre()
 
   def forward(start:Vertex):Array[Vertex] = {
     val bfs = new BFS(graph.V, 
@@ -195,14 +186,17 @@ class Reachable(graph: Graph) {
     
   }
 
-  def forward(start: Vertex, in: Array[Int]): Array[Vertex] = {
-    val inactive  = in.toSet
+  private def filteredNext(v:Vertex, inactive:Inactive) = {
+    val out = v.out()
+    val filteredOut = out.filter(e => !inactive.e.contains(e.id))
+    val filteredSucc = filteredOut.map(e => e.to)
+    val r = filteredSucc.filter(v => !inactive.v.contains(v.id))
+    new ArrayList[Vertex](r)
+  }
+
+  def forward(start: Vertex, inactive: Inactive): Array[Vertex] = {
     val bfs = new BFS(graph.V, 
-                      (v:Vertex) => 
-                      new ArrayList[Vertex] (
-			v.succ().filter( e=> !inactive.contains(e.id))
-		      )
-                     )
+                      (v:Vertex)=> filteredNext(v, inactive))
     
     bfs.initialize(start)
     bfs.run()
@@ -213,7 +207,7 @@ class Reachable(graph: Graph) {
     
   }
 
-  def forward(start:Int, in:Array[Int]):Array[Vertex] = 
+  def forward(start:Int, in:Inactive):Array[Vertex] = 
     forward(graph.getV(start), in)
 
 
@@ -230,13 +224,19 @@ class Reachable(graph: Graph) {
     vertices.map(v => v.id)
   }
 
-  def backward(start: Int, in: Array[Int]) = {
-    val inactive  = in.toSet
+
+  private def filteredPrev(v:Vertex, inactive:Inactive) = {
+    val out = v.in()
+    val filteredOut = out.filter(e => !inactive.e.contains(e.id))
+    val filteredSucc = filteredOut.map(e => e.from)
+    val r = filteredSucc.filter(v => !inactive.v.contains(v.id))
+    new ArrayList[Vertex](r)
+  }
+
+  def backward(start: Int, inactive: Inactive) = {
     val bfs = new BFS(graph.V, 
                       (v:Vertex) => 
-                        new ArrayList[Vertex] (
-			  v.pre().filter( e=> !inactive.contains(e.id))
-			  )
+		       filteredPrev(v, inactive)
                      )
     
     bfs.initialize(graph.getV(start))
@@ -262,14 +262,11 @@ class Reachable(graph: Graph) {
     vertices.map(v => v.id)
     
   }
-  def backward(start: Array[Int], in: Array[Int]) = {
-    val inactive  = in.toSet
+
+  def backward(start: Array[Int], inactive:Inactive) = {
     val bfs = new BFS(graph.V, 
                       (v:Vertex) => 
-                        new ArrayList[Vertex] (
-			  v.pre().filter( e=> !inactive.contains(e.id))
-			  )
-                     )
+                        filteredPrev(v, inactive))
     
     bfs.initialize(graph.getV(start))
     bfs.run()
@@ -283,6 +280,3 @@ class Reachable(graph: Graph) {
 
 }
 
-
-
-          

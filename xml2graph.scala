@@ -129,7 +129,7 @@ object TestReachFilter {
     val g = p.parse(args.apply(0))
     val filter = args.apply(1)
     val str = filter.slice(1,filter.length()-1).split(',')
-    val inactive = str.map( s => s.toInt)
+    val inactive = new Inactive(Array[Int](), str.map( s => s.toInt))
     
     g.print()
     println("Reachable from 0")

@@ -10,16 +10,21 @@ g.addEdge(v1,v2);
 g.addEdge(v2,v3);
 g.addEdge(v3,v4);
 
-g.print()
+g.toDotString
 
 %
 r = Reachable(g);
-b = r.forward(v1, [4 3]);
-b(1).sid
+inactive = Inactive([4 3], []);
+b = r.forward(1, inactive);
+b(1).id
 
-b = r.backward(v1, [4 3]);
-b(1).sid
+inactive = Inactive([4 3], []);
+b = r.backward(1, inactive);
+b
 
-b = r.backward(v3, [1]);
-b(1).sid
-b(2).sid
+b = r.backward(3, Inactive([1], []));
+b
+
+inactive = Inactive([], [1]);
+b = r.backward(4, inactive)
+b
