@@ -50,6 +50,12 @@ class Graph(v: ArrayList[Vertex] ) {
     dst.addIn(e)
   }
 
+  def addEdge(src:Int, dst:Int) {
+    val from = getV(src)
+    val to = getV(dst)
+    addEdge(from, to)
+  }
+
   def allSID(sids: Array[String]) = {
     sids.foldLeft ("")((a,b)=> a+b)
   }
