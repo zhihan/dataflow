@@ -123,12 +123,16 @@ class TreeNode( i: Int, c: List[TreeNode], t:String) {
   }
 
   def computeAncestorSubset(vec:Array[Int]) = {
-    val s = vec.toSet
-    val (a,r) = ancestorSubset(s)
-    if (r.isEmpty) {
-      a.toArray
-    } else {
-      throw new RuntimeException("No subset found")
+    if (vec == null) 
+      Array[Int]()
+    else {
+      val s = vec.toSet
+      val (a,r) = ancestorSubset(s)
+      if (r.isEmpty) {
+	a.toArray
+      } else {
+	throw new RuntimeException("No subset found")
+      }
     }
   }
 }
