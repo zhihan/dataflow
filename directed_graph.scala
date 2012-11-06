@@ -107,6 +107,15 @@ class Graph(v: ArrayList[Vertex] ) {
     which.map(x => getV(x))
   }
 
+  def getE(from: Int, to: Int) = {
+    val vFrom = getV(from)
+    val e = vFrom.out().find( e => e.to.id ==to)
+    e match {
+      case Some(x) => x.id
+      case None => throw new RuntimeException("Cannot edge to" + to)
+    }
+  }
+
 }
 
 // Alternative constructor for Graph
