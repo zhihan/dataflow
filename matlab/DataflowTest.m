@@ -10,22 +10,22 @@ classdef DataflowTest < matlab.unittest.TestCase
     
         function testForward1(testcase)
             g = createLinearGraph(4);
-            r = Reachable(g);
-            inactive = Inactive([4 3], []);
+            r = MySE.Reachable(g);
+            inactive = MySE.Inactive([4 3], []);
             b = r.forward(1, inactive);
             testcase.verifyEqual(length(b), 2);
         end
         function testForward2(testcase)
             g = createLinearGraph(5);
-            r = Reachable(g);
-            inactive = Inactive([], [2]);
+            r = MySE.Reachable(g);
+            inactive = MySE.Inactive([], [2]);
             b = r.forward(1, inactive);
             testcase.verifyEqual(length(b), 3);
         end
         function testBackward(testcase)
             g = createLinearGraph(5);
-            r = Reachable(g);
-            inactive = Inactive([], [2]);
+            r = MySE.Reachable(g);
+            inactive = MySE.Inactive([], [2]);
             b = r.backward(5, inactive);
             testcase.verifyEqual(length(b), 2);
         end
@@ -58,9 +58,9 @@ end
 function g = createLinearGraph(n)
 % Create a linear graph 1->2->3...->i
 for i=1:n
-    v(i) = Vertex(i, mat2str(i));
+    v(i) = MySE.Vertex(i, mat2str(i));
 end
-f = GraphFactory();
+f = MySE.GraphFactory();
 g = f.make(v);
 for i=1:n-1
     g.addEdge(i, i+1);
@@ -68,7 +68,7 @@ end
 end
 
 function a =createSampleTree()
-f = TreeNodeFactory;
+f = MySE.TreeNodeFactory;
 a = f.make(1,'1');
 b = f.make(2,'2');
 c = f.make(3,'3');
