@@ -4,41 +4,51 @@ import scala.collection.mutable.Queue
 import scala.collection.immutable.Set
 import scala.collection.JavaConversions._ 
 
+package MySE{
+
+/* Vertex class consists of an id, a string for sid
+ * and in- out- edges. The edges are ArrayList, which are
+ * mutable data members.
+ */
+class Vertex(_id: Int, s: Array[String]) {
+  val id = _id
+  val sid = s
+  
+  // Mutable data members
+  var _out = new ArrayList[Edge] ()
+  var _in = new ArrayList[Edge] ()
+  
+  var mark1 = false
+    
+  def in() = _in
+  def out() = _out
+    
+  // Access methods
+  def pre()  = new ArrayList(_in.map(e => e.from))
+  def succ() = new ArrayList(_out.map(e => e.to))
+    
+  // mutation
+  def addOut(e: Edge) {
+    _out.add(e)
+  }
+    
+  def addIn(e: Edge) {
+    _in.add(e)
+  }
+}
+
+/* Edge class consists of id, and the two end vertices
+ */
 class Edge(_id: Int,  _from:Vertex, _to:Vertex) {
-  // Remove the mutable data member
   val id = _id
   val from = _from
   val to = _to
 }
 
-class Vertex(_id: Int, s: Array[String]) {
-  val id = _id
-  val sid = s
-
-  // Mutable data members
-  var _out = new ArrayList[Edge] ()
-  var _in = new ArrayList[Edge] ()
-
-  var mark1 = false
-
-  def in() = _in
-  def out() = _out
-
-  // Access methods
-  def pre()  = new ArrayList(_in.map(e => e.from))
-  def succ() = new ArrayList(_out.map(e => e.to))
-
-  def addOut(e: Edge) {
-    _out.add(e)
-  }
-
-  def addIn(e: Edge) {
-    _in.add(e)
-  }
-
-}
-
+/* Graph class implements a simple graph using edgelist.
+ */
 class Graph(v: ArrayList[Vertex] ) {
+
   val V = v
   val E = new ArrayList[Edge]
 
@@ -136,7 +146,10 @@ class GraphFactory() {
     new Graph(convertVList(v))
   }
 }
-
+/* Breadth-First search
+ *
+ * Used by Reachable class to compute reachability.
+ */
 class BFS(V: ArrayList[Vertex], 
           visit: Vertex => ArrayList[Vertex]){
   // Immutable members
@@ -176,14 +189,22 @@ class BFS(V: ArrayList[Vertex],
     }
   }
 }
-
+/* Inactive class implements a mechanism to filter nodes
+   and edges in the BFS search.
+* */
 class Inactive(vArray: Array[Int], eArray:Array[Int])
 {
   val v = if (vArray != null ) vArray.toSet else Set[Int]()
   val e = if (eArray != null ) eArray.toSet else Set[Int]()
 }
           
-
+/* Reachable
+ * Compute graph reachability using BFS search.
+ *
+ * The default method performs a simple BFS search. When an
+ * Inactive object is given, the inactive object is used to
+ * stop searches at specified nodes and edges.
+ */
 class Reachable(graph: Graph) {
   val next = (v:Vertex)=> v.succ()
   val prev = (v:Vertex)=> v.pre()
@@ -295,3 +316,4 @@ class Reachable(graph: Graph) {
 
 }
 
+}

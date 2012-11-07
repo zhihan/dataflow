@@ -9,6 +9,7 @@ import java.util.ArrayList
 import scala.collection.mutable.HashMap
 import scala.collection.JavaConversions._ 
 
+import MySE._
 
 class XML2Graph() {
   

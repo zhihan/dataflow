@@ -2,7 +2,7 @@ import scala.collection.immutable.Set
 import scala.collection.JavaConversions._ 
 
 // A Tree node in the program structure tree
-
+package MySE{
 class TreeNode( i: Int, c: List[TreeNode], t:String) {
   val id = i
   var children = c  // mutable
@@ -142,4 +142,6 @@ class TreeNodeFactory () {
   def make(i:Int, t:String) = {
     new TreeNode(i, List[TreeNode](), t)
   }
+}
+
 }

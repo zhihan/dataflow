@@ -5,6 +5,7 @@ import org.w3c.dom.Node
 import org.w3c.dom.Element
 import java.io.File
 
+import MySE._
 class XML2Tree() {
   def getID(n: Element) = {
     val s = n.getAttribute("Id")
