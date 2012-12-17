@@ -70,7 +70,8 @@ object Diff {
     val dx = scope.newVar("d_" + newX.name)
     val dvar = Map(newX -> dx)
     val init_dx = Assignment(RefVar(dx), Const(FloatValue(1.0)))
-    
+
+    // Initialize du
     var init_du = ListBuffer[Statement]()
     newP.foreach{ u =>
       val du = scope.newVar("d_" + u.name)
@@ -79,10 +80,25 @@ object Diff {
     }
     val diff = new Diff(dvar)
 
+    // Differentiate the body
     val diffL = diffStatements(renamedBody, diff)
+    
+    // Assemble the statements together
     val body = init ::: (init_dx :: init_du.toList) ::: diffL 
 
     (body, scope)
+  }
+
+  def createDiffFunctions(l:List[Statement],
+                          sc:VarScope,
+                          vars:List[Var]) = 
+  {
+    for { x <- vars
+         u = vars.filter (_ != x)
+         (df, scope) = apply(l, sc, x, u) 
+       }
+    yield (df, scope, x, u)
+    
   }
 
 }

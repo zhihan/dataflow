@@ -75,7 +75,7 @@ package my.ir.sim.Test {
       val printer = new Print()
       val proc = Procedure(output.body, "Output")
       val prog = printer.Procedure(proc)
-      println(prog)
+      // println(prog)
       assert(prog.length > 10)
     }
 
@@ -100,7 +100,7 @@ package my.ir.sim.Test {
       val printer = new Print()
       val proc = Procedure(update.body, "Update")
       val prog = printer.Procedure(proc)
-      println(prog)
+      // println(prog)
       assert(prog.length > 10)
     }
 
@@ -129,13 +129,13 @@ package my.ir.sim.Test {
       val p1 = new Print()
       val proc1 = Procedure(output.body, "Output")
       val prog1 = p1.Procedure(proc1)
-      println(prog1)
+      // println(prog1)
       assert(prog1.length > 10)
 
       val p2 = new Print()
       val proc2 = Procedure(update.body, "Update")
       val prog2 = p2.Procedure(proc2)
-      println(prog2)
+      // println(prog2)
       assert(prog2.length > 10)
     }
 
