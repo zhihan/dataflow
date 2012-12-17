@@ -1,8 +1,0 @@
-import my.ir._
-
-import my.ir.conversion._
-
-import org.scalatest.FunSuite
-
-package my.ir.Test {
-  class AnalysisSuite extends FunSuite {
