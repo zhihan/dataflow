@@ -1,12 +1,16 @@
+package my.se
+
 import scala.collection.immutable.Set
 import scala.collection.JavaConversions._ 
 
-// A Tree node in the program structure tree
-package MySE{
-class TreeNode( i: Int, c: List[TreeNode], t:String) {
+
+/* TreeNode
+ * A Tree node in the program structure tree
+ *
+ * */
+class TreeNode( i: Int, c: List[TreeNode]) {
   val id = i
   var children = c  // mutable
-  val rType = t  // Region type
 
   // Get all descendant 
   private def getAllDescendants():List[TreeNode] = {
@@ -41,14 +45,14 @@ class TreeNode( i: Int, c: List[TreeNode], t:String) {
     }
   }
 
-  def getDescendantNodes(s: Array[Int]) = {
-    this.getDescendants(s.toSet )
-  }
-
   def getDescendantIDs(s: Array[Int]) = {
-    val result = this.getDescendants(s.toSet)
-    val ids = result.map(v => v.id)
-    ids.toArray
+    if (s == null) {
+      Array[Int]()
+    } else {
+      val result = this.getDescendants(s.toSet)
+      val ids = result.map(v => v.id)
+      ids.toArray
+    }
   }
 
   def getAllDescendantIDs() = {
@@ -91,8 +95,7 @@ class TreeNode( i: Int, c: List[TreeNode], t:String) {
   }
 
   private def dotString():String = {
-    var result = id.toString() + "[label=\"" + id +
-    ":" + rType +"\"]\n"
+    var result = id.toString() + "[label=\"" + id + "\"]\n"
 
     children.foreach(n => result = result + 
                      id.toString() + " -- " + n.id.toString() + "\n")
@@ -135,13 +138,32 @@ class TreeNode( i: Int, c: List[TreeNode], t:String) {
       }
     }
   }
+
+  private def removePartialAncestors(s:Set[Int]): Set[Int] = {
+    def allDescendantContainedIn(i:Int, s:Set[Int]):Boolean = {
+      val v = getNode(i)
+      val c = v.getAllDescendantIDs()
+      val cSet = c.toSet
+      cSet.subsetOf(s)
+    }
+    s.filter(x => allDescendantContainedIn(x, s))
+  }
+  
+  def removePartiallyContainedAncestors(vec:Array[Int]):Array[Int] = {
+    if (vec == null) 
+      Array[Int]()
+    else {
+      val s = vec.toSet
+      val r:Set[Int] = removePartialAncestors(s)
+      r.toArray
+    }
+  }
 }
 
 
 class TreeNodeFactory () {
-  def make(i:Int, t:String) = {
-    new TreeNode(i, List[TreeNode](), t)
+  def make(i:Int) = {
+    new TreeNode(i, List[TreeNode]())
   }
 }
 
-}

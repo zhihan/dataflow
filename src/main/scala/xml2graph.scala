@@ -9,7 +9,7 @@ import java.util.ArrayList
 import scala.collection.mutable.HashMap
 import scala.collection.JavaConversions._ 
 
-import MySE._
+import my.se._
 
 class XML2Graph() {
   
@@ -27,13 +27,13 @@ class XML2Graph() {
   
   def getSID(n: Element) = {
     val sid = n.getElementsByTagName("SID")
-    var result = List[String]()
+    var result = ""
     for (i <- 0 until sid.getLength() ) {
       val e = sid.item(i).getChildNodes()
       val c = e.item(0)
-      result = c.getNodeValue()::result
+      result = result + c.getNodeValue()
      } 
-    result.toArray
+    result
   }
   
   def getElementAttr(n: Element, name: String, attr: String) = {
@@ -53,9 +53,10 @@ class XML2Graph() {
   }
 
    def parse(filename: String) = {
-     var V = new ArrayList[Vertex]()
      val vMap = HashMap.empty[Int, Vertex];
-     var g = new Graph(V)
+     var g = new Graph()
+
+     var V = List[Vertex]()
 
      // Add a hash table
      try {
@@ -71,11 +72,11 @@ class XML2Graph() {
          val vid = getID(element)
 	 val v = new Vertex(gid, 
 			    getSID(element))
-         V.add(v)
+         V = v :: V
          vMap(gid) = v
        }
-       
-       g = new Graph(V)
+       val fac = new GraphFactory()
+       g = fac.make(V.toArray)
 
        val eList = doc.getElementsByTagName("edge")
        

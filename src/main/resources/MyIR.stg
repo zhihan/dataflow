@@ -1,0 +1,80 @@
+// Template file for dumping my-ir
+group MyIR;
+
+procedure(p) ::= <<
+function <p.name>()
+<p.body:stmt(); separator="\n">
+end
+>>
+
+stmt(s) ::= <<
+<if(s.assignment)><assignment(s)><\\\>
+<elseif(s.ifElse)><if_else(s)><\\\>
+<endif>
+>>
+
+assignment(s) ::= "<lref(s.lhs)> = <expression(s.expr)>;"
+
+if_else(s) ::= <<
+if (<expression(s.cond)>) 
+    <s.b1:stmt(); separator="\n">   
+else 
+    <s.b2:stmt(); separator="\n">   
+end
+>>
+
+lref(x) ::= "<if(x.refVar)><refVar(x)><elseif(e.refArray)><refArray(x)><endif>"
+
+refVar(x) ::= "<var(x.var)>"
+
+refArray(x) ::= "<var(x.var)>[<x.index>]"
+
+var(v) ::= "<v.name>"
+
+datatype(te) ::= <<
+<if(te.base)><baseType(te.baseType)><\\\>
+<elseif(te.array)><arrayType(te)><\\\>
+<endif>
+>>
+
+baseType(t) ::= <<
+<if(t.bool)>bool<\\\>
+<elseif(t.float)>float<\\\>
+<endif>
+>>
+
+arrayType(t) ::= "<baseType(t.baseType)>[<t.n>]"
+
+// Expressions
+expression(e) ::= <<
+<if(e.ref)><ref(e.var)><\\\>
+<elseif(e.deref)><deref(e.var)><\\\>
+<elseif(e.binExp)><binaryExpression(e)><\\\>
+<elseif(e.const)><constant(e)><\\\>
+<endif>
+>>
+
+// Use Matlab syntax 
+ref(v) ::= "<var(v)>"
+deref(v) ::= "<var(v)>" 
+
+binaryExpression(b) ::= <<
+<expression(b.lhs)> <binaryOperator(b.op)> <expression(b.rhs)>
+>>
+
+binaryOperator(o) ::= <<
+<if(o.mul)>*<\\\>
+<elseif(o.plus)>+<\\\>
+<elseif(o.lt)>\<<\\\>
+<endif>
+>>
+
+constant(c) ::= "<constValue(c.value)>"
+
+constValue(v) ::= <<
+<if(v.boolValue)><v.val>:bool<\\\>
+<elseif(v.floatValue)><v.val>:float<\\\>
+<else> Unknown const <v> <\\\>
+<endif>
+>>
+

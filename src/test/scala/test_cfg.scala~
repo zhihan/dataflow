@@ -1,0 +1,27 @@
+import my.ir._
+import my.ir.conversion._
+
+import org.antlr.runtime._
+import org.antlr.runtime.tree._
+
+import org.scalatest.FunSuite
+
+package my.ir.CFGTest {
+  class CFGTestSuite extends FunSuite {
+    test("Construct cfg") {
+      val a = """function((),(),main) 
+      {
+      if (@b) {
+      =(y, @x);
+      } else {
+      =(y, +(@x, @x)); 
+      } 
+      }"""
+      val p = new ParseAndCreateIR()
+      val (ast,_) = p.parse(a)
+      val (cfg,_) = Utility.createCFGForList(ast.body)
+      assert(cfg.graph.V.length == 9)
+      assert(cfg.graph.E.length == 9)
+   }
+  }
+}

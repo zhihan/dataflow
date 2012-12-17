@@ -5,7 +5,8 @@ import org.w3c.dom.Node
 import org.w3c.dom.Element
 import java.io.File
 
-import MySE._
+import my.se._
+
 class XML2Tree() {
   def getID(n: Element) = {
     val s = n.getAttribute("Id")
@@ -33,11 +34,11 @@ class XML2Tree() {
 	}
       }
     }
-    new TreeNode(id, children, t)
+    new TreeNode(id, children)
   }
 
   def parse(filename: String) = {
-    var t = new TreeNode(0, List[TreeNode](), "")
+    var t = new TreeNode(0, List[TreeNode]())
     try {
       val f = new File(filename)
       val dF = DocumentBuilderFactory.newInstance()
