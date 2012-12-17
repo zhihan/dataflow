@@ -10,22 +10,22 @@ classdef DataflowTest < matlab.unittest.TestCase
     
         function testForward1(testcase)
             g = createLinearGraph(4);
-            r = MySE.Reachable(g);
-            inactive = MySE.Inactive([4 3], []);
+            r = my.se.Reachable(g);
+            inactive = my.se.Inactive([4 3], []);
             b = r.forward(1, inactive);
             testcase.verifyEqual(length(b), 2);
         end
         function testForward2(testcase)
             g = createLinearGraph(5);
-            r = MySE.Reachable(g);
-            inactive = MySE.Inactive([], 2);
+            r = my.se.Reachable(g);
+            inactive = my.se.Inactive([], 2);
             b = r.forward(1, inactive);
             testcase.verifyEqual(length(b), 3);
         end
         function testBackward(testcase)
             g = createLinearGraph(5);
-            r = MySE.Reachable(g);
-            inactive = MySE.Inactive([], 2);
+            r = my.se.Reachable(g);
+            inactive = my.se.Inactive([], 2);
             b = r.backward(5, inactive);
             testcase.verifyEqual(length(b), 2);
         end
@@ -51,8 +51,8 @@ classdef DataflowTest < matlab.unittest.TestCase
         
         function testLabelFwd(testcase)
             g= createTestGraph();
-            Op = MySE.IntLabelOperation;
-            Lbl = MySE.IntLabel(g, Op);
+            Op = my.se.IntLabelOperation;
+            Lbl = my.se.IntLabel(g, Op);
             labels = Lbl.emptyLabel;
             Lbl.setLabel(labels, 1,1);
             Lbl.setLabel(labels, 2,2);
@@ -65,8 +65,8 @@ classdef DataflowTest < matlab.unittest.TestCase
         
         function testLabelBwd(testcase)
             g= createTestGraph();
-            Op = MySE.IntLabelOperation;
-            Lbl = MySE.IntLabel(g, Op);
+            Op = my.se.IntLabelOperation;
+            Lbl = my.se.IntLabel(g, Op);
             labels = Lbl.emptyLabel;
             Lbl.setLabel(labels, 5,5);
             Lbl.setLabel(labels, 3,3);
@@ -79,8 +79,8 @@ classdef DataflowTest < matlab.unittest.TestCase
         
         function testLabelBoth(testcase)
             g= createLinearGraph(5);
-            Op = MySE.IntLabelOperation;
-            Lbl = MySE.IntLabel(g, Op);
+            Op = my.se.IntLabelOperation;
+            Lbl = my.se.IntLabel(g, Op);
             labels = Lbl.emptyLabel;
             Lbl.setLabel(labels, 2,2);
             Lbl.setLabel(labels, 4,4);
@@ -94,9 +94,9 @@ classdef DataflowTest < matlab.unittest.TestCase
         
         function testLabelLoop(testcase)
             for i=1:5
-                v(i) = MySE.Vertex(i, mat2str(i)); %#ok<AGROW>
+                v(i) = my.se.Vertex(i, mat2str(i)); %#ok<AGROW>
             end
-            f = MySE.GraphFactory();
+            f = my.se.GraphFactory();
             g = f.make(v);
             g.addEdge(1,2);
             g.addEdge(2,3);
@@ -104,8 +104,8 @@ classdef DataflowTest < matlab.unittest.TestCase
             g.addEdge(4,5);
             g.addEdge(5,2);
             
-            Op = MySE.IntLabelOperation;
-            Lbl = MySE.IntLabel(g, Op);
+            Op = my.se.IntLabelOperation;
+            Lbl = my.se.IntLabel(g, Op);
             labels = Lbl.emptyLabel;
             Lbl.setLabel(labels, 2,2);
             Lbl.setLabel(labels, 1,1);
@@ -120,8 +120,8 @@ classdef DataflowTest < matlab.unittest.TestCase
         
         function testLabelPair(testcase)
             g = amTestGraph();
-            Op = MySE.IntLabelOperation;
-            Lbl = MySE.IntLabel(g, Op);
+            Op = my.se.IntLabelOperation;
+            Lbl = my.se.IntLabel(g, Op);
             ilabels = Lbl.emptyLabel;
             olabels = Lbl.emptyLabel;
             % Input label
@@ -152,11 +152,11 @@ classdef DataflowTest < matlab.unittest.TestCase
 end
 
 function g= createTestGraph()
+import my.se.Graph
+g = Graph;
 for i=1:5
-    v(i) = MySE.Vertex(i, mat2str(i)); %#ok<AGROW>
+    v(i) = g.newVertex(mat2str(i)); %#ok<AGROW>
 end
-f = MySE.GraphFactory();
-g = f.make(v);
 g.addEdge(1,3);
 g.addEdge(2,3);
 g.addEdge(1,4);
@@ -166,11 +166,11 @@ end
 
 function g = amTestGraph()
 % Test graph from Alongkrit and Mohamed
+import my.se.Graph
+g = Graph;
 for i=1:9
-    v(i) = MySE.Vertex(i, mat2str(i)); %#ok<AGROW>
+    v(i) = g.newVertex(mat2str(i)); %#ok<AGROW>
 end
-f = MySE.GraphFactory;
-g = f.make(v);
 g.addEdge(1,2);
 g.addEdge(2,3);
 g.addEdge(2,5);
@@ -183,22 +183,22 @@ end
 
 function g = createLinearGraph(n)
 % Create a linear graph 1->2->3...->i
+import my.se.Graph
+g = Graph;
 for i=1:n
-    v(i) = MySE.Vertex(i, mat2str(i)); %#ok<AGROW>
+    v(i) = g.newVertex(mat2str(i)); %#ok<AGROW>
 end
-f = MySE.GraphFactory();
-g = f.make(v);
 for i=1:n-1
     g.addEdge(i, i+1);
 end
 end
 
 function a =createSampleTree()
-f = MySE.TreeNodeFactory;
-a = f.make(1,'1');
-b = f.make(2,'2');
-c = f.make(3,'3');
-d = f.make(4,'4');
+f = my.se.TreeNodeFactory;
+a = f.make(1);
+b = f.make(2);
+c = f.make(3);
+d = f.make(4);
 a.addChild(b);
 a.addChild(c);
 b.addChild(d);
