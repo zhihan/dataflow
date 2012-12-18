@@ -24,6 +24,7 @@ package my.ir.sim.Test {
       // println(xname)
       assert(xname == List("x"))
     }
+
     test("Simple output simstate insersion") {
       val a =  """function((),(),step) 
       {

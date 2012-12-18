@@ -21,6 +21,7 @@ class Diff(dvar : Map[Var,Var]) {
 						 apply(lhs), 
 						 apply(rhs))
 
+      case BinExp(OpLt(), lhs, rhs) => Const(FloatValue(0.0)) 
       case Const(_)  => Const(FloatValue(0.0))
       case Ref(v) => e 
     }
@@ -43,7 +44,10 @@ object Diff {
 	val db2 = diffStatements(b2, diff)
 	List(IfElse(e, db1, db2))
       }
+      
       case Noop(_) => List(s)
+      case _ => List(s) // Don't know what to do yet
+
     }
   }
   

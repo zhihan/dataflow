@@ -8,7 +8,7 @@ import scala.collection.mutable.Set
 // Binary operations 
 // Every case class needs to implements 'is' method
 // to facilitate stringtemplate.
-abstract class BinaryOperator 
+sealed abstract class BinaryOperator 
 case class OpMul() extends BinaryOperator
 {
   def isMul() = true
@@ -25,7 +25,7 @@ case class OpLt() extends BinaryOperator
 /* Variable
  * A variable has a name and an id (integer) 
  */
-class Var(varname: String, varid: Int) {
+sealed class Var(varname: String, varid: Int) {
   val name = varname
   val id = varid
   
@@ -42,7 +42,7 @@ object Var {
 
 
 // Base type system
-abstract class BaseType 
+sealed abstract class BaseType 
 case class TBool() extends BaseType
 {
   def isBool() = true
@@ -52,7 +52,7 @@ case class Tfloat() extends BaseType
   def isFloat() = true
 }
 
-abstract class DataType
+sealed abstract class DataType
 case class Tbase(baseType:BaseType) extends DataType
 {
   def isBase() = true
@@ -65,7 +65,7 @@ case class Tarray(base:BaseType, n:Int) extends DataType
   def getN() = n
 }
 
-abstract class BaseValue 
+sealed abstract class BaseValue 
 case class BoolValue(v:Boolean) extends BaseValue
 {
   def getVal = v
@@ -77,7 +77,7 @@ case class FloatValue(v:Double) extends BaseValue
   def isFloatValue() = true
 }
 
-abstract class Exp
+sealed abstract class Exp
 
 case class Ref(v:Var) extends Exp
 {
@@ -103,7 +103,7 @@ case class Const(value:BaseValue) extends Exp
 }
 
 // Anything appearing as LHS of assignment
-abstract class LRef
+sealed abstract class LRef
 case class RefVar(v: Var) extends LRef
 {
   def isRefVar() = true
@@ -116,7 +116,7 @@ case class RefArray(v: Var, i: Int) extends LRef
   def getIndex() = i
 }
 
-abstract class Statement
+sealed abstract class Statement
 case class Assignment(l:LRef, e:Exp) extends Statement
 {
   // String template hooks
