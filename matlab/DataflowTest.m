@@ -195,10 +195,10 @@ end
 
 function a =createSampleTree()
 f = my.se.TreeNodeFactory;
-a = f.make(1);
-b = f.make(2);
-c = f.make(3);
-d = f.make(4);
+a = f.make();
+b = f.make();
+c = f.make();
+d = f.make();
 a.addChild(b);
 a.addChild(c);
 b.addChild(d);
