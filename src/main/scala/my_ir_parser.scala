@@ -1,5 +1,7 @@
 package my.ir //
 
+import my.utility._ // Gensym
+
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Map
 import org.antlr.runtime._
@@ -36,8 +38,6 @@ class VarScope () {
 
 
 package conversion {
-
-
   class ConvertingVisitor ()
   {
     val adaptor = new CommonTreeAdaptor()

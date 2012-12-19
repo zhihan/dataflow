@@ -3,6 +3,7 @@ package my.se
 import scala.collection.immutable.Set
 import scala.collection.JavaConversions._ 
 
+import my.utility._ // Gensym
 
 /* TreeNode
  * A Tree node in the program structure tree
@@ -162,8 +163,10 @@ class TreeNode( i: Int, c: List[TreeNode]) {
 
 
 class TreeNodeFactory () {
-  def make(i:Int) = {
-    new TreeNode(i, List[TreeNode]())
+  val gensym = new Gensym()
+
+  def make() = {
+    new TreeNode(gensym(), List[TreeNode]())
   }
 }
 

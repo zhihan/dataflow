@@ -4,6 +4,7 @@
 package my.ir
 
 import scala.collection.mutable.Set
+import my.utility._ // Gensym
 
 // Binary operations 
 // Every case class needs to implements 'is' method
@@ -175,16 +176,3 @@ case class Procedure(body: List[Statement], name:String)
   def isProcedure = true
 }
 
-
-class Gensym () {
-  var id = 0
-  def apply() = {
-    id = id+1
-    id
-  }
-  def copy() = {
-    val a = new Gensym()
-    a.id = id
-    a
-  }
-}
