@@ -50,10 +50,11 @@ class Graph() {
     v
   }
 
-  def addEdge(src:Vertex, dst:Vertex) {
+  def addEdge(src:Vertex, dst:Vertex):Edge = {
     val id = E.size()
     val e = new Edge(id, src, dst)
     E.add(e)
+    e 
   }
 
   // Todo: test if the following function works
@@ -90,7 +91,7 @@ class Graph() {
     ArrayBuffer[Vertex]() ++ r
   }
 
-  def addEdge(src:Int, dst:Int) {
+  def addEdge(src:Int, dst:Int): Edge = {
     val from = getV(src)
     val to = getV(dst)
     addEdge(from, to)
@@ -155,7 +156,8 @@ class Graph() {
     val e = outE(vFrom).find( e => e.to.id ==to)
     e match {
       case Some(x) => x.id
-      case None => throw new RuntimeException("Cannot edge to" + to)
+      case None => throw new RuntimeException(
+        "Cannot find edge from " + from + " to " + to)
     }
   }
 

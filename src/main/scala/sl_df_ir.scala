@@ -3,9 +3,16 @@ package my.sl.ir
 import my.se._
 import scala.collection.mutable.Map
 
+/**
+ * A dataflow node can be either a variable node or a proc node.
+ *
+ * - Variable node models variables used for signals, state and data stores.
+ * - Proc node models block methods that uses or writes to the variables.
+ *
+ */
 abstract class DataflowNode(i:Int) 
 {
-  val id = i
+  val id = i   // Note: this id is identical to the vid of the vertex
 }
 case class Var(_i:Int) extends DataflowNode(_i)
 {
@@ -18,16 +25,25 @@ case class Proc(_i:Int) extends DataflowNode(_i)
 class DataflowGraph() {
   val g = new Graph()  
 
-  // Two-way maps between graphical vertices and semantic 
-  // nodes
-
+  // Get the node for a given Id
   val nodes = Map[Int, DataflowNode]()
+
+  private def isProc(n:DataflowNode) = {
+    n match {
+      case Var(_) => false
+      case Proc(_) => true 
+    }
+  }
 
   def newVarNode(name:String) = {
     val v = g.newVertex(name)
     val n = Var(v.id)
     nodes(v.id) = n
     n
+  }
+
+  def getVarNodes(name:String) = {
+    g.V.filter(_.sid == name)
   }
 
   def newProcNode(name:String) = {
@@ -37,14 +53,12 @@ class DataflowGraph() {
     n
   }
 
-  def addEdge(src:Int, dst:Int) {
-    g.addEdge(src, dst)
-  }
+  def addEdge(src:Int, dst:Int) = g.addEdge(src, dst)
+  
 
-  def addEdge(src:DataflowNode, dst:DataflowNode) {
-    
+  def addEdge(src:DataflowNode, dst:DataflowNode) = 
     g.addEdge(src.id, dst.id)
-  }
+  
   
   
   def toDotString(): String = {
@@ -53,15 +67,63 @@ class DataflowGraph() {
       val n = nodes(v.id)
       val shape = 
         n match {
-          case Var(_) => "[shape='box']"
-          case Proc(_) => "[shape='ellipse']"
+          case Var(_) => "[shape=\"box\"]"
+          case Proc(_) => "[shape=\"ellipse\"]"
       }
-      val label = "[label='" + v.sid + "']"
+      val label = "[label=\"" + v.sid + "\"]"
       shape + label
     }
 
     writeGraphviz(g, vLabel)
   }
+
+  def backwardReachable(src:Array[Int]) : Array[Int] = {
+    val reach = new Reachable(g)
+    reach.backward(src)
+  }
+
+  def backwardReachableProcs(src: Array[Int], 
+                             inactive:Inactive) = {
+    val reach = new Reachable(g)
+    val allReached = reach.backward(src,inactive)
+    allReached.filter( i => isProc(nodes(i))).toArray
+  }
+
+  def backwardReachableVars(src: Array[Int], 
+                             inactive:Inactive) = {
+    val reach = new Reachable(g)
+    val allReached = reach.backward(src,inactive)
+    allReached.filter( i => !isProc(nodes(i))).toArray
+  }
+
+
+  def allProcsButID(ids:Array[Int]) = {
+    val idSet = ids.toSet
+    
+    val result = g.V.filter(v => isProc(nodes(v.id))
+                          ).filter( v=> !idSet.contains(v.id) 
+                                 ).toArray
+    result.map(v => v.id)
+  }
+
+  // Delegate methods
+
+  def getE(from:Int, to:Int) = g.getE(from, to)
+
+  def getV(which:Int) = g.getV(which)
+  def getV(which:Array[Int]) = g.getV(which)
+  def pre(which:Int) = g.pre(getV(which)).map(_.id).toArray
+
+  def outEId(which:Int) = g.outE(getV(which)).toArray
+
+  def outEIdFiltered(which:Int, ids:Array[Int]) = {
+    val out = g.outE(getV(which))
+    val idSet = ids.toSet
+    out.filter( e => idSet.contains (e.to.id)
+             ).map(e => e.id
+                 ).toArray
+  } 
 }
 
 
+ 
