@@ -247,6 +247,10 @@ class Reachable(graph: Graph) {
     bfs.visited.toArray
     
   }
+  def forward(start:Int):Array[Int] = {
+    val f = forward(graph.getV(start))
+    f.map(v => v.id)
+  }
 
   private def filteredNext(v:Vertex, inactive:Inactive) = {
     val out = graph.outE(v)

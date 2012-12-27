@@ -1,4 +1,4 @@
-package my.sl.ir
+package sl.ir
 
 import my.se._
 import scala.collection.mutable.Map
@@ -10,18 +10,22 @@ import scala.collection.mutable.Map
  * - Proc node models block methods that uses or writes to the variables.
  *
  */
-abstract class DataflowNode(i:Int) 
+
+import sl.ir._
+
+abstract class DataflowNode extends AnyRef with HasId
+case class Var(override val id:Int) extends DataflowNode 
 {
-  val id = i   // Note: this id is identical to the vid of the vertex
 }
-case class Var(_i:Int) extends DataflowNode(_i)
-{
-}
-case class Proc(_i:Int) extends DataflowNode(_i)
+case class Proc(override val id:Int) extends DataflowNode
 {
 }
 
-
+/**
+ * A Simulink dataflow graph consists of a set of dataflow nodes
+ * and dataflow edges. Multiple edges can exists between two distinct nodes.
+ * Self-loop is not allowed.
+ */
 class DataflowGraph() {
   val g = new Graph()  
 
@@ -53,8 +57,13 @@ class DataflowGraph() {
     n
   }
 
-  def addEdge(src:Int, dst:Int) = g.addEdge(src, dst)
-  
+  def addEdge(src:Int, dst:Int) = { 
+    if (src == dst) {
+      throw new RuntimeException("No self-loop is allowed")
+    } else {
+      g.addEdge(src, dst)
+    }
+  }
 
   def addEdge(src:DataflowNode, dst:DataflowNode) = 
     g.addEdge(src.id, dst.id)
