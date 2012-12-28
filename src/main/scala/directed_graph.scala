@@ -16,7 +16,7 @@ abstract class LabelOp[Label] {
   def max(l:Label, r:Label):Label
 }
 
-/* Vertex class consists of an id, a string for sid
+/** Vertex class consists of an id, a string for sid
  * and in- out- edges. The edges are ArrayBuffer, which are
  * mutable data members.
  */
@@ -57,7 +57,7 @@ class Graph() {
     e 
   }
 
-  // Todo: test if the following function works
+  /** Remove a vertex, its source and destination will be disconnected */
   def removeVertex(v:Vertex) {
     val out = outE(v)
     val in = inE(v)
@@ -66,6 +66,8 @@ class Graph() {
     V.remove(V.indexOf(v))
   }
 
+  /** Remove a vertex and add an edge that by-pass this vertex.
+   *  After the reduction its source and destination will be connected. */
   def reduceVertex(v:Vertex) {
     val dstV = succ(v)
     val srcV = pre(v)
@@ -236,11 +238,11 @@ class Inactive(vArray: Array[Int], eArray:Array[Int])
  * stop searches at specified nodes and edges.
  */
 class Reachable(graph: Graph) {
-  val next = (v:Vertex)=> graph.succ(v)
-  val prev = (v:Vertex)=> graph.pre(v)
+  val successor = (v:Vertex)=> graph.succ(v)
+  val predecessor = (v:Vertex)=> graph.pre(v)
 
   def forward(start:Vertex):Array[Vertex] = {
-    val bfs = new BFS(next)
+    val bfs = new BFS(successor)
     
     bfs.initialize(start)
     bfs.run()
@@ -252,61 +254,8 @@ class Reachable(graph: Graph) {
     f.map(v => v.id)
   }
 
-  private def filteredNext(v:Vertex, inactive:Inactive) = {
-    val out = graph.outE(v)
-    val filteredOut = out.filter(e => !inactive.e.contains(e.id))
-    val filteredSucc = filteredOut.map(e => e.to)
-    val r = filteredSucc.filter(v => !inactive.v.contains(v.id))
-    ArrayBuffer[Vertex]() ++ r
-  }
-
-  def forward(start: Vertex, inactive: Inactive): Array[Vertex] = {
-    val bfs = new BFS((v:Vertex)=> filteredNext(v, inactive))
-    
-    bfs.initialize(start)
-    bfs.run()
-    bfs.visited.toArray
-    
-  }
-
-  def forward(start:Int, in:Inactive):Array[Vertex] = 
-    forward(graph.getV(start), in)
-
-
-  def backward(start:Int) = {
-    val bfs = new BFS(prev)
-    
-    bfs.initialize(graph.getV(start))
-    bfs.run()
-    
-    val vertices = bfs.visited.toArray
-    vertices.map(v => v.id)
-  }
-
-
-  private def filteredPrev(v:Vertex, inactive:Inactive) = {
-    val out = graph.inE(v)
-    val filteredOut = out.filter(e => !inactive.e.contains(e.id))
-    val filteredSucc = filteredOut.map(e => e.from)
-    val r = filteredSucc.filter(v => !inactive.v.contains(v.id))
-    ArrayBuffer[Vertex]() ++ r
-  }
-
-  def backward(start: Int, inactive: Inactive) = {
-    val bfs = new BFS((v:Vertex) => 
-			filteredPrev(v, inactive)
-                    )
-    
-    bfs.initialize(graph.getV(start))
-    bfs.run()
-    
-    val v = bfs.visited.toArray
-    v.map(v => v.id)
-    
-  }
-
-  def backward(start: Array[Int]) = {
-    val bfs = new BFS(prev)
+  def forward(start: Array[Int]) = {
+    val bfs = new BFS(successor)
     
     bfs.initialize(graph.getV(start))
     bfs.run()
@@ -316,9 +265,102 @@ class Reachable(graph: Graph) {
     
   }
 
+  private def filteredSuccessor(v:Vertex, inactive:Inactive) = {
+    val out = graph.outE(v)
+    val filteredOut = out.filter(e => !inactive.e.contains(e.id))
+    val filteredSucc = filteredOut.map(e => e.to)
+    val r = filteredSucc.filter(v => !inactive.v.contains(v.id))
+    ArrayBuffer[Vertex]() ++ r
+  }
+
+  private def errorOutIfInSet(v: Int, s: scala.collection.Set[Int]):Unit = {
+    if (s contains v) {
+      throw new RuntimeException("Error: " + v + " is in the set.")
+    }
+  }
+  private def errorOutIfInSet(v: Vertex, s:scala.collection.Set[Int]):Unit =
+    errorOutIfInSet(v.id, s)
+
+
+  def forward(start: Vertex, inactive: Inactive): Array[Vertex] = {
+    val bfs = new BFS((v:Vertex)=> filteredSuccessor(v, inactive))
+
+    // Should I error out if start is in inactive?
+    errorOutIfInSet(start, inactive.v)
+
+    bfs.initialize(start)
+    bfs.run()
+    bfs.visited.toArray
+    
+  }
+
+  def forward(start:Int, in:Inactive):Array[Vertex] = 
+    forward(graph.getV(start), in)
+
+  def forward(start: Array[Int], inactive:Inactive) = {
+    val bfs = new BFS((v:Vertex) => 
+                        filteredSuccessor(v, inactive))
+    
+    start.foreach( errorOutIfInSet(_, inactive.v))
+    
+    bfs.initialize(graph.getV(start))
+    bfs.run()
+    val vertices = bfs.visited.toArray
+    vertices.map(v => v.id)
+  }
+
+  
+  // Backward reachability
+
+  def backward(start:Int) = {
+    val bfs = new BFS(predecessor)
+    
+    bfs.initialize(graph.getV(start))
+    bfs.run()
+    
+    val vertices = bfs.visited.toArray
+    vertices.map(v => v.id)
+  }
+
+  def backward(start: Array[Int]) = {
+    val bfs = new BFS(predecessor)
+    
+    bfs.initialize(graph.getV(start))
+    bfs.run()
+   
+    val vertices = bfs.visited.toArray
+    vertices.map(v => v.id)
+    
+  }
+
+  private def filteredPredecessor(v:Vertex, inactive:Inactive) = {
+    val out = graph.inE(v)
+    val filteredOut = out.filter(e => !inactive.e.contains(e.id))
+    val filteredSucc = filteredOut.map(e => e.from)
+    val r = filteredSucc.filter(v => !inactive.v.contains(v.id))
+    ArrayBuffer[Vertex]() ++ r
+  }
+
+  def backward(start: Int, inactive: Inactive) = {
+    val bfs = new BFS((v:Vertex) => 
+			filteredPredecessor(v, inactive)
+                    )
+    errorOutIfInSet(start, inactive.v)
+    
+    bfs.initialize(graph.getV(start))
+    bfs.run()
+    
+    val v = bfs.visited.toArray
+    v.map(v => v.id)
+    
+  }
+
+
   def backward(start: Array[Int], inactive:Inactive) = {
     val bfs = new BFS((v:Vertex) => 
-                        filteredPrev(v, inactive))
+                        filteredPredecessor(v, inactive))
+    
+    start.foreach( errorOutIfInSet(_, inactive.v))
     
     bfs.initialize(graph.getV(start))
     bfs.run()
@@ -327,15 +369,16 @@ class Reachable(graph: Graph) {
   }
 
 }
-/* PropagateLabel
+
+/** PropagateLabel
  * 
  * Propagate label set in the dataflow diagram until no more label is
  * found. 
  */
 class PropagateLabel[LabelT] (graph: Graph, 
 			      op:LabelOp[LabelT]) {
-  val next = (v:Vertex)=> graph.succ(v)
-  val prev = (v:Vertex)=> graph.pre(v)
+  val successor = (v:Vertex)=> graph.succ(v)
+  val predecessor = (v:Vertex)=> graph.pre(v)
   
   def propagate(start:Array[Vertex], 
                 l:HashMap[Int,LabelT],
@@ -365,13 +408,19 @@ class PropagateLabel[LabelT] (graph: Graph,
   }
 
   def forward(start:Array[Int], l:HashMap[Int,LabelT]) {
-    propagate(graph.getV(start), l, next)
+    propagate(graph.getV(start), l, successor)
   }
   def backward(start:Array[Int], l:HashMap[Int,LabelT]) {
-    propagate(graph.getV(start), l, prev)
+    propagate(graph.getV(start), l, predecessor)
   }
 }
 
+/**
+ * WriteGraphviz write the graph to a graphviz string. A customed
+ * vertex writer and edge writer can be provided to write the
+ * additional node properties and edge properties.
+ * 
+ */
 object writeGraphviz {
   // Create a v-to-id and e-to-id map
   private def createVMap(g: Graph) = {
@@ -408,19 +457,24 @@ object writeGraphviz {
     s
   }
 
-  private def eListString(g: Graph, vIdMap: Map[Vertex,Int]) = {
+  private def eListString(g: Graph, vIdMap: Map[Vertex,Int], 
+                        ew: Edge => String ) = {
     var s = ""
     for ( e <- g.E) {
-      s = s + vIdMap(e.from) + " -> " + vIdMap(e.to) + "\n"
+      s = s + vIdMap(e.from) + " -> " + vIdMap(e.to) + ew(e) + "\n"
     }
     s
   }
+  
   val defaultVW: Vertex=>String = { _ => "" }
+  val defaultEW: Edge=>String = { _=>"" } 
 
-  def apply(g: Graph, vw: Vertex=>String): String = {
+  def apply(g: Graph, 
+            vw: Vertex=>String = defaultVW, 
+            ew: Edge=>String = defaultEW): String = {
     val header = "digraph G {\n"
     val vIdMap = createVMap(g)
-    header + vListString(g, vIdMap, vw) + eListString(g,vIdMap) + "}\n"
+    header + vListString(g, vIdMap, vw) + eListString(g,vIdMap, ew) + "}\n"
   }
 }
 

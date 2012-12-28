@@ -86,6 +86,11 @@ class DataflowGraph() {
     writeGraphviz(g, vLabel)
   }
 
+  def forwardReachable(src:Array[Int]) : Array[Int] = {
+    val reach = new Reachable(g)
+    reach.forward(src)
+  }
+
   def backwardReachable(src:Array[Int]) : Array[Int] = {
     val reach = new Reachable(g)
     reach.backward(src)
@@ -115,23 +120,33 @@ class DataflowGraph() {
     result.map(v => v.id)
   }
 
-  // Delegate methods
+  
 
-  def getE(from:Int, to:Int) = g.getE(from, to)
-
-  def getV(which:Int) = g.getV(which)
-  def getV(which:Array[Int]) = g.getV(which)
-  def pre(which:Int) = g.pre(getV(which)).map(_.id).toArray
-
-  def outEId(which:Int) = g.outE(getV(which)).toArray
-
-  def outEIdFiltered(which:Int, ids:Array[Int]) = {
+  /** Compute ids of the out edges for a given node filtered by the target nodes */
+  def outEIdFilteredByTarget(which:Int, ids:Array[Int]) = {
     val out = g.outE(getV(which))
     val idSet = ids.toSet
     out.filter( e => idSet.contains (e.to.id)
              ).map(e => e.id
                  ).toArray
   } 
+
+  // Delegate methods to 
+  def getE(from:Int, to:Int) = g.getE(from, to)
+
+  def getV(which:Int) = g.getV(which)
+  def getV(which:Array[Int]) = g.getV(which)
+  
+  /** Predecessor */
+  def pre(which:Int) = g.pre(getV(which)).map(_.id).toArray
+
+  /** Successor */
+  def succ(which:Int) = g.succ(getV(which)).map(_.id).toArray
+
+  def outEId(which:Int) = g.outE(getV(which)).toArray
+
+
+
 }
 
 

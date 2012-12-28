@@ -75,6 +75,13 @@ class VirtualBlockGraph() {
     }
   }
 
+  /** Compute reachable ports and return them in input-output pairs
+   *
+   *  The return array is alternating list of out and in ports.
+   * [ out1 in1 out2 in2 ... outn inn]
+   *  where the connections are out1 -> in1, out2 -> in2 ,.... outn -> inn.
+   *
+   */
   def forwardReachablePairs(src:Int): Array[Int] = {
     val reach = new Reachable(g)
     val reachSet = reach.forward(src).toSet

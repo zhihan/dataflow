@@ -140,6 +140,7 @@ class TreeNode( i: Int, c: List[TreeNode]) {
     }
   }
 
+  /** Remove nodes whose has descendant that is not in the set */
   private def removePartialAncestors(s:Set[Int]): Set[Int] = {
     def allDescendantContainedIn(i:Int, s:Set[Int]):Boolean = {
       val v = getNode(i)
@@ -150,6 +151,7 @@ class TreeNode( i: Int, c: List[TreeNode]) {
     s.filter(x => allDescendantContainedIn(x, s))
   }
   
+  /** Remove nodes whose has descendant that is not in the set */
   def removePartiallyContainedAncestors(vec:Array[Int]):Array[Int] = {
     if (vec == null) 
       Array[Int]()
