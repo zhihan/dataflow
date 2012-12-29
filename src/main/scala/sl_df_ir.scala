@@ -86,14 +86,28 @@ class DataflowGraph() {
     writeGraphviz(g, vLabel)
   }
 
-  def forwardReachable(src:Array[Int]) : Array[Int] = {
+  private def forwardReachable(src:Array[Int]) : Array[Int] = {
     val reach = new Reachable(g)
     reach.forward(src)
   }
+  
+  def forwardReachableProcs(src:Array[Int]): Array[Int] = {
+    forwardReachable(src).filter( i=> isProc(nodes(i))).toArray
+  }
+  def forwardReachableVars(src:Array[Int]): Array[Int] = {
+    forwardReachable(src).filter( i=> !isProc(nodes(i))).toArray
+  }
 
-  def backwardReachable(src:Array[Int]) : Array[Int] = {
+  def backwardReachableProcs(src:Array[Int]) : Array[Int] = {
     val reach = new Reachable(g)
-    reach.backward(src)
+    val allReached = reach.backward(src)
+    allReached.filter( i => isProc(nodes(i))).toArray
+  }
+
+  def backwardReachableVars(src:Array[Int]) : Array[Int] = {
+    val reach = new Reachable(g)
+    val allReached = reach.backward(src)
+    allReached.filter( i => !isProc(nodes(i))).toArray
   }
 
   def backwardReachableProcs(src: Array[Int], 
