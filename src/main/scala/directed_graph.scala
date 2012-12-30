@@ -23,6 +23,8 @@ abstract class LabelOp[Label] {
 class Vertex(_id: Int, s: String) {
   val id = _id
   val sid = s
+
+  def deepCopy = new Vertex(id, sid)
 }
 
 /* Edge class consists of id, and the two end vertices
@@ -31,6 +33,7 @@ class Edge(_id: Int,  _from:Vertex, _to:Vertex) {
   val id = _id
   val from = _from
   val to = _to
+  
 }
 
 /*
@@ -42,6 +45,7 @@ class Graph() {
   val E = ArrayBuffer[Edge]()
 
   var id = 0
+
 
   def newVertex(name:String) = {
     id += 1
@@ -179,6 +183,19 @@ class GraphFactory() {
     val g = new Graph()
     g.V ++= v
     g
+  }
+
+  def deepCopy(g: Graph) = {
+    val gCopy = new Graph()
+    // Deep copy must maintain ids
+    g.V.foreach( x => gCopy.V +=x.deepCopy) 
+    g.E.foreach( e =>
+      gCopy.E += new Edge(e.id, 
+			  gCopy.getV(e.from.id), 
+			  gCopy.getV(e.to.id))
+ 	      )
+    gCopy.id = g.id
+    gCopy
   }
 }
 /* Breadth-First search

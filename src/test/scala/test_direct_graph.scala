@@ -33,6 +33,18 @@ package my.se.test.GraphTest {
       assert(g.E.length == 1)
       
     }
+
+    test("Deep copy") {
+      val g = createLinGraph
+      val f = new GraphFactory()
+      val g2 = f.deepCopy(g)
+      g.reduceVertex(g.getV(2)) // mutate g
+      // println(g2.toDotString)
+      assert(g2.getV(1) != g.getV(1)) // not Object equivalent
+      // assert(g2.getV(1) == g2.getV(1)) 
+      assert(g2.V.length == 3)
+      assert(g2.E.length == 2)
+    }
   }
 
 }
