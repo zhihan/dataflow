@@ -12,8 +12,8 @@ case class BasicRegion() extends Region
 case class ChainRegion() extends Region
 case class IfElseRegion() extends Region
 
-class Pst(val root:TreeNode, r:Region ) {
-  val regions = Map(root.id -> r) // mutable
+class Pst(val t:TreeNode, r:Region ) {
+  val regions = Map(t.id -> r) // mutable
 }
 
 object Pst {
@@ -26,15 +26,15 @@ object Pst {
     val root = tf.make()
     val pst = new Pst(root, ChainRegion())
     for (i <- l) {
-      root.addChild(i.root)
+      root.addChild(i.t)
       pst.regions ++= i.regions
     }
     pst
   }
   def ifElse(b1:Pst, b2:Pst) = {
     val root =tf.make()
-    root.addChild(b1.root)
-    root.addChild(b2.root)
+    root.addChild(b1.t)
+    root.addChild(b2.t)
     val pst = new Pst(root, IfElseRegion()) 
     pst.regions++= b1.regions
     pst.regions++= b2.regions

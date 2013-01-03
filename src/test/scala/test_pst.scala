@@ -18,7 +18,7 @@ package my.ir.PstTest {
       val p = new ParseAndCreateIR()
       val (ast, _) = p.parse(a)
       val r = PstFactory.createPst(ast.body)
-      val isBasic = r.regions(r.root.id) match {
+      val isBasic = r.regions(r.t.id) match {
 	case BasicRegion() => true
 	case _ => false
       }
@@ -39,8 +39,8 @@ package my.ir.PstTest {
       val p = new ParseAndCreateIR()
       val (ast, _) = p.parse(a)
       val r = PstFactory.createPst(ast.body)
-      assert( r.regions(r.root.id) == ChainRegion())
-      val children = r.root.children
+      assert( r.regions(r.t.id) == ChainRegion())
+      val children = r.t.children
       assert(children.length == 2)
       assert(children.exists(c =>
 	r.regions(c.id) == IfElseRegion()))
