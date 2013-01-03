@@ -76,8 +76,8 @@ class DataflowGraph() {
       val n = nodes(v.id)
       val shape = 
         n match {
-          case Var(_) => "[shape=\"box\"]"
-          case Proc(_) => "[shape=\"ellipse\"]"
+          case Var(_) => "[shape=\"ellipse\"]"
+          case Proc(_) => "[shape=\"box\"]"
       }
       val label = "[label=\"" + v.sid + "\"]"
       shape + label
