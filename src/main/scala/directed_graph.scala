@@ -9,6 +9,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConversions._ 
 import scala.collection.mutable.HashMap
 
+import scala.collection.mutable.Stack
 
 abstract class LabelOp[Label] {
   type T = Label
@@ -90,6 +91,8 @@ class Graph() {
     val r = out.map( e => e.to)
     ArrayBuffer[Vertex]() ++ r
   }
+
+  def hasSelfLoop(v:Vertex) = succ(v).contains(v)
 
   def pre(v:Vertex) = {
     val out = E.filter (e => v.eq(e.to) )
@@ -237,6 +240,7 @@ class BFS(callback: Vertex => ArrayBuffer[Vertex]){
     }
   }
 }
+
 
 /* Inactive class implements a mechanism to filter nodes
  and edges in the BFS search.
@@ -495,3 +499,78 @@ object writeGraphviz {
   }
 }
 
+class tarjan(val g: Graph) {
+  // Work struct
+  class TarjanWork() {
+    var number = -1
+    var lowlink = -1
+  }
+
+  def min(i:Int, j:Int) = if (i<j) i else j
+
+  val nextF = (v:Vertex) => g.succ(v)
+  val stack = Stack[Vertex]() // mutable
+  val scc = ArrayBuffer[ArrayBuffer[Vertex]]() // mutable result
+  var index = -1 // default value
+
+  val work = (for (v <- g.V) yield (v, new TarjanWork())).toMap
+
+  def visit(v:Vertex) {
+    work(v).number = index
+    work(v).lowlink = index
+    index += 1
+
+    stack.push(v)
+    val next = nextF(v)
+    for (i <- next) {
+      if (work(i).number == -1) 
+        { // never visited
+          visit(i)
+          work(v).lowlink = min(work(v).lowlink, work(i).lowlink)
+        } 
+      else if ( (work(i).number < work(v).number) && 
+                 stack.contains(i)) 
+        { // reset
+          work(v).lowlink = work(i).lowlink
+        }
+    }
+
+    if (work(v).lowlink == work(v).number) {
+      // Finish up the node
+      val c = ArrayBuffer[Vertex]()
+      if (!stack.isEmpty && 
+          stack.head == v) {
+        // Only one element, need to check whether it has self-loop
+        val x = stack.pop()
+        if (g.hasSelfLoop(v)) {
+          // The SCC contains only x
+          c.append(v)
+        } 
+      } else {
+        var break = false
+        while (!stack.isEmpty && !break ) {
+          val x = stack.pop()
+          c.append(x)
+          break = (x == v) // Stop if v is reached
+        }
+      }
+      if (!c.isEmpty) {
+        scc.append(c)
+      }
+    }
+  }
+  
+  def run() = {
+    index = 0
+    for (i <- g.V if work(i).number == -1) { visit(i)}
+    scc
+  }
+  
+}
+
+object tarjan {
+  def apply(g:Graph) = {
+    val t = new tarjan(g)
+    t.run()
+  }
+}

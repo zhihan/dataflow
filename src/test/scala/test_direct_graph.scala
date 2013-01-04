@@ -45,6 +45,22 @@ package my.se.test.GraphTest {
       assert(g2.V.length == 3)
       assert(g2.E.length == 2)
     }
+
+    test("Tarjan SCC algorithm") {
+      val g = new Graph()
+      val v1 = g.newVertex("v1")
+      val v2 = g.newVertex("v2")
+      val v3 = g.newVertex("v3")
+      val v4 = g.newVertex("v4")
+      g.addEdge(v1, v2)
+      g.addEdge(v2, v3)
+      g.addEdge(v3, v2)
+      g.addEdge(v2, v4)
+      
+      val scc = tarjan(g)
+      assert(scc.length == 1)
+      assert(scc(0).length == 2)
+    }
   }
 
 }
