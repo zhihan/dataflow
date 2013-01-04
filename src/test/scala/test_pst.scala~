@@ -1,0 +1,13 @@
+import my.ir._
+
+import org.antlr.runtime._
+import org.antlr.runtime.tree._
+
+import org.scalatest.FunSuite
+
+package my.ir.PstTest {
+  class PstTestSuite extends FunSuite {
+    
+  }
+
+}

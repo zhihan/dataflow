@@ -38,7 +38,7 @@ object BooleanMapSet {
   }
   
   // Return a set of used variables for a 
-  def usedSet(g: Graph, s: CFGMap, variable: Var) = {
+  def usedSet(g: Graph, s:Map[Vertex,Statement], variable: Var) = {
     def isUsed = (x: Var, stmt: Statement) => 
       stmt match {
 	case Assignment(v,e) => VarUse(e).exists(_ == x)
@@ -46,32 +46,24 @@ object BooleanMapSet {
 	case _ => false 
       }
     
-    def isUsedIn(x:Var, ss:List[Statement]) = {
-      ss.exists( s => isUsed(x, s))
-    }
     
     def addIf = (m: Map[Vertex,Boolean], v : Vertex) => 
-      m + (if (isUsedIn(variable, 
-		      s.getStatements(v)))  v -> true else  v-> false )
+      m + (if (isUsed(variable, s(v)))  v -> true else  v-> false )
 
     val m = g.V.foldLeft (Map[Vertex,Boolean]()) (addIf)
     new BooleanMapSet(m)
   }
 
-  def modifiedSet(g: Graph, s: CFGMap, variable: Var) = {
+  def modifiedSet(g: Graph, s:Map[Vertex,Statement], variable: Var) = {
     def isModified = (x: Var, stmt: Statement) => 
       stmt match {
 	case Assignment(RefVar(v),_) => v == x
 	case _ => false 
       }
     
-    def isModifiedIn(x:Var, ss:List[Statement]) = {
-      ss.exists( s => isModified(x, s))
-    }
 
     def addIf = (m: Map[Vertex,Boolean], v : Vertex) => 
-      m + (if (isModifiedIn(variable, 
-			  s.getStatements(v))) { v -> true } else { v-> false} )
+      m + (if (isModified(variable, s(v))) { v -> true } else { v-> false} )
 
     val m = g.V.foldLeft (Map[Vertex,Boolean]()) (addIf)
     new BooleanMapSet(m)
@@ -79,7 +71,7 @@ object BooleanMapSet {
 
   // Default factory method creates the default four predicates for dataflow analysis
   def apply(cfg: Graph, 
-	    s: CFGMap,
+	    s: Map[Vertex, Statement],
 	    x: Var) = {
     val used = usedSet(cfg, s, x)
     val modified = modifiedSet(cfg, s, x)
@@ -148,7 +140,7 @@ object DefUse {
   }
 
   def analyzeLive(cfg: Graph, 
-		  s: CFGMap,
+		  s: Map[Vertex, Statement],
 		  x: Var) = {
     val p = BooleanMapSet(cfg,s,x)
     lfp(BooleanMapSet(cfg,s,x), cfg, live)

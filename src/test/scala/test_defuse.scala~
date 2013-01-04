@@ -49,11 +49,10 @@ package my.ir.Test {
       val e34 = g.addEdge(v3,v4)
       val e42 = g.addEdge(v4,v2)
   
-      val s = new CFGMap
-      s.add(v1, init)
-      s.add(v2, input)
-      s.add(v3, output)
-      s.add(v4, update)
+      val s:Map[Vertex, Statement] = Map(v1->init, 
+					 v2 -> input, 
+					 v3->output, 
+					 v4->update)
       
       var p = DefUse.analyzeLive(g, s, x)
       /*println(" X Liveness: ")

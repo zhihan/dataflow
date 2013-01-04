@@ -38,7 +38,7 @@ object Analysis {
     val (stepCFG, map) = Utility.createCFGForList(s.body)
 
     // Add a dummy initialize function
-    map.add(stepCFG.entry, Noop(""))
+    map += (stepCFG.entry -> Noop(""))
     val g= stepCFG.graph
     val tops = g.succ(stepCFG.entry)
     assert(tops.length ==1 ) // entry node has one successor

@@ -32,18 +32,16 @@ object DeadCode {
     val p = DefUse.analyzeLive(seseG.graph, map, x)
     val dead = Set[Statement]()
 
-    def deadAssign(outP:BooleanMapSet, v:Vertex, 
-		   m:CFGMap) = {
-      m.getStatements(v).forall( s =>
-	s match {
+    def deadAssign(outP:BooleanMapSet, v:Vertex, m:Map[Vertex, Statement]) = {
+      m(v) match {
 	case Assignment(RefVar(l),_) => (l==x) && !outP(v)
 	case _ => false
- 	})
+     }
     }
 
     seseG.graph.V.foreach { v =>
       if (deadAssign(p.exit, v, map)) 
-	dead ++= map.getStatements(v) else {}
+	dead += map(v) else {}
     }
     dead
   }
