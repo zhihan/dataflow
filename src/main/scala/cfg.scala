@@ -84,8 +84,12 @@ object Utility {
     for (stmt <- l) {
       stmt match {
 	case IfElse(_, b1, b2) =>{
-	  val e1 = createAndEmbedBlock(b1, g, m, lastEntry)
-	  val e2 = createAndEmbedBlock(b2, g, m, lastEntry)
+	  val ifV = g.newVertex("if")
+	  g.addEdge(lastEntry, ifV)
+	  m.add(ifV, stmt)
+
+	  val e1 = createAndEmbedBlock(b1, g, m, ifV)
+	  val e2 = createAndEmbedBlock(b2, g, m, ifV)
 	  val exitV = g.newVertex("merge")
 	  val exitS = Noop("merge")
 	  m.add(exitV, exitS)

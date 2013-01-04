@@ -26,7 +26,7 @@ package my.ir.PstTest {
       
     }
 
-    test("Chain region") {
+    test("Chain region from AST") {
       val a = """function((),(), chain)
       {
 	=(y,@x);
@@ -41,6 +41,32 @@ package my.ir.PstTest {
       val r = PstFactory.createPst(ast.body)
       assert( r.regions(r.t.id) == ChainRegion())
       val children = r.t.children
+      assert(children.length == 2)
+      assert(children.exists(c =>
+	r.regions(c.id) == IfElseRegion()))
+      assert(children.exists(c =>
+	r.regions(c.id) == BasicRegion()))
+    }
+
+    test("Chain region from CFG") {
+      val a = """function((),(), chain)
+      {
+	=(y,@x);
+        if(@b) { 
+	  =(z,@y);
+        } else {
+	  =(z,@x);
+	}
+      }"""
+      val p = new ParseAndCreateIR()
+      val (ast, _) = p.parse(a)
+      val (cfg, m) = Utility.createCFGForList(ast.body)
+      val (_, r) = PstFactory.createPst(cfg.entry,
+				   cfg.graph, 
+				   cfg.exit ,m)
+      assert( r.regions(r.t.id) == ChainRegion())
+      val children = r.t.children
+      print(children.length)
       assert(children.length == 2)
       assert(children.exists(c =>
 	r.regions(c.id) == IfElseRegion()))

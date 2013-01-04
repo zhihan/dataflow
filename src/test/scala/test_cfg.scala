@@ -23,8 +23,8 @@ package my.ir.CFGTest {
       val (cfg,m) = Utility.createCFGForList(ast.body)
       // println(cfg.graph.toDotString )
       //println(writeGraphviz(cfg.graph, (v => m(v).toString)))
-      assert(cfg.graph.V.length == 9)
-      assert(cfg.graph.E.length == 9)
+      assert(cfg.graph.V.length == 10)
+      assert(cfg.graph.E.length == 10)
    }
   }
 }
