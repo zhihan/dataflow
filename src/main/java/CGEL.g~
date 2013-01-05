@@ -12,7 +12,6 @@ tokens {
   FUNCTION_OUTPUT;
   BLOCK;
   IF_ELSE;
-  WHILE;
 }
 
 
@@ -58,17 +57,13 @@ assignment:
         '='^ '('! ID ','! expr ')'! ';'
     ;
 if_else_stmt:
-        'if' '(' expr ')' b1=block 'else' b2=block -> ^(IF_ELSE expr $b1 $b2)
-    ;
-while_stmt:
-        'while' '(' expr ')' body=block -> ^(WHILE expr $body) 
+        'if' '(' expr ')' b1=block 'else' b2=block -> ^(IF_ELSE expr $b1 $b2 )
     ;
 
 expr:
     | '@'^ ID  
     | ID^  
     | BINARY_OPERATOR^ '('!  expr ','! expr ')'!
-    | RELATIONAL_OPERATOR^ '('! expr ','! expr ')'!
     ;
 // 
 // Lexing rules 
@@ -78,7 +73,6 @@ WS: (' ' | '\t' | '\r' | '\n' )+ { skip(); } ;
 
 BINARY_OPERATOR: '+' | '-' | '*' | '/' ;
 
-RELATIONAL_OPERATOR: '==' | '>' | '<' | '>=' | '<=' ;
 
 // Single-line comments
 SL_COMMENTS: '//' ( ~ '\n' )* '\n' { skip(); } ;
