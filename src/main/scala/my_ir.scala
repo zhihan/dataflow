@@ -136,6 +136,13 @@ case class IfElse(e:Exp, b1:List[Statement], b2:List[Statement]) extends Stateme
   def getB2() = b2.toArray
 }
 
+case class While(e:Exp, body:List[Statement]) extends Statement
+{
+  def isWhile() = true
+  def getCond() = e
+  def getBody() = body.toArray
+}
+
 object VarUse {
   // VarUse function 
   def apply(e:Exp):List[Var] =  {

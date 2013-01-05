@@ -1,4 +1,4 @@
-// $ANTLR 3.4 CGEL.g 2013-01-05 13:31:08
+// $ANTLR 3.4 CGEL.g 2013-01-05 14:12:25
 
 package my.ir;
 
@@ -887,7 +887,7 @@ public TreeAdaptor getTreeAdaptor() {
                 int alt5=2;
                 int LA5_0 = input.LA(1);
 
-                if ( (LA5_0==19||(LA5_0 >= 23 && LA5_0 <= 24)) ) {
+                if ( (LA5_0==19||(LA5_0 >= 23 && LA5_0 <= 25)) ) {
                     alt5=1;
                 }
 
@@ -982,7 +982,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "stmt"
-    // CGEL.g:53:1: stmt : ( var_decl | assignment | if_else_stmt );
+    // CGEL.g:53:1: stmt : ( var_decl | assignment | if_else_stmt | while_stmt );
     public final CGELParser.stmt_return stmt() throws RecognitionException {
         CGELParser.stmt_return retval = new CGELParser.stmt_return();
         retval.start = input.LT(1);
@@ -996,11 +996,13 @@ public TreeAdaptor getTreeAdaptor() {
 
         CGELParser.if_else_stmt_return if_else_stmt38 =null;
 
+        CGELParser.while_stmt_return while_stmt39 =null;
+
 
 
         try {
-            // CGEL.g:53:5: ( var_decl | assignment | if_else_stmt )
-            int alt6=3;
+            // CGEL.g:53:5: ( var_decl | assignment | if_else_stmt | while_stmt )
+            int alt6=4;
             switch ( input.LA(1) ) {
             case 24:
                 {
@@ -1015,6 +1017,11 @@ public TreeAdaptor getTreeAdaptor() {
             case 23:
                 {
                 alt6=3;
+                }
+                break;
+            case 25:
+                {
+                alt6=4;
                 }
                 break;
             default:
@@ -1071,6 +1078,21 @@ public TreeAdaptor getTreeAdaptor() {
 
                     }
                     break;
+                case 4 :
+                    // CGEL.g:54:48: while_stmt
+                    {
+                    root_0 = (CommonTree)adaptor.nil();
+
+
+                    pushFollow(FOLLOW_while_stmt_in_stmt360);
+                    while_stmt39=while_stmt();
+
+                    state._fsp--;
+
+                    adaptor.addChild(root_0, while_stmt39.getTree());
+
+                    }
+                    break;
 
             }
             retval.stop = input.LT(-1);
@@ -1110,21 +1132,21 @@ public TreeAdaptor getTreeAdaptor() {
 
         CommonTree root_0 = null;
 
-        Token char_literal39=null;
         Token char_literal40=null;
-        Token ID41=null;
-        Token char_literal42=null;
-        Token char_literal44=null;
+        Token char_literal41=null;
+        Token ID42=null;
+        Token char_literal43=null;
         Token char_literal45=null;
-        CGELParser.expr_return expr43 =null;
+        Token char_literal46=null;
+        CGELParser.expr_return expr44 =null;
 
 
-        CommonTree char_literal39_tree=null;
         CommonTree char_literal40_tree=null;
-        CommonTree ID41_tree=null;
-        CommonTree char_literal42_tree=null;
-        CommonTree char_literal44_tree=null;
+        CommonTree char_literal41_tree=null;
+        CommonTree ID42_tree=null;
+        CommonTree char_literal43_tree=null;
         CommonTree char_literal45_tree=null;
+        CommonTree char_literal46_tree=null;
 
         try {
             // CGEL.g:57:11: ( '=' ^ '(' ! ID ',' ! expr ')' ! ';' )
@@ -1133,38 +1155,38 @@ public TreeAdaptor getTreeAdaptor() {
             root_0 = (CommonTree)adaptor.nil();
 
 
-            char_literal39=(Token)match(input,19,FOLLOW_19_in_assignment377); 
-            char_literal39_tree = 
-            (CommonTree)adaptor.create(char_literal39)
+            char_literal40=(Token)match(input,19,FOLLOW_19_in_assignment380); 
+            char_literal40_tree = 
+            (CommonTree)adaptor.create(char_literal40)
             ;
-            root_0 = (CommonTree)adaptor.becomeRoot(char_literal39_tree, root_0);
+            root_0 = (CommonTree)adaptor.becomeRoot(char_literal40_tree, root_0);
 
 
-            char_literal40=(Token)match(input,15,FOLLOW_15_in_assignment380); 
+            char_literal41=(Token)match(input,15,FOLLOW_15_in_assignment383); 
 
-            ID41=(Token)match(input,ID,FOLLOW_ID_in_assignment383); 
-            ID41_tree = 
-            (CommonTree)adaptor.create(ID41)
+            ID42=(Token)match(input,ID,FOLLOW_ID_in_assignment386); 
+            ID42_tree = 
+            (CommonTree)adaptor.create(ID42)
             ;
-            adaptor.addChild(root_0, ID41_tree);
+            adaptor.addChild(root_0, ID42_tree);
 
 
-            char_literal42=(Token)match(input,17,FOLLOW_17_in_assignment385); 
+            char_literal43=(Token)match(input,17,FOLLOW_17_in_assignment388); 
 
-            pushFollow(FOLLOW_expr_in_assignment388);
-            expr43=expr();
+            pushFollow(FOLLOW_expr_in_assignment391);
+            expr44=expr();
 
             state._fsp--;
 
-            adaptor.addChild(root_0, expr43.getTree());
+            adaptor.addChild(root_0, expr44.getTree());
 
-            char_literal44=(Token)match(input,16,FOLLOW_16_in_assignment390); 
+            char_literal45=(Token)match(input,16,FOLLOW_16_in_assignment393); 
 
-            char_literal45=(Token)match(input,18,FOLLOW_18_in_assignment393); 
-            char_literal45_tree = 
-            (CommonTree)adaptor.create(char_literal45)
+            char_literal46=(Token)match(input,18,FOLLOW_18_in_assignment396); 
+            char_literal46_tree = 
+            (CommonTree)adaptor.create(char_literal46)
             ;
-            adaptor.addChild(root_0, char_literal45_tree);
+            adaptor.addChild(root_0, char_literal46_tree);
 
 
             }
@@ -1206,21 +1228,21 @@ public TreeAdaptor getTreeAdaptor() {
 
         CommonTree root_0 = null;
 
-        Token string_literal46=null;
-        Token char_literal47=null;
-        Token char_literal49=null;
-        Token string_literal50=null;
+        Token string_literal47=null;
+        Token char_literal48=null;
+        Token char_literal50=null;
+        Token string_literal51=null;
         CGELParser.block_return b1 =null;
 
         CGELParser.block_return b2 =null;
 
-        CGELParser.expr_return expr48 =null;
+        CGELParser.expr_return expr49 =null;
 
 
-        CommonTree string_literal46_tree=null;
-        CommonTree char_literal47_tree=null;
-        CommonTree char_literal49_tree=null;
-        CommonTree string_literal50_tree=null;
+        CommonTree string_literal47_tree=null;
+        CommonTree char_literal48_tree=null;
+        CommonTree char_literal50_tree=null;
+        CommonTree string_literal51_tree=null;
         RewriteRuleTokenStream stream_21=new RewriteRuleTokenStream(adaptor,"token 21");
         RewriteRuleTokenStream stream_23=new RewriteRuleTokenStream(adaptor,"token 23");
         RewriteRuleTokenStream stream_15=new RewriteRuleTokenStream(adaptor,"token 15");
@@ -1231,37 +1253,37 @@ public TreeAdaptor getTreeAdaptor() {
             // CGEL.g:60:13: ( 'if' '(' expr ')' b1= block 'else' b2= block -> ^( IF_ELSE expr $b1 $b2) )
             // CGEL.g:61:9: 'if' '(' expr ')' b1= block 'else' b2= block
             {
-            string_literal46=(Token)match(input,23,FOLLOW_23_in_if_else_stmt412);  
-            stream_23.add(string_literal46);
+            string_literal47=(Token)match(input,23,FOLLOW_23_in_if_else_stmt415);  
+            stream_23.add(string_literal47);
 
 
-            char_literal47=(Token)match(input,15,FOLLOW_15_in_if_else_stmt414);  
-            stream_15.add(char_literal47);
+            char_literal48=(Token)match(input,15,FOLLOW_15_in_if_else_stmt417);  
+            stream_15.add(char_literal48);
 
 
-            pushFollow(FOLLOW_expr_in_if_else_stmt416);
-            expr48=expr();
+            pushFollow(FOLLOW_expr_in_if_else_stmt419);
+            expr49=expr();
 
             state._fsp--;
 
-            stream_expr.add(expr48.getTree());
+            stream_expr.add(expr49.getTree());
 
-            char_literal49=(Token)match(input,16,FOLLOW_16_in_if_else_stmt418);  
-            stream_16.add(char_literal49);
+            char_literal50=(Token)match(input,16,FOLLOW_16_in_if_else_stmt421);  
+            stream_16.add(char_literal50);
 
 
-            pushFollow(FOLLOW_block_in_if_else_stmt422);
+            pushFollow(FOLLOW_block_in_if_else_stmt425);
             b1=block();
 
             state._fsp--;
 
             stream_block.add(b1.getTree());
 
-            string_literal50=(Token)match(input,21,FOLLOW_21_in_if_else_stmt424);  
-            stream_21.add(string_literal50);
+            string_literal51=(Token)match(input,21,FOLLOW_21_in_if_else_stmt427);  
+            stream_21.add(string_literal51);
 
 
-            pushFollow(FOLLOW_block_in_if_else_stmt428);
+            pushFollow(FOLLOW_block_in_if_else_stmt431);
             b2=block();
 
             state._fsp--;
@@ -1335,7 +1357,7 @@ public TreeAdaptor getTreeAdaptor() {
 
 
     // $ANTLR start "while_stmt"
-    // CGEL.g:63:1: while_stmt : 'while' '(' expr ')' body= block -> ^( WHILE expr $body) ;
+    // CGEL.g:63:1: while_stmt : 'while' '(' expr ')' b= block -> ^( WHILE expr $b) ;
     public final CGELParser.while_stmt_return while_stmt() throws RecognitionException {
         CGELParser.while_stmt_return retval = new CGELParser.while_stmt_return();
         retval.start = input.LT(1);
@@ -1343,67 +1365,67 @@ public TreeAdaptor getTreeAdaptor() {
 
         CommonTree root_0 = null;
 
-        Token string_literal51=null;
-        Token char_literal52=null;
-        Token char_literal54=null;
-        CGELParser.block_return body =null;
+        Token string_literal52=null;
+        Token char_literal53=null;
+        Token char_literal55=null;
+        CGELParser.block_return b =null;
 
-        CGELParser.expr_return expr53 =null;
+        CGELParser.expr_return expr54 =null;
 
 
-        CommonTree string_literal51_tree=null;
-        CommonTree char_literal52_tree=null;
-        CommonTree char_literal54_tree=null;
+        CommonTree string_literal52_tree=null;
+        CommonTree char_literal53_tree=null;
+        CommonTree char_literal55_tree=null;
         RewriteRuleTokenStream stream_15=new RewriteRuleTokenStream(adaptor,"token 15");
         RewriteRuleTokenStream stream_16=new RewriteRuleTokenStream(adaptor,"token 16");
         RewriteRuleTokenStream stream_25=new RewriteRuleTokenStream(adaptor,"token 25");
         RewriteRuleSubtreeStream stream_block=new RewriteRuleSubtreeStream(adaptor,"rule block");
         RewriteRuleSubtreeStream stream_expr=new RewriteRuleSubtreeStream(adaptor,"rule expr");
         try {
-            // CGEL.g:63:11: ( 'while' '(' expr ')' body= block -> ^( WHILE expr $body) )
-            // CGEL.g:64:9: 'while' '(' expr ')' body= block
+            // CGEL.g:63:11: ( 'while' '(' expr ')' b= block -> ^( WHILE expr $b) )
+            // CGEL.g:64:9: 'while' '(' expr ')' b= block
             {
-            string_literal51=(Token)match(input,25,FOLLOW_25_in_while_stmt461);  
-            stream_25.add(string_literal51);
+            string_literal52=(Token)match(input,25,FOLLOW_25_in_while_stmt464);  
+            stream_25.add(string_literal52);
 
 
-            char_literal52=(Token)match(input,15,FOLLOW_15_in_while_stmt463);  
-            stream_15.add(char_literal52);
+            char_literal53=(Token)match(input,15,FOLLOW_15_in_while_stmt466);  
+            stream_15.add(char_literal53);
 
 
-            pushFollow(FOLLOW_expr_in_while_stmt465);
-            expr53=expr();
-
-            state._fsp--;
-
-            stream_expr.add(expr53.getTree());
-
-            char_literal54=(Token)match(input,16,FOLLOW_16_in_while_stmt467);  
-            stream_16.add(char_literal54);
-
-
-            pushFollow(FOLLOW_block_in_while_stmt471);
-            body=block();
+            pushFollow(FOLLOW_expr_in_while_stmt468);
+            expr54=expr();
 
             state._fsp--;
 
-            stream_block.add(body.getTree());
+            stream_expr.add(expr54.getTree());
+
+            char_literal55=(Token)match(input,16,FOLLOW_16_in_while_stmt470);  
+            stream_16.add(char_literal55);
+
+
+            pushFollow(FOLLOW_block_in_while_stmt474);
+            b=block();
+
+            state._fsp--;
+
+            stream_block.add(b.getTree());
 
             // AST REWRITE
-            // elements: body, expr
+            // elements: b, expr
             // token labels: 
-            // rule labels: body, retval
+            // rule labels: retval, b
             // token list labels: 
             // rule list labels: 
             // wildcard labels: 
             retval.tree = root_0;
-            RewriteRuleSubtreeStream stream_body=new RewriteRuleSubtreeStream(adaptor,"rule body",body!=null?body.tree:null);
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
+            RewriteRuleSubtreeStream stream_b=new RewriteRuleSubtreeStream(adaptor,"rule b",b!=null?b.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 64:41: -> ^( WHILE expr $body)
+            // 64:38: -> ^( WHILE expr $b)
             {
-                // CGEL.g:64:44: ^( WHILE expr $body)
+                // CGEL.g:64:41: ^( WHILE expr $b)
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot(
@@ -1412,7 +1434,7 @@ public TreeAdaptor getTreeAdaptor() {
 
                 adaptor.addChild(root_1, stream_expr.nextTree());
 
-                adaptor.addChild(root_1, stream_body.nextTree());
+                adaptor.addChild(root_1, stream_b.nextTree());
 
                 adaptor.addChild(root_0, root_1);
                 }
@@ -1461,37 +1483,37 @@ public TreeAdaptor getTreeAdaptor() {
 
         CommonTree root_0 = null;
 
-        Token char_literal55=null;
-        Token ID56=null;
+        Token char_literal56=null;
         Token ID57=null;
-        Token BINARY_OPERATOR58=null;
-        Token char_literal59=null;
-        Token char_literal61=null;
-        Token char_literal63=null;
-        Token RELATIONAL_OPERATOR64=null;
-        Token char_literal65=null;
-        Token char_literal67=null;
-        Token char_literal69=null;
-        CGELParser.expr_return expr60 =null;
+        Token ID58=null;
+        Token BINARY_OPERATOR59=null;
+        Token char_literal60=null;
+        Token char_literal62=null;
+        Token char_literal64=null;
+        Token RELATIONAL_OPERATOR65=null;
+        Token char_literal66=null;
+        Token char_literal68=null;
+        Token char_literal70=null;
+        CGELParser.expr_return expr61 =null;
 
-        CGELParser.expr_return expr62 =null;
+        CGELParser.expr_return expr63 =null;
 
-        CGELParser.expr_return expr66 =null;
+        CGELParser.expr_return expr67 =null;
 
-        CGELParser.expr_return expr68 =null;
+        CGELParser.expr_return expr69 =null;
 
 
-        CommonTree char_literal55_tree=null;
-        CommonTree ID56_tree=null;
+        CommonTree char_literal56_tree=null;
         CommonTree ID57_tree=null;
-        CommonTree BINARY_OPERATOR58_tree=null;
-        CommonTree char_literal59_tree=null;
-        CommonTree char_literal61_tree=null;
-        CommonTree char_literal63_tree=null;
-        CommonTree RELATIONAL_OPERATOR64_tree=null;
-        CommonTree char_literal65_tree=null;
-        CommonTree char_literal67_tree=null;
-        CommonTree char_literal69_tree=null;
+        CommonTree ID58_tree=null;
+        CommonTree BINARY_OPERATOR59_tree=null;
+        CommonTree char_literal60_tree=null;
+        CommonTree char_literal62_tree=null;
+        CommonTree char_literal64_tree=null;
+        CommonTree RELATIONAL_OPERATOR65_tree=null;
+        CommonTree char_literal66_tree=null;
+        CommonTree char_literal68_tree=null;
+        CommonTree char_literal70_tree=null;
 
         try {
             // CGEL.g:67:5: (| '@' ^ ID | ID ^| BINARY_OPERATOR ^ '(' ! expr ',' ! expr ')' !| RELATIONAL_OPERATOR ^ '(' ! expr ',' ! expr ')' !)
@@ -1546,18 +1568,18 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (CommonTree)adaptor.nil();
 
 
-                    char_literal55=(Token)match(input,20,FOLLOW_20_in_expr501); 
-                    char_literal55_tree = 
-                    (CommonTree)adaptor.create(char_literal55)
+                    char_literal56=(Token)match(input,20,FOLLOW_20_in_expr504); 
+                    char_literal56_tree = 
+                    (CommonTree)adaptor.create(char_literal56)
                     ;
-                    root_0 = (CommonTree)adaptor.becomeRoot(char_literal55_tree, root_0);
+                    root_0 = (CommonTree)adaptor.becomeRoot(char_literal56_tree, root_0);
 
 
-                    ID56=(Token)match(input,ID,FOLLOW_ID_in_expr504); 
-                    ID56_tree = 
-                    (CommonTree)adaptor.create(ID56)
+                    ID57=(Token)match(input,ID,FOLLOW_ID_in_expr507); 
+                    ID57_tree = 
+                    (CommonTree)adaptor.create(ID57)
                     ;
-                    adaptor.addChild(root_0, ID56_tree);
+                    adaptor.addChild(root_0, ID57_tree);
 
 
                     }
@@ -1568,11 +1590,11 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (CommonTree)adaptor.nil();
 
 
-                    ID57=(Token)match(input,ID,FOLLOW_ID_in_expr514); 
-                    ID57_tree = 
-                    (CommonTree)adaptor.create(ID57)
+                    ID58=(Token)match(input,ID,FOLLOW_ID_in_expr517); 
+                    ID58_tree = 
+                    (CommonTree)adaptor.create(ID58)
                     ;
-                    root_0 = (CommonTree)adaptor.becomeRoot(ID57_tree, root_0);
+                    root_0 = (CommonTree)adaptor.becomeRoot(ID58_tree, root_0);
 
 
                     }
@@ -1583,32 +1605,32 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (CommonTree)adaptor.nil();
 
 
-                    BINARY_OPERATOR58=(Token)match(input,BINARY_OPERATOR,FOLLOW_BINARY_OPERATOR_in_expr525); 
-                    BINARY_OPERATOR58_tree = 
-                    (CommonTree)adaptor.create(BINARY_OPERATOR58)
+                    BINARY_OPERATOR59=(Token)match(input,BINARY_OPERATOR,FOLLOW_BINARY_OPERATOR_in_expr528); 
+                    BINARY_OPERATOR59_tree = 
+                    (CommonTree)adaptor.create(BINARY_OPERATOR59)
                     ;
-                    root_0 = (CommonTree)adaptor.becomeRoot(BINARY_OPERATOR58_tree, root_0);
+                    root_0 = (CommonTree)adaptor.becomeRoot(BINARY_OPERATOR59_tree, root_0);
 
 
-                    char_literal59=(Token)match(input,15,FOLLOW_15_in_expr528); 
+                    char_literal60=(Token)match(input,15,FOLLOW_15_in_expr531); 
 
-                    pushFollow(FOLLOW_expr_in_expr532);
-                    expr60=expr();
-
-                    state._fsp--;
-
-                    adaptor.addChild(root_0, expr60.getTree());
-
-                    char_literal61=(Token)match(input,17,FOLLOW_17_in_expr534); 
-
-                    pushFollow(FOLLOW_expr_in_expr537);
-                    expr62=expr();
+                    pushFollow(FOLLOW_expr_in_expr535);
+                    expr61=expr();
 
                     state._fsp--;
 
-                    adaptor.addChild(root_0, expr62.getTree());
+                    adaptor.addChild(root_0, expr61.getTree());
 
-                    char_literal63=(Token)match(input,16,FOLLOW_16_in_expr539); 
+                    char_literal62=(Token)match(input,17,FOLLOW_17_in_expr537); 
+
+                    pushFollow(FOLLOW_expr_in_expr540);
+                    expr63=expr();
+
+                    state._fsp--;
+
+                    adaptor.addChild(root_0, expr63.getTree());
+
+                    char_literal64=(Token)match(input,16,FOLLOW_16_in_expr542); 
 
                     }
                     break;
@@ -1618,32 +1640,32 @@ public TreeAdaptor getTreeAdaptor() {
                     root_0 = (CommonTree)adaptor.nil();
 
 
-                    RELATIONAL_OPERATOR64=(Token)match(input,RELATIONAL_OPERATOR,FOLLOW_RELATIONAL_OPERATOR_in_expr548); 
-                    RELATIONAL_OPERATOR64_tree = 
-                    (CommonTree)adaptor.create(RELATIONAL_OPERATOR64)
+                    RELATIONAL_OPERATOR65=(Token)match(input,RELATIONAL_OPERATOR,FOLLOW_RELATIONAL_OPERATOR_in_expr551); 
+                    RELATIONAL_OPERATOR65_tree = 
+                    (CommonTree)adaptor.create(RELATIONAL_OPERATOR65)
                     ;
-                    root_0 = (CommonTree)adaptor.becomeRoot(RELATIONAL_OPERATOR64_tree, root_0);
+                    root_0 = (CommonTree)adaptor.becomeRoot(RELATIONAL_OPERATOR65_tree, root_0);
 
 
-                    char_literal65=(Token)match(input,15,FOLLOW_15_in_expr551); 
+                    char_literal66=(Token)match(input,15,FOLLOW_15_in_expr554); 
 
-                    pushFollow(FOLLOW_expr_in_expr554);
-                    expr66=expr();
-
-                    state._fsp--;
-
-                    adaptor.addChild(root_0, expr66.getTree());
-
-                    char_literal67=(Token)match(input,17,FOLLOW_17_in_expr556); 
-
-                    pushFollow(FOLLOW_expr_in_expr559);
-                    expr68=expr();
+                    pushFollow(FOLLOW_expr_in_expr557);
+                    expr67=expr();
 
                     state._fsp--;
 
-                    adaptor.addChild(root_0, expr68.getTree());
+                    adaptor.addChild(root_0, expr67.getTree());
 
-                    char_literal69=(Token)match(input,16,FOLLOW_16_in_expr561); 
+                    char_literal68=(Token)match(input,17,FOLLOW_17_in_expr559); 
+
+                    pushFollow(FOLLOW_expr_in_expr562);
+                    expr69=expr();
+
+                    state._fsp--;
+
+                    adaptor.addChild(root_0, expr69.getTree());
+
+                    char_literal70=(Token)match(input,16,FOLLOW_16_in_expr564); 
 
                     }
                     break;
@@ -1707,45 +1729,46 @@ public TreeAdaptor getTreeAdaptor() {
     public static final BitSet FOLLOW_16_in_var_decl270 = new BitSet(new long[]{0x0000000000040000L});
     public static final BitSet FOLLOW_18_in_var_decl273 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_ID_in_aType292 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_26_in_block311 = new BitSet(new long[]{0x0000000009880000L});
-    public static final BitSet FOLLOW_stmt_in_block314 = new BitSet(new long[]{0x0000000009880000L});
+    public static final BitSet FOLLOW_26_in_block311 = new BitSet(new long[]{0x000000000B880000L});
+    public static final BitSet FOLLOW_stmt_in_block314 = new BitSet(new long[]{0x000000000B880000L});
     public static final BitSet FOLLOW_27_in_block318 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_var_decl_in_stmt348 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_assignment_in_stmt352 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_if_else_stmt_in_stmt356 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_19_in_assignment377 = new BitSet(new long[]{0x0000000000008000L});
-    public static final BitSet FOLLOW_15_in_assignment380 = new BitSet(new long[]{0x0000000000000100L});
-    public static final BitSet FOLLOW_ID_in_assignment383 = new BitSet(new long[]{0x0000000000020000L});
-    public static final BitSet FOLLOW_17_in_assignment385 = new BitSet(new long[]{0x0000000000110910L});
-    public static final BitSet FOLLOW_expr_in_assignment388 = new BitSet(new long[]{0x0000000000010000L});
-    public static final BitSet FOLLOW_16_in_assignment390 = new BitSet(new long[]{0x0000000000040000L});
-    public static final BitSet FOLLOW_18_in_assignment393 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_23_in_if_else_stmt412 = new BitSet(new long[]{0x0000000000008000L});
-    public static final BitSet FOLLOW_15_in_if_else_stmt414 = new BitSet(new long[]{0x0000000000110910L});
-    public static final BitSet FOLLOW_expr_in_if_else_stmt416 = new BitSet(new long[]{0x0000000000010000L});
-    public static final BitSet FOLLOW_16_in_if_else_stmt418 = new BitSet(new long[]{0x0000000004000000L});
-    public static final BitSet FOLLOW_block_in_if_else_stmt422 = new BitSet(new long[]{0x0000000000200000L});
-    public static final BitSet FOLLOW_21_in_if_else_stmt424 = new BitSet(new long[]{0x0000000004000000L});
-    public static final BitSet FOLLOW_block_in_if_else_stmt428 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_25_in_while_stmt461 = new BitSet(new long[]{0x0000000000008000L});
-    public static final BitSet FOLLOW_15_in_while_stmt463 = new BitSet(new long[]{0x0000000000110910L});
-    public static final BitSet FOLLOW_expr_in_while_stmt465 = new BitSet(new long[]{0x0000000000010000L});
-    public static final BitSet FOLLOW_16_in_while_stmt467 = new BitSet(new long[]{0x0000000004000000L});
-    public static final BitSet FOLLOW_block_in_while_stmt471 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_20_in_expr501 = new BitSet(new long[]{0x0000000000000100L});
-    public static final BitSet FOLLOW_ID_in_expr504 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ID_in_expr514 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_BINARY_OPERATOR_in_expr525 = new BitSet(new long[]{0x0000000000008000L});
-    public static final BitSet FOLLOW_15_in_expr528 = new BitSet(new long[]{0x0000000000120910L});
-    public static final BitSet FOLLOW_expr_in_expr532 = new BitSet(new long[]{0x0000000000020000L});
-    public static final BitSet FOLLOW_17_in_expr534 = new BitSet(new long[]{0x0000000000110910L});
-    public static final BitSet FOLLOW_expr_in_expr537 = new BitSet(new long[]{0x0000000000010000L});
-    public static final BitSet FOLLOW_16_in_expr539 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_RELATIONAL_OPERATOR_in_expr548 = new BitSet(new long[]{0x0000000000008000L});
-    public static final BitSet FOLLOW_15_in_expr551 = new BitSet(new long[]{0x0000000000120910L});
-    public static final BitSet FOLLOW_expr_in_expr554 = new BitSet(new long[]{0x0000000000020000L});
-    public static final BitSet FOLLOW_17_in_expr556 = new BitSet(new long[]{0x0000000000110910L});
-    public static final BitSet FOLLOW_expr_in_expr559 = new BitSet(new long[]{0x0000000000010000L});
-    public static final BitSet FOLLOW_16_in_expr561 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_while_stmt_in_stmt360 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_19_in_assignment380 = new BitSet(new long[]{0x0000000000008000L});
+    public static final BitSet FOLLOW_15_in_assignment383 = new BitSet(new long[]{0x0000000000000100L});
+    public static final BitSet FOLLOW_ID_in_assignment386 = new BitSet(new long[]{0x0000000000020000L});
+    public static final BitSet FOLLOW_17_in_assignment388 = new BitSet(new long[]{0x0000000000110910L});
+    public static final BitSet FOLLOW_expr_in_assignment391 = new BitSet(new long[]{0x0000000000010000L});
+    public static final BitSet FOLLOW_16_in_assignment393 = new BitSet(new long[]{0x0000000000040000L});
+    public static final BitSet FOLLOW_18_in_assignment396 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_23_in_if_else_stmt415 = new BitSet(new long[]{0x0000000000008000L});
+    public static final BitSet FOLLOW_15_in_if_else_stmt417 = new BitSet(new long[]{0x0000000000110910L});
+    public static final BitSet FOLLOW_expr_in_if_else_stmt419 = new BitSet(new long[]{0x0000000000010000L});
+    public static final BitSet FOLLOW_16_in_if_else_stmt421 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_block_in_if_else_stmt425 = new BitSet(new long[]{0x0000000000200000L});
+    public static final BitSet FOLLOW_21_in_if_else_stmt427 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_block_in_if_else_stmt431 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_25_in_while_stmt464 = new BitSet(new long[]{0x0000000000008000L});
+    public static final BitSet FOLLOW_15_in_while_stmt466 = new BitSet(new long[]{0x0000000000110910L});
+    public static final BitSet FOLLOW_expr_in_while_stmt468 = new BitSet(new long[]{0x0000000000010000L});
+    public static final BitSet FOLLOW_16_in_while_stmt470 = new BitSet(new long[]{0x0000000004000000L});
+    public static final BitSet FOLLOW_block_in_while_stmt474 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_20_in_expr504 = new BitSet(new long[]{0x0000000000000100L});
+    public static final BitSet FOLLOW_ID_in_expr507 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ID_in_expr517 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_BINARY_OPERATOR_in_expr528 = new BitSet(new long[]{0x0000000000008000L});
+    public static final BitSet FOLLOW_15_in_expr531 = new BitSet(new long[]{0x0000000000120910L});
+    public static final BitSet FOLLOW_expr_in_expr535 = new BitSet(new long[]{0x0000000000020000L});
+    public static final BitSet FOLLOW_17_in_expr537 = new BitSet(new long[]{0x0000000000110910L});
+    public static final BitSet FOLLOW_expr_in_expr540 = new BitSet(new long[]{0x0000000000010000L});
+    public static final BitSet FOLLOW_16_in_expr542 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_RELATIONAL_OPERATOR_in_expr551 = new BitSet(new long[]{0x0000000000008000L});
+    public static final BitSet FOLLOW_15_in_expr554 = new BitSet(new long[]{0x0000000000120910L});
+    public static final BitSet FOLLOW_expr_in_expr557 = new BitSet(new long[]{0x0000000000020000L});
+    public static final BitSet FOLLOW_17_in_expr559 = new BitSet(new long[]{0x0000000000110910L});
+    public static final BitSet FOLLOW_expr_in_expr562 = new BitSet(new long[]{0x0000000000010000L});
+    public static final BitSet FOLLOW_16_in_expr564 = new BitSet(new long[]{0x0000000000000002L});
 
 }

@@ -76,7 +76,6 @@ package conversion {
         }
         case _ => node.getText() match {
           case "@" => {
-	    
 	    val v =visitVar(adaptor.getChild(t,0))
 	    Deref(v)
 	  }
@@ -94,6 +93,12 @@ package conversion {
             val b2 = visitBlock(adaptor.getChild(t,2))
             IfElse(e,b1,b2)
           }
+	case CGELLexer.WHILE => 
+	  {
+	    val e = visitExpr(adaptor.getChild(t, 0))
+	    val body = visitBlock(adaptor.getChild(t, 1))
+	    While(e, body)
+	  }
         case _ =>
         node.getText() match {
           case "var" => {

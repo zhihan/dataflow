@@ -11,6 +11,7 @@ abstract class Region
 case class BasicRegion() extends Region
 case class ChainRegion() extends Region
 case class IfElseRegion() extends Region
+case class WhileRegion() extends Region
 
 class Pst(val t:TreeNode, r:Region ) {
   val regions = Map(t.id -> r) // mutable
@@ -38,6 +39,14 @@ object Pst {
     val pst = new Pst(root, IfElseRegion()) 
     pst.regions++= b1.regions
     pst.regions++= b2.regions
+    pst
+  }
+
+  def whileR(b:Pst) = {
+    val root =tf.make()
+    root.addChild(b.t)
+    val pst = new Pst(root, IfElseRegion()) 
+    pst.regions++= b.regions
     pst
   }
 }
@@ -159,9 +168,14 @@ object PstFactory {
 	    val r2 = createPst(b2)
 	    listOfRegion.append( Pst.ifElse(r1,r2))
 	  }
-	  case _ => {
+	  case Noop(_) => {
 	    listOfStmt.append(s)
 	  }
+	  case While(_,b) => {
+	    val r = createPst(b)
+	    listOfRegion.append(Pst.whileR(r))
+	  }
+	  case Assignment(_,_) => listOfStmt.append(s)
 	}
       }
       finishBasicRegion()

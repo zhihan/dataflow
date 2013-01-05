@@ -29,6 +29,8 @@ object RenameVar{
       case IfElse(e, b1, b2) => IfElse(apply(m,e), 
 				       apply(m,b1), 
 				       apply(m,b2))
+      case While(e, b) => While(apply(m, e),
+				apply(m, b))
       case Noop(_) => s
     }
   }

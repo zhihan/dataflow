@@ -51,7 +51,7 @@ block:
     ; 
 
 stmt:
-        var_decl | assignment | if_else_stmt 
+        var_decl | assignment | if_else_stmt | while_stmt
     ;
 
 assignment:
@@ -61,7 +61,7 @@ if_else_stmt:
         'if' '(' expr ')' b1=block 'else' b2=block -> ^(IF_ELSE expr $b1 $b2)
     ;
 while_stmt:
-        'while' '(' expr ')' body=block -> ^(WHILE expr $body) 
+        'while' '(' expr ')' b=block -> ^(WHILE expr $b) 
     ;
 
 expr:

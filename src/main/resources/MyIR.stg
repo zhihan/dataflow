@@ -10,6 +10,7 @@ end
 stmt(s) ::= <<
 <if(s.assignment)><assignment(s)><\\\>
 <elseif(s.ifElse)><if_else(s)><\\\>
+<elseif(s.while)><while(s)><\\\>
 <endif>
 >>
 
@@ -20,6 +21,12 @@ if (<expression(s.cond)>)
     <s.b1:stmt(); separator="\n">   
 else 
     <s.b2:stmt(); separator="\n">   
+end
+>>
+
+while(s) ::= <<
+while (<expression(s.cond)>) 
+    <s.body:stmt(); separator="\n">
 end
 >>
 
