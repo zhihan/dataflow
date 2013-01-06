@@ -388,6 +388,21 @@ class Reachable(graph: Graph) {
     val vertices = bfs.visited.toArray
     vertices.map(v => v.id)
   }
+  
+  private def guardedSuccessor(v:Vertex, stop:Set[Vertex]) = 
+    if (v==stop) ArrayBuffer[Vertex]() else graph.succ(v)
+
+  private def guardedPredecessor(v:Vertex, stop:Set[Vertex]) =
+    if (v==stop) ArrayBuffer[Vertex]() else graph.pre(v)
+  
+  def backward(start:Array[Int], stop:Set[Vertex]) = {
+    val bfs = new BFS((v:Vertex) => guardedPredecessor(v, stop))
+
+    bfs.initialize(graph.getV(start))
+    bfs.run()
+    val vertices = bfs.visited.toArray
+    vertices.map(v => v.id)
+  }
 
 }
 

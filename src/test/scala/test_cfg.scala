@@ -21,10 +21,27 @@ package my.ir.CFGTest {
       val p = new ParseAndCreateIR()
       val (ast,_) = p.parse(a)
       val (cfg,m) = Utility.createCFGForList(ast.body)
-      // println(cfg.graph.toDotString )
+      //println(cfg.graph.toDotString )
       //println(writeGraphviz(cfg.graph, (v => m(v).toString)))
       assert(cfg.graph.V.length == 10)
       assert(cfg.graph.E.length == 10)
    }
+    test("CFG for while loop") {
+      val a = """function((),(),main) 
+      {
+      while (@b) {
+      =(y, @x);
+      }
+      }"""
+      val p = new ParseAndCreateIR()
+      val (ast,_) = p.parse(a)
+      val (cfg,m) = Utility.createCFGForList(ast.body)
+      // println(cfg.graph.toDotString )
+      //println(writeGraphviz(cfg.graph, 
+      // (v => m.getFirstStatement(v).toString)))
+      assert(cfg.graph.V.length == 8)
+      assert(cfg.graph.E.length == 8)
+   }
+
   }
 }

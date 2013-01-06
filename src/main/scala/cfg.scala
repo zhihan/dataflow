@@ -99,22 +99,27 @@ object Utility {
 	}
 	  
 	case While(_, b) => {
-	  // Create merge node at top, this way 
+	  // Create head node at top, this way 
 	  // the while block only branches, and the header
-	  // node merges two branches
-	  val mergeV = g.newVertex("merge")
-	  val mergeS = Noop("merge")
-	  g.addEdge(lastEntry, mergeV)
-	  m.add(mergeV, mergeS)
+	  // node merges two branches, add an additional
+	  // loop exit node for loop exit
+	  val headV = g.newVertex("whileHead")
+	  val headS = Noop("whileHead")
+	  g.addEdge(lastEntry, headV)
+	  m.add(headV, headS)
 
 	  val whileV = g.newVertex("while")
-	  g.addEdge(mergeV, whileV)
+	  g.addEdge(headV, whileV)
 	  m.add(whileV, stmt)
 	  
 	  val loopEnd = createAndEmbedBlock(b, g, m, whileV)
-	  g.addEdge(loopEnd, mergeV)
+	  g.addEdge(loopEnd, headV)
 	  
-	  lastEntry = whileV
+	  val exitV = g.newVertex("whileExit")
+	  val exitS = Noop("whileExit")
+	  m.add(exitV, exitS)
+	  g.addEdge(whileV, exitV)
+	  lastEntry = exitV
 	}
 
 	case Noop(_) => {
