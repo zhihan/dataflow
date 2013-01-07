@@ -208,7 +208,6 @@ class ComputePst() {
     }
     
     for (s <- l) {
-      println(s)
       s match {
 	case IfElse(_,b1,b2) => {
 	  finishBasicRegion()
@@ -220,7 +219,6 @@ class ComputePst() {
 	  // Nothing
 	}
 	case While(_,b) => {
-	  println("While region")
 	  val r = createPst(b)
 	  listOfRegion.append(pstF.whileR(r))
 	}

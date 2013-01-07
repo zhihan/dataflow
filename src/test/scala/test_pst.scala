@@ -120,20 +120,60 @@ package my.ir.PstTest {
       }"""
       val p = new ParseAndCreateIR()
       val (ast, _) = p.parse(a)
-     println("AST")
-     println(ast)
+     //println("AST")
+     //println(ast)
       val c = new ComputePst
       val r = c.createPst(ast.body)
-      println(r.t.toDotString)
+      //println(r.t.toDotString)
       assert( r.regions(r.t.id) == ChainRegion())
       val children = r.t.children
-      print(children.length)
+      //print(children.length)
       assert(children.length == 2)
       assert(children.exists(c =>
 	r.regions(c.id) == WhileRegion()))
       assert(children.exists(c =>
 	r.regions(c.id) == BasicRegion()))
+    }
+
+    test("While loop nested") {
+      val a = """function((),(), chain)
+      {
+	while(@b) {
+	  while(@c) {
+	    =(y,@x);
+	  }
+	}
+      =(z,@y);
+      }"""
+      val p = new ParseAndCreateIR()
+      val (ast, _) = p.parse(a)
+      val (cfg, m) = Utility.createCFGForList(ast.body)
+      // println(cfg.graph.toDotString )
+      val c = new ComputePst
+      val (_, r) = c.createPst(cfg.entry,
+				   cfg.graph, 
+				   cfg.exit ,m)
+      // println(r.t.toDotString)
+      assert( r.regions(r.t.id) == ChainRegion())
+      val children = r.t.children
+      // print(children.length)
+
+      // Root region has two children
+      // One of them is while region
+      assert(children.length == 2)
+      assert(children.exists(c =>
+	r.regions(c.id) == WhileRegion()))
+      // The while region has a child
+      // which is also while region
+      val w = children.filter(x => 
+	r.regions(x.id) == WhileRegion())
+      assert(w.length == 1)
+      val wh = w.head
+      assert(wh.children.length == 1)
+      assert(r.regions(wh.children.head.id)
+	     == WhileRegion())
     } 
+ 
   }
 
 }
