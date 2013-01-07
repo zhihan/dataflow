@@ -174,6 +174,37 @@ package my.ir.PstTest {
 	     == WhileRegion())
     } 
  
+   test("While loop with if region") {
+      val a = """function((),(), chain)
+      {
+	while(@b) {
+	  if (@c) {
+	    =(y,@x);
+	  } else {
+	    =(y,@x);
+	  }
+	}
+       }"""
+      val p = new ParseAndCreateIR()
+      val (ast, _) = p.parse(a)
+      val (cfg, m) = Utility.createCFGForList(ast.body)
+
+      val c = new ComputePst
+      val (_, r) = c.createPst(cfg.entry,
+				   cfg.graph, 
+				   cfg.exit ,m)
+
+      // Root region is a while region
+      assert( r.regions(r.t.id) == WhileRegion())
+      val children = r.t.children
+
+      // The while region has a child
+      // which is an if-else region
+      assert(children.length == 1)
+      assert(children.exists(c =>
+	r.regions(c.id) == IfElseRegion()))
+     } 
+ 
   }
 
 }
