@@ -529,8 +529,9 @@ class tarjan(val g: Graph) {
   var index = -1 // default value
 
   val work = (for (v <- g.V) yield (v, new TarjanWork())).toMap
+  val parent = HashMap[Vertex, Vertex]()
 
-  def visit(v:Vertex) {
+  def visit(v:Vertex, callback: Vertex => Unit) {
     work(v).number = index
     work(v).lowlink = index
     index += 1
@@ -540,7 +541,8 @@ class tarjan(val g: Graph) {
     for (i <- next) {
       if (work(i).number == -1) 
         { // never visited
-          visit(i)
+          parent(i) = v
+          visit(i, callback)
           work(v).lowlink = min(work(v).lowlink, work(i).lowlink)
         } 
       else if ( (work(i).number < work(v).number) && 
@@ -549,7 +551,12 @@ class tarjan(val g: Graph) {
           work(v).lowlink = work(i).lowlink
         }
     }
+    callback(v)
 
+  }
+
+  def processSCC(v:Vertex) {
+    // Process SCC computation
     if (work(v).lowlink == work(v).number) {
       // Finish up the node
       val c = ArrayBuffer[Vertex]()
@@ -574,18 +581,131 @@ class tarjan(val g: Graph) {
       }
     }
   }
-  
-  def run() = {
+
+  def computeSCC() = {
     index = 0
-    for (i <- g.V if work(i).number == -1) { visit(i)}
+    for (i <- g.V if work(i).number == -1) { visit(i, processSCC)}
     scc
   }
-  
+
+  def dfNumber(root:Vertex) = {
+    index = 0
+    visit(root, (v:Vertex)=>())
+    val dfnum = (for (v <- g.V) yield(v, work(v).number)).toMap
+    (dfnum, parent)
+  }
 }
 
-object tarjan {
+object tarjanSCC {
   def apply(g:Graph) = {
     val t = new tarjan(g)
-    t.run()
+    t.computeSCC()
   }
+}
+
+class TarjanDominators {
+  // A class that wraps the Lengauer-Tarjan algorithm for dominators
+  
+  def compute(g:Graph, root:Vertex) = {
+    val t = new tarjan(g)
+    val (dfNum, parent) = t.dfNumber(root)
+    // Compute a reverse map for vertices
+    val vertex = (for (kv <- dfNum) yield (kv._2, kv._1)).toMap
+
+    println(writeGraphviz(g, vw=(v:Vertex)=> 
+      "[label\"=\""+dfNum(v).toString+"\"]"))
+
+    val semiDominated = HashMap[Vertex, ArrayBuffer[Vertex]]()
+    for (i <- g.V) {
+      semiDominated(i) = ArrayBuffer[Vertex]()
+    }
+
+    val idom = HashMap[Vertex, Vertex]()
+    val samedom = HashMap[Vertex, Vertex]()
+    val semi = HashMap[Vertex,Vertex]()
+
+    // ancestor is a mutable version of parent. It builds up the 
+    // spanning tree bottom-up. 
+    val ancestor = HashMap[Vertex, Vertex]() 
+
+    for (i <- (g.V.length-1) to 1 by -1) {
+      val n = vertex(i)
+      val p = parent(n)
+      val s = computeSemiDominator(n, p, 
+                                   semi, ancestor,
+                                   dfNum, g)
+      semi(n) = s
+      semiDominated(s).append(n)
+      
+      // Link nodes by adding ancestor relations.
+      // A node is linked once its semi[] is computed
+      ancestor(n) = p
+
+      // All vertices under p has been visited.
+      for (v <- semiDominated(p)) {
+        val y = ancestorWithLowestSemi(v, semi,
+                                       dfNum, ancestor)
+        if (semi(y) == semi(v)) {
+          idom(v) = p
+        } else {
+          // Defer to computation of y
+          samedom(v) = y
+        }
+      }
+    }
+    
+    for (i <- 1 to g.V.length-1) {
+      val n = vertex(i)
+      if (samedom.contains(n)) {
+        idom(n) = idom(samedom(n))
+      }
+    }
+    idom
+  }
+
+  def ancestorWithLowestSemi(v: Vertex, 
+                             semi: HashMap[Vertex,Vertex],
+                             dfNum: Map[Vertex,Int],
+                             ancestor: HashMap[Vertex,Vertex]) = {
+    
+    var currentSemi = v 
+    var currentV = v    
+    while (semi.contains(currentV))  {
+      val semiV = semi(currentV)
+      val semiU = semi(currentSemi)
+      if (dfNum(semiV) < dfNum(semiU)) {
+        currentSemi = currentV
+      }
+      currentV = ancestor(currentV)
+    }
+    currentSemi
+  }
+  
+  def link(p:Vertex, n:Vertex, ancestor: HashMap[Vertex,Vertex]) {
+    ancestor += n->p
+  }
+
+  def computeSemiDominator(n: Vertex, 
+                           p: Vertex,
+                           semi: HashMap[Vertex,Vertex],
+                           ancestor: HashMap[Vertex,Vertex],
+                           dfNum: Map[Vertex,Int],
+                           g:Graph) = {
+    var s = p 
+    var pred = g.pre(n)
+    for (v <- pred) {
+      val s2 = 
+        if (dfNum(v) <= dfNum(n)) {
+          // v is in the dfg spanning tree to n
+          v 
+        } else {
+          // v is on a cross edge to n
+          val c = ancestorWithLowestSemi(v, semi, dfNum, ancestor)
+          semi(c)
+        }
+      s = if (dfNum(s2) < dfNum(s)) s2 else s
+    }
+    s
+  }
+
 }
