@@ -612,9 +612,6 @@ class TarjanDominators {
     // Compute a reverse map for vertices
     val vertex = (for (kv <- dfNum) yield (kv._2, kv._1)).toMap
 
-    println(writeGraphviz(g, vw=(v:Vertex)=> 
-      "[label\"=\""+dfNum(v).toString+"\"]"))
-
     val semiDominated = HashMap[Vertex, ArrayBuffer[Vertex]]()
     for (i <- g.V) {
       semiDominated(i) = ArrayBuffer[Vertex]()
@@ -707,5 +704,51 @@ class TarjanDominators {
     }
     s
   }
+  
+  def dominate(n: Vertex, w: Vertex, 
+	       idom:HashMap[Vertex, Vertex]):Boolean = {
+    if (!idom.contains(w)) {
+      false
+    }  else if (idom(w) == n) {
+      true
+    } else { 
+      dominate( n, idom(w), idom)
+    } 
+  }
 
+  class DominanceF(val g:Graph, val idom:HashMap[Vertex, Vertex]) {
+    val df = HashMap[Vertex,Set[Vertex]]()
+    for (v <- g.V) {
+      df(v) = Set[Vertex]()
+    }
+
+    
+    def compute(n: Vertex) {
+      val s = Set[Vertex]()
+      val succ = g.succ(n)
+      for (y <- succ) {
+	// Immediate successor is DF if 
+	// it is not dmoniated by the vertex
+	if (idom(y) != n) {
+	  s += y
+	}
+      }
+      for (c <- g.V if (idom.contains(c) && idom(c) == n)) {
+	// n directly dominate c
+	compute(c)
+	for (w <- df(c) if (!dominate(n,w, idom) || n==w )) {
+	  // if n does not dominate w, w is also a DF of c.
+	  s += w
+	}
+      }
+      df(n) = s
+    }
+  }
+  def dominanceFrontier(n: Vertex, idom: HashMap[Vertex,Vertex],
+		       g: Graph) = {
+    val c = new DominanceF(g, idom)
+    c.compute(n)
+    c.df
+  }
+  
 }

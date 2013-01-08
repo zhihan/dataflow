@@ -102,9 +102,13 @@ package my.se.test.GraphTest {
       val idom =  t.compute(graph, a)
       assert(idom.contains(b))
       assert(!idom.contains(a))
-      //println("idom")
+      // println("idom")
       // idom.foreach(e => println(e._1.sid + "->" +e._2.sid))
-      
+      val df = t.dominanceFrontier(a, idom, graph)
+      assert(df(a).isEmpty)
+      assert(df(c).contains(c) && df(c).contains(m))
+      assert(df(b).contains(m) && df(b).contains(b))
+      assert(df(d).contains(g) && df(d).contains(i) && df(d).contains(l))
     }
   }
 
