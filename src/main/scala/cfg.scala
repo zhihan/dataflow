@@ -1,6 +1,7 @@
 package my.ir
 import my.se._
 import scala.collection.mutable.Map
+import scala.collection.mutable.Set
 
 class CFGMap {
   // A vertex in the CFG correspond to a "block" which is 
@@ -138,6 +139,58 @@ object Utility {
 
     val result = new SeseGraph(g, entryV, exitV)
     (result, m)
+  }
+}
+
+object VarUse {
+  // VarUse function 
+  def apply(e:Exp):List[Var] =  {
+    e match {
+      case Ref(v) => List( v )
+      case Deref(v) => List ( v ) 
+      case BinExp(_, lhs, rhs) => apply(lhs) ::: apply(rhs)
+      case Const(_) => List[Var]()
+    }
+  }
+
+  def apply(s:Statement):List[Var] = {
+    s match {
+      case Assignment(_, e) => apply(e)
+      case IfElse(_,_,_) => List()
+      case While(_,_) => List()
+      case Noop(_) => List()
+    }
+  }
+  def apply(s:List[Statement]):List[Var] = 
+    s.flatMap(x => apply(x))
+}
+
+object VarDefine {
+  // The list of variables defined in the statement
+  // corresponding to CFG vertices.
+  //
+  // NOTE
+  // For if-statement and while-statement return empty
+  // because their body is in the CFG.
+  //
+  def apply(s:Statement):List[Var] = {
+    s match {
+      case Assignment(RefVar(x), _) =>
+	List(x)
+      case Assignment(RefArray(a,_), _) =>
+	List(a)
+      case IfElse(_, b1, b2) => {
+	List()
+      }
+      case While(_,_) => List()
+      case Noop(_) => List()
+    }
+  }
+  def apply(l:List[Statement]):List[Var] = {
+    val s = Set[Var]()
+    l.foreach{ st => 
+      s ++= apply(st) } 
+    s.toList
   }
 }
 
