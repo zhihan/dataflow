@@ -6,7 +6,7 @@ import org.scalatest.FunSuite
 
 class VirtualGraphTest extends FunSuite {
   def createVGraph = {
-    val gr = new VirtualBlockGraph()
+    val gr = new VirtualPortGraph()
     val a = gr.newOutport("1")
     val b = gr.newInport("2")
     val c = gr.newOutport("3")
