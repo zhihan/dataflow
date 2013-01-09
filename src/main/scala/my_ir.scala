@@ -143,38 +143,6 @@ case class While(e:Exp, body:List[Statement]) extends Statement
   def getBody() = body.toArray
 }
 
-object VarUse {
-  // VarUse function 
-  def apply(e:Exp):List[Var] =  {
-    e match {
-      case Ref(v) => List( v )
-      case Deref(v) => List ( v ) 
-      case BinExp(_, lhs, rhs) => apply(lhs) ::: apply(rhs)
-      case Const(_) => List[Var]()
-    }
-  }
-}
-
-object VarDefine {
-  def apply(s:Statement):List[Var] = {
-    s match {
-      case Assignment(RefVar(x), _) =>
-	List(x)
-      case IfElse(_,b1,b2) => {
-	val s = Set[Var]() ++ apply(b1)
-	s ++= apply(b2)
-	s.toList
-      }
-      case _ => List()
-    }
-  }
-  def apply(l:List[Statement]):List[Var] = {
-    val s = Set[Var]()
-    l.foreach{ st => 
-      s ++= apply(st) } 
-    s.toList
-  }
-}
 
 case class Procedure(body: List[Statement], name:String)
 {

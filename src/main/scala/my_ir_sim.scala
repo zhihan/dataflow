@@ -58,8 +58,11 @@ object Analysis {
 					      map, 
 					      stepCFG.exit)
     g.addEdge(useExit, top)
-
-    val varsDefined = VarDefine(s.body)
+    
+    // Loop through the CFG and get all variables defined
+    // in these nodes.
+    val varsDefined = g.V.flatMap(v => 
+      VarDefine(map.getStatements(v))).toList 
     val simstate = varsDefined.filter( x => {
       val p = DefUse.analyzeLive(g, map, x)
       // A variable if live if it is live-out at the exit
