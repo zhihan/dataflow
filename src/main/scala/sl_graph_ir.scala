@@ -11,18 +11,18 @@ trait HasId
 
 abstract class Port extends AnyRef with HasId
 
-case class Inport(override val id: Int) extends Port
+case class Inport(id: Int) extends Port
 {
 }
-case class Outport(override val id:Int) extends Port
+case class Outport(id:Int) extends Port
 {
 }
 
-/** Virtual block graph captures the relationship between
- * virtual blocks. It is used to compute the
+/** Virtual port graph captures the relationship between
+ * ports of virtual blocks. It is used to compute the
  * virtual blocks in  a signal pathway*/
 
-class VirtualBlockGraph() {
+class VirtualPortGraph() {
 
   /** Underlying dag */
   val g = new Graph()
@@ -78,7 +78,7 @@ class VirtualBlockGraph() {
   /** Compute reachable ports and return them in input-output pairs
    *
    *  The return array is alternating list of out and in ports.
-   * [ out1 in1 out2 in2 ... outn inn]
+   * [out1 in1 out2 in2 ... outn inn]
    *  where the connections are out1 -> in1, out2 -> in2 ,.... outn -> inn.
    *
    */
@@ -103,6 +103,59 @@ class VirtualBlockGraph() {
     ioList.toArray
   }
 
+}
+
+case class Block(id:Int) extends AnyRef with HasId
+
+class VirtualBlockGraph() {
+  val g = new Graph()
+  val nodes = Map[Int, Block]()
+
+  def newBlock(name:String) = {
+    val b = g.newVertex(name)
+    val n = Block(b.id)
+    nodes(b.id) = n
+    n
+  }
+
+  def newBlocks(names:Array[String]) = {
+    val result = ListBuffer[Int]()
+    names.foreach{ name => 
+      result.append(newBlock(name).id)}
+    result.toArray
+  }
   
+  def addEdge(src:Int, dst:Int) = {
+    if (src == dst) {
+      throw new RuntimeException("No self-loop is allowed")
+    } else {
+      g.addEdge(src,dst)
+    }
+  }
+
+  def toDotString(): String = {
+    def vLabel(v:Vertex) = "[label=\"" + v.sid + "\"]"
+    writeGraphviz(g, vLabel)
+  }
+
+  def unreachable(fSrc:Array[Int], bSrc:Array[Int]): Array[Int] = {
+
+    val reach = new Reachable(g)
+    
+    val fwd = if (fSrc!= null) { 
+      reach.forward(fSrc).toSet
+    } else {
+      Set[Int]()
+    }
+    val bwd = if (bSrc != null) {
+      reach.backward(bSrc).toSet
+    } else {
+      Set[Int]()
+    }
+    val both = fwd.intersect(bwd).toArray
+    val result = g.V.filter(v => !both.contains(v.id))
+    result.map(_.id).toArray
+    
+  }
 
 }

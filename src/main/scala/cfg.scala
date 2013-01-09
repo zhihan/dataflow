@@ -6,31 +6,22 @@ class CFGMap {
   // A vertex in the CFG correspond to a "block" which is 
   // a list of simple statement.
   val block = Map[Vertex, List[Statement]]()
-  val vertex = Map[Statement, Vertex] ()
 
   def add(v:Vertex, s:Statement) {
     val st = List(s)
     block += v->st
-    vertex += s->v
   }
 
   def add(v:Vertex, ss:List[Statement]) {
     block += v->ss
-    ss.foreach( s=>
-	       vertex += s->v)
   }
 
   def update(v:Vertex, ss:List[Statement]) {
     assert(block.contains(v))
     block(v) = ss
     
-    ss.foreach( s => {
-      assert(vertex.contains(s))
-      vertex(s) = v
-    })
-  }
+   }
   
-  def getVertex(s:Statement) = vertex(s)
   def getStatements(v:Vertex) = block(v)
   def getFirstStatement(v:Vertex) = block(v).head
  
