@@ -7,6 +7,9 @@ object RenameVar{
   def apply (m: Map[Var, Var], e:Exp) :Exp = {
     e match {
       case Ref(v) => if (m contains v) Ref(m(v)) else Ref(v)
+      case UniExp(op, e) => UniExp(op, apply(m, e))
+      case Function(name, args) => Function(name, 
+                                            args.map(x=> apply(m, x)))
       case BinExp(op, lhs, rhs) => BinExp(op, 
 					  apply (m, lhs), 
 					  apply (m, rhs))

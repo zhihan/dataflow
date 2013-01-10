@@ -6,33 +6,51 @@ import scala.collection.mutable.ListBuffer
 
 // Expression auto differentiation
 class Diff(dvar : Map[Var,Var]) {
-    val dv = dvar
-    def apply(e: Exp): Exp = e match {
-      case Deref(v) => Deref(getDv(v))
-      case BinExp(OpMul(), lhs, rhs) => BinExp(OpPlus(), 
-                                               BinExp(OpMul(), 
-						      apply(lhs), 
-						      rhs), 
-                                               BinExp(OpMul(), 
-						      lhs, 
-						      apply(rhs))
-                                             )
-      case BinExp(OpPlus(), lhs, rhs) => BinExp(OpPlus(), 
-						 apply(lhs), 
-						 apply(rhs))
-
-      case BinExp(OpLt(), lhs, rhs) => Const(FloatValue(0.0)) 
-      case Const(_)  => Const(FloatValue(0.0))
-      case Ref(v) => e 
-      case Function(fcn, args) => 
-        fcn match {
-          case "sin" => Function("cos", args)
-          case "cos" => UniExp(OpNeg(), Function("sin",args))
-          case _ => Const(FloatValue(0.0))
-        }
-      case UniExp(OpNeg(), e) => UniExp(OpNeg(), apply(e))
-    }
+  val dv = dvar
+  def applyBinExp(e:BinExp) = e match {
+    case BinExp(OpMul(), lhs, rhs) => BinExp(OpPlus(), 
+                                             BinExp(OpMul(), 
+						    apply(lhs), 
+						    rhs), 
+                                             BinExp(OpMul(), 
+						    lhs, 
+						    apply(rhs))
+                                           )
+    case BinExp(OpPlus(), lhs, rhs) => BinExp(OpPlus(), 
+					      apply(lhs), 
+					      apply(rhs))
+    case BinExp(OpMinus(), lhs, rhs) => BinExp(OpMinus(), 
+					      apply(lhs), 
+					      apply(rhs))
+    case BinExp(OpDivide(), lhs, rhs) => 
+      BinExp(OpPlus(),
+             BinExp(OpDivide(),
+                    apply(lhs),
+                    rhs),
+             BinExp(OpMul(),
+                    BinExp(OpDivide(),
+                           lhs,
+                           BinExp(OpMul(),
+                                  rhs, rhs)),
+                    apply(rhs)))
+    case BinExp(OpLt(), lhs, rhs) => Const(FloatValue(0.0)) 
     
+  }
+
+  def apply(e: Exp): Exp = e match {
+    case Deref(v) => Deref(getDv(v))
+    case Const(_)  => Const(FloatValue(0.0))
+    case Ref(v) => e 
+    case BinExp(_,_,_) => applyBinExp(e.asInstanceOf[BinExp])
+    case Function(fcn, args) => 
+      fcn match {
+        case "sin" => Function("cos", args)
+        case "cos" => UniExp(OpNeg(), Function("sin",args))
+        case _ => Const(FloatValue(0.0))
+      }
+    case UniExp(OpNeg(), e) => UniExp(OpNeg(), apply(e))
+  }
+  
   def getDv(v:Var) = if (dv.contains(v)) dv(v) else Var("d_" + v.name, 0)  
 }
 

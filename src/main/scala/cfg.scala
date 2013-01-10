@@ -148,6 +148,8 @@ object VarUse {
     e match {
       case Ref(v) => List( v )
       case Deref(v) => List ( v ) 
+      case UniExp(_, e) => apply(e)
+      case Function(_,e) => e.flatMap(x => apply(x))
       case BinExp(_, lhs, rhs) => apply(lhs) ::: apply(rhs)
       case Const(_) => List[Var]()
     }
