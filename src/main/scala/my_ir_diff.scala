@@ -34,7 +34,30 @@ class Diff(dvar : Map[Var,Var]) {
                                   rhs, rhs)),
                     apply(rhs)))
     case BinExp(OpLt(), lhs, rhs) => Const(FloatValue(0.0)) 
-    
+  }
+
+  def applyFunction(fcn:String, args:List[Exp]) = fcn match {
+
+    //sin'(y) = cos(y) * y'
+    case "sin" => BinExp(OpMul(),
+                         Function("cos", args),
+                         apply(args.head))
+    // cos'(y) = -sin(y) * y'
+    case "cos" => UniExp(OpNeg(),
+                         BinExp(OpMul(),
+                                Function("sin",args),
+                                apply(args.head)))
+    // exp'(y) = exp(y) * y'
+    case "exp" => BinExp(OpMul(),
+                         Function("exp", args),
+                         apply(args.head))
+    // log'(y) = 1/y * y'
+    case "log" => BinExp(OpMul(),
+                         BinExp(OpDivide(),
+                                Const(FloatValue(1.0)),
+                                args.head),
+                         apply(args.head))
+    case _ => Const(FloatValue(0.0))
   }
 
   def apply(e: Exp): Exp = e match {
@@ -42,12 +65,7 @@ class Diff(dvar : Map[Var,Var]) {
     case Const(_)  => Const(FloatValue(0.0))
     case Ref(v) => e 
     case BinExp(_,_,_) => applyBinExp(e.asInstanceOf[BinExp])
-    case Function(fcn, args) => 
-      fcn match {
-        case "sin" => Function("cos", args)
-        case "cos" => UniExp(OpNeg(), Function("sin",args))
-        case _ => Const(FloatValue(0.0))
-      }
+    case Function(fcn, args) => applyFunction(fcn, args)
     case UniExp(OpNeg(), e) => UniExp(OpNeg(), apply(e))
   }
   
