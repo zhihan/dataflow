@@ -54,6 +54,7 @@ package conversion {
     {
       val node = t.asInstanceOf[CommonTree]
       println(node.getText)
+      println("Don't know what to do yet")
     }
 
     def visitExpr(t: AnyRef):Exp = 
@@ -73,6 +74,22 @@ package conversion {
 	    case "*" => OpMul()
 	  }
 	  BinExp(op, v1, v2)
+        }
+        case CGELLexer.FUNCTION_CALL => {
+          val n = adaptor.getChildCount(t)
+          assert(n >= 1)
+          val nameNode = adaptor.getChild(t, 0).asInstanceOf[CommonTree]
+          val name = nameNode.getText()
+          if (n == 1) {
+            Function(name, List[Exp]())
+          } else {
+            val args = ListBuffer[Exp]()
+            for (i <- 1 until n) {
+              val x = visitExpr(adaptor.getChild(t, i))
+              args.append(x)
+            }
+            Function(name, args.toList)
+          }
         }
         case _ => node.getText() match {
           case "@" => {
@@ -144,11 +161,9 @@ package conversion {
   }
 
   class ParseAndCreateIR () {
-    def parse(a:String) = {
-      val input = new ANTLRStringStream(a)
-
+    private def parseSS(s: ANTLRStringStream) = {
       // Parse
-      val lexer = new CGELLexer(input)
+      val lexer = new CGELLexer(s)
       val tokens = new CommonTokenStream(lexer)
       val parser = new CGELParser(tokens)
 
@@ -157,6 +172,15 @@ package conversion {
       
       val visitor = new ConvertingVisitor()
       visitor.visit(t)
+    }
+
+    def parse(a:String) = {
+      val input = new ANTLRStringStream(a)
+      parseSS(input)
+    }
+    def parseFile(a:String) = {
+      val input = new ANTLRFileStream(a)
+      parseSS(input)
     }
   }
 }

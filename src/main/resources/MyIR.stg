@@ -58,6 +58,7 @@ expression(e) ::= <<
 <elseif(e.deref)><deref(e.var)><\\\>
 <elseif(e.binExp)><binaryExpression(e)><\\\>
 <elseif(e.const)><constant(e)><\\\>
+<elseif(e.function)><function(e)><\\\>
 <endif>
 >>
 
@@ -85,3 +86,6 @@ constValue(v) ::= <<
 <endif>
 >>
 
+function(f) ::= <<
+<(f.name)>(<f.args:expression(); separator=",">)
+>>

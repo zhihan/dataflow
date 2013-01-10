@@ -3,6 +3,7 @@ grammar CGEL;
 options {
     output=AST;
     ASTLabelType=CommonTree; // tree.toStringTree
+    backtrack=true;   // Function -> exp is recursive
 }
 
 // Main Grammar
@@ -13,6 +14,7 @@ tokens {
   BLOCK;
   IF_ELSE;
   WHILE;
+  FUNCTION_CALL;
 }
 
 
@@ -33,11 +35,11 @@ function_prototype:
     ;
 function_output:
     | '(' ')' -> ^(FUNCTION_OUTPUT)
-    | '(' var_decl (','  var_decl )*')' -> ^(FUNCTION_OUTPUT var_decl+)
+    | '(' var_decl (','  var_decl )* ')' -> ^(FUNCTION_OUTPUT var_decl+)
     ;
 function_input:
     | '(' ')' -> ^(FUNCTION_INPUT)
-    | '(' var_decl (','  var_decl )*')' -> ^(FUNCTION_INPUT var_decl+)
+    | '(' var_decl (','  var_decl )* ')' -> ^(FUNCTION_INPUT var_decl+)
     ;
 var_decl:
        'var'^ '('! aType ','!  ID ')'! ';'
@@ -64,9 +66,16 @@ while_stmt:
         'while' '(' expr ')' b=block -> ^(WHILE expr $b) 
     ;
 
+// I don't know why the following grammar works. 
+// But it does parse 0,1, or more arguments.
+function_call:
+        (n=ID)  '(' expr? (',' expr)* ')' -> ^(FUNCTION_CALL $n expr*)
+    ;
+
 expr:
     | '@'^ ID  
     | ID^  
+    | function_call^ 
     | BINARY_OPERATOR^ '('!  expr ','! expr ')'!
     | RELATIONAL_OPERATOR^ '('! expr ','! expr ')'!
     ;

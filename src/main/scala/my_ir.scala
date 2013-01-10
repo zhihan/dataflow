@@ -103,6 +103,13 @@ case class Const(value:BaseValue) extends Exp
   def isConst() = true
 }
 
+case class Function(name:String, args:List[Exp]) extends Exp
+{
+  def getName() = name
+  def getArgs() = args.toArray
+  def isFunction = true
+}
+
 // Anything appearing as LHS of assignment
 sealed abstract class LRef
 case class RefVar(v: Var) extends LRef

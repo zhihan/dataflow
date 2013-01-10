@@ -1,4 +1,4 @@
-// $ANTLR 3.4 CGEL.g 2013-01-05 14:12:26
+// $ANTLR 3.4 CGEL.g 2013-01-10 11:35:56
 
 package my.ir;
 
@@ -11,7 +11,6 @@ import java.util.ArrayList;
 @SuppressWarnings({"all", "warnings", "unchecked"})
 public class CGELLexer extends Lexer {
     public static final int EOF=-1;
-    public static final int T__15=15;
     public static final int T__16=16;
     public static final int T__17=17;
     public static final int T__18=18;
@@ -24,17 +23,19 @@ public class CGELLexer extends Lexer {
     public static final int T__25=25;
     public static final int T__26=26;
     public static final int T__27=27;
+    public static final int T__28=28;
     public static final int BINARY_OPERATOR=4;
     public static final int BLOCK=5;
-    public static final int FUNCTION_INPUT=6;
-    public static final int FUNCTION_OUTPUT=7;
-    public static final int ID=8;
-    public static final int IF_ELSE=9;
-    public static final int LETTER=10;
-    public static final int RELATIONAL_OPERATOR=11;
-    public static final int SL_COMMENTS=12;
-    public static final int WHILE=13;
-    public static final int WS=14;
+    public static final int FUNCTION_CALL=6;
+    public static final int FUNCTION_INPUT=7;
+    public static final int FUNCTION_OUTPUT=8;
+    public static final int ID=9;
+    public static final int IF_ELSE=10;
+    public static final int LETTER=11;
+    public static final int RELATIONAL_OPERATOR=12;
+    public static final int SL_COMMENTS=13;
+    public static final int WHILE=14;
+    public static final int WS=15;
 
     // delegates
     // delegators
@@ -51,36 +52,15 @@ public class CGELLexer extends Lexer {
     }
     public String getGrammarFileName() { return "CGEL.g"; }
 
-    // $ANTLR start "T__15"
-    public final void mT__15() throws RecognitionException {
-        try {
-            int _type = T__15;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // CGEL.g:6:7: ( '(' )
-            // CGEL.g:6:9: '('
-            {
-            match('('); 
-
-            }
-
-            state.type = _type;
-            state.channel = _channel;
-        }
-        finally {
-        	// do for sure before leaving
-        }
-    }
-    // $ANTLR end "T__15"
-
     // $ANTLR start "T__16"
     public final void mT__16() throws RecognitionException {
         try {
             int _type = T__16;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // CGEL.g:7:7: ( ')' )
-            // CGEL.g:7:9: ')'
+            // CGEL.g:6:7: ( '(' )
+            // CGEL.g:6:9: '('
             {
-            match(')'); 
+            match('('); 
 
             }
 
@@ -98,10 +78,10 @@ public class CGELLexer extends Lexer {
         try {
             int _type = T__17;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // CGEL.g:8:7: ( ',' )
-            // CGEL.g:8:9: ','
+            // CGEL.g:7:7: ( ')' )
+            // CGEL.g:7:9: ')'
             {
-            match(','); 
+            match(')'); 
 
             }
 
@@ -119,10 +99,10 @@ public class CGELLexer extends Lexer {
         try {
             int _type = T__18;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // CGEL.g:9:7: ( ';' )
-            // CGEL.g:9:9: ';'
+            // CGEL.g:8:7: ( ',' )
+            // CGEL.g:8:9: ','
             {
-            match(';'); 
+            match(','); 
 
             }
 
@@ -140,10 +120,10 @@ public class CGELLexer extends Lexer {
         try {
             int _type = T__19;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // CGEL.g:10:7: ( '=' )
-            // CGEL.g:10:9: '='
+            // CGEL.g:9:7: ( ';' )
+            // CGEL.g:9:9: ';'
             {
-            match('='); 
+            match(';'); 
 
             }
 
@@ -161,10 +141,10 @@ public class CGELLexer extends Lexer {
         try {
             int _type = T__20;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // CGEL.g:11:7: ( '@' )
-            // CGEL.g:11:9: '@'
+            // CGEL.g:10:7: ( '=' )
+            // CGEL.g:10:9: '='
             {
-            match('@'); 
+            match('='); 
 
             }
 
@@ -182,12 +162,10 @@ public class CGELLexer extends Lexer {
         try {
             int _type = T__21;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // CGEL.g:12:7: ( 'else' )
-            // CGEL.g:12:9: 'else'
+            // CGEL.g:11:7: ( '@' )
+            // CGEL.g:11:9: '@'
             {
-            match("else"); 
-
-
+            match('@'); 
 
             }
 
@@ -205,10 +183,10 @@ public class CGELLexer extends Lexer {
         try {
             int _type = T__22;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // CGEL.g:13:7: ( 'function' )
-            // CGEL.g:13:9: 'function'
+            // CGEL.g:12:7: ( 'else' )
+            // CGEL.g:12:9: 'else'
             {
-            match("function"); 
+            match("else"); 
 
 
 
@@ -228,10 +206,10 @@ public class CGELLexer extends Lexer {
         try {
             int _type = T__23;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // CGEL.g:14:7: ( 'if' )
-            // CGEL.g:14:9: 'if'
+            // CGEL.g:13:7: ( 'function' )
+            // CGEL.g:13:9: 'function'
             {
-            match("if"); 
+            match("function"); 
 
 
 
@@ -251,10 +229,10 @@ public class CGELLexer extends Lexer {
         try {
             int _type = T__24;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // CGEL.g:15:7: ( 'var' )
-            // CGEL.g:15:9: 'var'
+            // CGEL.g:14:7: ( 'if' )
+            // CGEL.g:14:9: 'if'
             {
-            match("var"); 
+            match("if"); 
 
 
 
@@ -274,10 +252,10 @@ public class CGELLexer extends Lexer {
         try {
             int _type = T__25;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // CGEL.g:16:7: ( 'while' )
-            // CGEL.g:16:9: 'while'
+            // CGEL.g:15:7: ( 'var' )
+            // CGEL.g:15:9: 'var'
             {
-            match("while"); 
+            match("var"); 
 
 
 
@@ -297,10 +275,12 @@ public class CGELLexer extends Lexer {
         try {
             int _type = T__26;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // CGEL.g:17:7: ( '{' )
-            // CGEL.g:17:9: '{'
+            // CGEL.g:16:7: ( 'while' )
+            // CGEL.g:16:9: 'while'
             {
-            match('{'); 
+            match("while"); 
+
+
 
             }
 
@@ -318,6 +298,27 @@ public class CGELLexer extends Lexer {
         try {
             int _type = T__27;
             int _channel = DEFAULT_TOKEN_CHANNEL;
+            // CGEL.g:17:7: ( '{' )
+            // CGEL.g:17:9: '{'
+            {
+            match('{'); 
+
+            }
+
+            state.type = _type;
+            state.channel = _channel;
+        }
+        finally {
+        	// do for sure before leaving
+        }
+    }
+    // $ANTLR end "T__27"
+
+    // $ANTLR start "T__28"
+    public final void mT__28() throws RecognitionException {
+        try {
+            int _type = T__28;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
             // CGEL.g:18:7: ( '}' )
             // CGEL.g:18:9: '}'
             {
@@ -332,17 +333,17 @@ public class CGELLexer extends Lexer {
         	// do for sure before leaving
         }
     }
-    // $ANTLR end "T__27"
+    // $ANTLR end "T__28"
 
     // $ANTLR start "WS"
     public final void mWS() throws RecognitionException {
         try {
             int _type = WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // CGEL.g:77:3: ( ( ' ' | '\\t' | '\\r' | '\\n' )+ )
-            // CGEL.g:77:5: ( ' ' | '\\t' | '\\r' | '\\n' )+
+            // CGEL.g:86:3: ( ( ' ' | '\\t' | '\\r' | '\\n' )+ )
+            // CGEL.g:86:5: ( ' ' | '\\t' | '\\r' | '\\n' )+
             {
-            // CGEL.g:77:5: ( ' ' | '\\t' | '\\r' | '\\n' )+
+            // CGEL.g:86:5: ( ' ' | '\\t' | '\\r' | '\\n' )+
             int cnt1=0;
             loop1:
             do {
@@ -399,7 +400,7 @@ public class CGELLexer extends Lexer {
         try {
             int _type = BINARY_OPERATOR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // CGEL.g:79:16: ( '+' | '-' | '*' | '/' )
+            // CGEL.g:88:16: ( '+' | '-' | '*' | '/' )
             // CGEL.g:
             {
             if ( (input.LA(1) >= '*' && input.LA(1) <= '+')||input.LA(1)=='-'||input.LA(1)=='/' ) {
@@ -428,7 +429,7 @@ public class CGELLexer extends Lexer {
         try {
             int _type = RELATIONAL_OPERATOR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // CGEL.g:81:20: ( '==' | '>' | '<' | '>=' | '<=' )
+            // CGEL.g:90:20: ( '==' | '>' | '<' | '>=' | '<=' )
             int alt2=5;
             switch ( input.LA(1) ) {
             case '=':
@@ -470,7 +471,7 @@ public class CGELLexer extends Lexer {
 
             switch (alt2) {
                 case 1 :
-                    // CGEL.g:81:22: '=='
+                    // CGEL.g:90:22: '=='
                     {
                     match("=="); 
 
@@ -479,21 +480,21 @@ public class CGELLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // CGEL.g:81:29: '>'
+                    // CGEL.g:90:29: '>'
                     {
                     match('>'); 
 
                     }
                     break;
                 case 3 :
-                    // CGEL.g:81:35: '<'
+                    // CGEL.g:90:35: '<'
                     {
                     match('<'); 
 
                     }
                     break;
                 case 4 :
-                    // CGEL.g:81:41: '>='
+                    // CGEL.g:90:41: '>='
                     {
                     match(">="); 
 
@@ -502,7 +503,7 @@ public class CGELLexer extends Lexer {
                     }
                     break;
                 case 5 :
-                    // CGEL.g:81:48: '<='
+                    // CGEL.g:90:48: '<='
                     {
                     match("<="); 
 
@@ -526,14 +527,14 @@ public class CGELLexer extends Lexer {
         try {
             int _type = SL_COMMENTS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // CGEL.g:84:12: ( '//' (~ '\\n' )* '\\n' )
-            // CGEL.g:84:14: '//' (~ '\\n' )* '\\n'
+            // CGEL.g:93:12: ( '//' (~ '\\n' )* '\\n' )
+            // CGEL.g:93:14: '//' (~ '\\n' )* '\\n'
             {
             match("//"); 
 
 
 
-            // CGEL.g:84:19: (~ '\\n' )*
+            // CGEL.g:93:19: (~ '\\n' )*
             loop3:
             do {
                 int alt3=2;
@@ -587,13 +588,13 @@ public class CGELLexer extends Lexer {
         try {
             int _type = ID;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // CGEL.g:86:3: ( LETTER ( LETTER | '0' .. '9' )* )
-            // CGEL.g:86:5: LETTER ( LETTER | '0' .. '9' )*
+            // CGEL.g:95:3: ( LETTER ( LETTER | '0' .. '9' )* )
+            // CGEL.g:95:5: LETTER ( LETTER | '0' .. '9' )*
             {
             mLETTER(); 
 
 
-            // CGEL.g:86:12: ( LETTER | '0' .. '9' )*
+            // CGEL.g:95:12: ( LETTER | '0' .. '9' )*
             loop4:
             do {
                 int alt4=2;
@@ -641,7 +642,7 @@ public class CGELLexer extends Lexer {
     // $ANTLR start "LETTER"
     public final void mLETTER() throws RecognitionException {
         try {
-            // CGEL.g:88:16: ( ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) )
+            // CGEL.g:97:16: ( ( 'a' .. 'z' | 'A' .. 'Z' | '_' ) )
             // CGEL.g:
             {
             if ( (input.LA(1) >= 'A' && input.LA(1) <= 'Z')||input.LA(1)=='_'||(input.LA(1) >= 'a' && input.LA(1) <= 'z') ) {
@@ -665,7 +666,7 @@ public class CGELLexer extends Lexer {
     // $ANTLR end "LETTER"
 
     public void mTokens() throws RecognitionException {
-        // CGEL.g:1:8: ( T__15 | T__16 | T__17 | T__18 | T__19 | T__20 | T__21 | T__22 | T__23 | T__24 | T__25 | T__26 | T__27 | WS | BINARY_OPERATOR | RELATIONAL_OPERATOR | SL_COMMENTS | ID )
+        // CGEL.g:1:8: ( T__16 | T__17 | T__18 | T__19 | T__20 | T__21 | T__22 | T__23 | T__24 | T__25 | T__26 | T__27 | T__28 | WS | BINARY_OPERATOR | RELATIONAL_OPERATOR | SL_COMMENTS | ID )
         int alt5=18;
         switch ( input.LA(1) ) {
         case '(':
@@ -989,105 +990,105 @@ public class CGELLexer extends Lexer {
 
         switch (alt5) {
             case 1 :
-                // CGEL.g:1:10: T__15
-                {
-                mT__15(); 
-
-
-                }
-                break;
-            case 2 :
-                // CGEL.g:1:16: T__16
+                // CGEL.g:1:10: T__16
                 {
                 mT__16(); 
 
 
                 }
                 break;
-            case 3 :
-                // CGEL.g:1:22: T__17
+            case 2 :
+                // CGEL.g:1:16: T__17
                 {
                 mT__17(); 
 
 
                 }
                 break;
-            case 4 :
-                // CGEL.g:1:28: T__18
+            case 3 :
+                // CGEL.g:1:22: T__18
                 {
                 mT__18(); 
 
 
                 }
                 break;
-            case 5 :
-                // CGEL.g:1:34: T__19
+            case 4 :
+                // CGEL.g:1:28: T__19
                 {
                 mT__19(); 
 
 
                 }
                 break;
-            case 6 :
-                // CGEL.g:1:40: T__20
+            case 5 :
+                // CGEL.g:1:34: T__20
                 {
                 mT__20(); 
 
 
                 }
                 break;
-            case 7 :
-                // CGEL.g:1:46: T__21
+            case 6 :
+                // CGEL.g:1:40: T__21
                 {
                 mT__21(); 
 
 
                 }
                 break;
-            case 8 :
-                // CGEL.g:1:52: T__22
+            case 7 :
+                // CGEL.g:1:46: T__22
                 {
                 mT__22(); 
 
 
                 }
                 break;
-            case 9 :
-                // CGEL.g:1:58: T__23
+            case 8 :
+                // CGEL.g:1:52: T__23
                 {
                 mT__23(); 
 
 
                 }
                 break;
-            case 10 :
-                // CGEL.g:1:64: T__24
+            case 9 :
+                // CGEL.g:1:58: T__24
                 {
                 mT__24(); 
 
 
                 }
                 break;
-            case 11 :
-                // CGEL.g:1:70: T__25
+            case 10 :
+                // CGEL.g:1:64: T__25
                 {
                 mT__25(); 
 
 
                 }
                 break;
-            case 12 :
-                // CGEL.g:1:76: T__26
+            case 11 :
+                // CGEL.g:1:70: T__26
                 {
                 mT__26(); 
 
 
                 }
                 break;
-            case 13 :
-                // CGEL.g:1:82: T__27
+            case 12 :
+                // CGEL.g:1:76: T__27
                 {
                 mT__27(); 
+
+
+                }
+                break;
+            case 13 :
+                // CGEL.g:1:82: T__28
+                {
+                mT__28(); 
 
 
                 }

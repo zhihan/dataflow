@@ -24,6 +24,7 @@ class Diff(dvar : Map[Var,Var]) {
       case BinExp(OpLt(), lhs, rhs) => Const(FloatValue(0.0)) 
       case Const(_)  => Const(FloatValue(0.0))
       case Ref(v) => e 
+      case Function(_,_) => Const(FloatValue(0.0))
     }
     
   def getDv(v:Var) = if (dv.contains(v)) dv(v) else Var("d_" + v.name, 0)  
