@@ -3,7 +3,7 @@ grammar CGEL;
 options {
     output=AST;
     ASTLabelType=CommonTree; // tree.toStringTree
-    backtrack=true;   // Function -> exp is recursive
+    backtrack=false;   // Function -> exp is recursive
 }
 
 // Main Grammar
@@ -15,6 +15,8 @@ tokens {
   IF_ELSE;
   WHILE;
   FUNCTION_CALL;
+  BINARY_OPERATOR;
+  UNARY_OPERATOR;
 }
 
 
@@ -34,15 +36,15 @@ function_prototype:
     '('! function_input ','! function_output ','! ID^  ')'!
     ;
 function_output:
-    | '(' ')' -> ^(FUNCTION_OUTPUT)
+     '(' ')' -> ^(FUNCTION_OUTPUT)
     | '(' var_decl (','  var_decl )* ')' -> ^(FUNCTION_OUTPUT var_decl+)
     ;
 function_input:
-    | '(' ')' -> ^(FUNCTION_INPUT)
+     '(' ')' -> ^(FUNCTION_INPUT)
     | '(' var_decl (','  var_decl )* ')' -> ^(FUNCTION_INPUT var_decl+)
     ;
 var_decl:
-       'var'^ '('! aType ','!  ID ')'! ';'
+       'var'^ '('! aType ','!  ID ')'! ';'!
     ;
 aType:
         ID
@@ -57,7 +59,7 @@ stmt:
     ;
 
 assignment:
-        '='^ '('! ID ','! expr ')'! ';'
+        '='^ '('! ID ','! expr ')'! ';'!
     ;
 if_else_stmt:
         'if' '(' expr ')' b1=block 'else' b2=block -> ^(IF_ELSE expr $b1 $b2)
@@ -66,26 +68,39 @@ while_stmt:
         'while' '(' expr ')' b=block -> ^(WHILE expr $b) 
     ;
 
-// I don't know why the following grammar works. 
-// But it does parse 0,1, or more arguments.
+
 function_call:
-        (n=ID)  '(' expr? (',' expr)* ')' -> ^(FUNCTION_CALL $n expr*)
+        n=ID '(' expr (',' expr)* ')' -> ^(FUNCTION_CALL $n expr+)
     ;
 
 expr:
-    | '@'^ ID  
-    | ID^  
-    | function_call^ 
-    | BINARY_OPERATOR^ '('!  expr ','! expr ')'!
-    | RELATIONAL_OPERATOR^ '('! expr ','! expr ')'!
+     '@'^ ID
+    | id=ID (  // Sub-rule used for left factorization 
+            '(' ')' -> ^(FUNCTION_CALL $id )
+        | -> ^($id)
+        | '(' expr (',' expr)* ')' -> ^(FUNCTION_CALL $id expr+)
+        )
+    
+    | RELATIONAL_OPERATOR '(' e1=expr ',' e2=expr ')' -> ^(RELATIONAL_OPERATOR $e1 $e2)
+        // Syntax predicate for unary operator
+    | (MINUS '(' expr ')') => MINUS '(' expr ')' ->  ^(UNARY_OPERATOR MINUS expr)  
+    | op=binary_operator '(' e1=expr ',' e2=expr ')' -> ^(BINARY_OPERATOR $op $e1 $e2)
     ;
+
+binary_operator: 
+    PLUS | MINUS | MULTIPLY | DIVIDE
+    ;
+
 // 
 // Lexing rules 
 // 
 // White space
 WS: (' ' | '\t' | '\r' | '\n' )+ { skip(); } ;
 
-BINARY_OPERATOR: '+' | '-' | '*' | '/' ;
+PLUS: '+' ;
+MINUS: '-' ;
+MULTIPLY: '*' ;
+DIVIDE: '/' ;
 
 RELATIONAL_OPERATOR: '==' | '>' | '<' | '>=' | '<=' ;
 

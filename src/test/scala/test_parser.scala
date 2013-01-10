@@ -40,6 +40,7 @@ package my.ir.ParserTest {
 
       val parseResult = parser.function()
       val t = parseResult.getTree().asInstanceOf[CommonTree]
+      // print(t.toStringTree())
       
       val visitor = new ConvertingVisitor()
       val (ast,_) = visitor.visit(t)
@@ -106,14 +107,14 @@ package my.ir.ParserTest {
     test("Parse function call") {
       val a = """function((),(),main) 
       {
-        =(y, fcn());
+        =(y, fcn()  );
         =(y, fcn(@x));
-        =(y, fcn(@x, @x));
+       // =(y, fcn(@x, @x));
       }"""
       
       /*
        * ANTLR parsing
-       * 
+       */ 
       val input = new ANTLRStringStream(a)
       val lexer = new CGELLexer(input)
       val tokens = new CommonTokenStream(lexer)
@@ -121,7 +122,7 @@ package my.ir.ParserTest {
 
       val parseResult = parser.function()
       val t = parseResult.getTree().asInstanceOf[CommonTree]
-      println(t.toStringTree()) */
+      //println(t.toStringTree()) 
       
 
       val p = new ParseAndCreateIR()
@@ -131,6 +132,33 @@ package my.ir.ParserTest {
       val out = printer.Procedure(ast)
       // println(out) 
       assert(out.length > 10)
+    }
+    test("Parse unary function") {
+      val a = """function((),(),main) 
+      {
+        =(y, -(@x));
+      }"""
+     /*
+       * ANTLR parsing
+       */ 
+      val input = new ANTLRStringStream(a)
+      val lexer = new CGELLexer(input)
+      val tokens = new CommonTokenStream(lexer)
+      val parser = new CGELParser(tokens)
+
+      val parseResult = parser.function()
+      val t = parseResult.getTree().asInstanceOf[CommonTree]
+      //println(t.toStringTree()) 
+      
+      val p = new ParseAndCreateIR()
+      val (ast,_) = p.parse(a)
+      //println(ast)
+      
+      val printer = new Print()
+      val out = printer.Procedure(ast)
+      //println(out) 
+      assert(out.length > 10)
+      
     }
   }
 }

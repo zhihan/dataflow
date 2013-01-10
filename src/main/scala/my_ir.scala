@@ -18,9 +18,23 @@ case class OpPlus() extends BinaryOperator
 {
   def isPlus() = true
 }
+case class OpMinus() extends BinaryOperator
+{
+  def isMinus() = true
+}
+case class OpDivide() extends BinaryOperator
+{
+  def isDivide() = true
+}
 case class OpLt() extends BinaryOperator
 {
   def isLt() = true
+}
+
+sealed abstract class UnaryOperator
+case class OpNeg() extends UnaryOperator 
+{
+  def isNeg() = true
 }
 
 /* Variable
@@ -89,6 +103,12 @@ case class Deref(v: Var) extends Exp
 {
   def getVar() = v
   def isDeref() = true
+}
+case class UniExp(op:UnaryOperator, e:Exp) extends Exp 
+{
+  def getOp() = op
+  def getE() = e
+  def isUniExp() = true
 }
 case class BinExp(op:BinaryOperator,l:Exp, r:Exp) extends Exp
 {

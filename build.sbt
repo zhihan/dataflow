@@ -7,7 +7,7 @@ resolvers += "Sonatype Releases" at "http://oss.sonatype.org/content/repositorie
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "1.8" % "test"
 
-libraryDependencies += "org.antlr" % "antlr" % "3.4" // java
+libraryDependencies += "org.antlr" % "antlr" % "3.5" // java
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "1.8" % "test" // scala
 

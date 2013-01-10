@@ -57,22 +57,38 @@ package conversion {
       println("Don't know what to do yet")
     }
 
+    def visitBinOp(t: AnyRef) = {
+      val node = t.asInstanceOf[CommonTree]
+      node.getType() match {
+	case CGELLexer.PLUS => OpPlus()
+	case CGELLexer.MULTIPLY => OpMul()
+        case CGELLexer.MINUS => OpMinus()
+        case CGELLexer.DIVIDE => OpDivide()
+      }
+    }
+    def visitUniOp(t: AnyRef) = {
+      val node = t.asInstanceOf[CommonTree]
+      node.getType() match {
+	case CGELLexer.MINUS => OpNeg()
+      }
+    }
     def visitExpr(t: AnyRef):Exp = 
     {
       val node = t.asInstanceOf[CommonTree]
       node.getType() match {
         case CGELLexer.ID => {
-	  
 	  val v = visitVar(node)
 	  Ref(v)
 	}
+        case CGELLexer.UNARY_OPERATOR => {
+          val e = visitExpr(adaptor.getChild(t,1))
+          val op = visitUniOp(adaptor.getChild(t,0))
+          UniExp(op, e)
+        }
         case CGELLexer.BINARY_OPERATOR => {
-          val v1 = visitExpr(adaptor.getChild(t, 0))
-          val v2 = visitExpr(adaptor.getChild(t, 1))
-	  val op = node.getText() match {
-	    case "+" => OpPlus()
-	    case "*" => OpMul()
-	  }
+          val v1 = visitExpr(adaptor.getChild(t, 1))
+          val v2 = visitExpr(adaptor.getChild(t, 2))
+          val op = visitBinOp(adaptor.getChild(t,0))
 	  BinExp(op, v1, v2)
         }
         case CGELLexer.FUNCTION_CALL => {

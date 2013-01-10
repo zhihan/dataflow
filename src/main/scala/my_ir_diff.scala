@@ -24,7 +24,13 @@ class Diff(dvar : Map[Var,Var]) {
       case BinExp(OpLt(), lhs, rhs) => Const(FloatValue(0.0)) 
       case Const(_)  => Const(FloatValue(0.0))
       case Ref(v) => e 
-      case Function(_,_) => Const(FloatValue(0.0))
+      case Function(fcn, args) => 
+        fcn match {
+          case "sin" => Function("cos", args)
+          case "cos" => UniExp(OpNeg(), Function("sin",args))
+          case _ => Const(FloatValue(0.0))
+        }
+      case UniExp(OpNeg(), e) => UniExp(OpNeg(), apply(e))
     }
     
   def getDv(v:Var) = if (dv.contains(v)) dv(v) else Var("d_" + v.name, 0)  
