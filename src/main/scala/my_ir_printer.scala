@@ -2,9 +2,17 @@ package my.ir
 import org.stringtemplate.v4._
 
  //
-class Print 
+class Print (format:String = "matlab")
 {
- val lib = new STGroupFile("MyIR.stg")
+ 
+ val lib = format match {
+   case "matlab" => 
+     new STGroupFile(
+       getClass.getResource("/MATLAB.stg").getFile())
+   case "myir" =>
+     new STGroupFile(
+       getClass.getResource("/myir.stg").getFile())
+ }
 
  def Var(v:Var) = 
    {

@@ -1,0 +1,10 @@
+function((),(),step)
+{
+  // This is a comment
+  var(double, y);
+  var(double, x);   
+  =(y, sin(@x));
+  =(y, cos(@x));
+  =(y, exp(@x));
+  =(y, log(@x));
+} 

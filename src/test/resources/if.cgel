@@ -1,0 +1,9 @@
+function((),(),main)
+{
+ =(y, @x);
+ if (<(@x, const(double, 1.0))){
+   =(y, +(@x, @x)); 
+ } else {
+   =(y, *(@x, @x));
+ }
+}

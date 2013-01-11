@@ -1,0 +1,101 @@
+// Template file for dumping my-ir
+group myir;
+
+procedure(p) ::= <<
+function ((),(),<p.name>) {
+    <p.body:stmt(); separator="\n">
+}
+>>
+
+stmt(s) ::= <<
+<if(s.assignment)><assignment(s)><\\>
+<elseif(s.ifElse)><if_else(s)><\\>
+<elseif(s.while)><while(s)><\\>
+<endif>
+>>
+
+assignment(s) ::= "=(<lref(s.lhs)>,<expression(s.expr)>);"
+
+if_else(s) ::= <<
+if (<expression(s.cond)>){ 
+    <s.b1:stmt(); separator="\n">   
+} else { 
+    <s.b2:stmt(); separator="\n">   
+}
+>>
+
+while(s) ::= <<
+while (<expression(s.cond)>){
+    <s.body:stmt(); separator="\n">
+}
+>>
+
+lref(x) ::= "<if(x.refVar)><refVar(x)><elseif(e.refArray)><refArray(x)><endif>"
+
+refVar(x) ::= "<var(x.var)>"
+
+refArray(x) ::= "<var(x.var)>[<x.index>]"
+
+var(v) ::= "<v.name>"
+
+datatype(te) ::= <<
+<if(te.base)><baseType(te.baseType)><\\>
+<elseif(te.array)><arrayType(te)><\\>
+<endif>
+>>
+
+baseType(t) ::= "<if(t.bool)>bool<elseif(t.float)>float<endif>"
+
+arrayType(t) ::= "<baseType(t.baseType)>[<t.n>]"
+
+// Expressions
+expression(e) ::= <<
+<if(e.ref)><ref(e.var)><\\>
+<elseif(e.deref)><deref(e.var)><\\>
+<elseif(e.uniExp)><unaryExpression(e)><\\>
+<elseif(e.binExp)><binaryExpression(e)><\\>
+<elseif(e.const)><constant(e)><\\>
+<elseif(e.function)><function(e)><\\>
+<endif>
+>>
+
+// Use Matlab syntax 
+ref(v) ::= "<var(v)>"
+deref(v) ::= "@<var(v)>" 
+
+unaryExpression(b) ::= <<
+<unaryOperator(b.op)>(<expression(b.e)>)
+>>
+
+unaryOperator(o) ::= "<if(o.neg)>-<else>unknown<endif>"
+
+binaryExpression(b) ::= <<
+<binaryOperator(b.op)>(<expression(b.lhs)>,<expression(b.rhs)>)
+>>
+
+binaryOperator(o) ::= <<
+<if(o.mul)>*<\\>
+<elseif(o.plus)>+<\\>
+<elseif(o.minus)>-<\\>
+<elseif(o.divide)>/<\\>
+<elseif(o.lt)>\<<\\>
+<elseif(o.le)>\<=<\\>
+<elseif(o.gt)>\><\\>
+<elseif(o.ge)>\>=<\\>
+<elseif(o.eq)>==<\\>
+<endif>
+>>
+
+constant(c) ::= "const(<constValue(c.value)>)"
+
+constValue(v) ::= <<
+<if(v.boolValue)>bool,<v.val><\\>
+<elseif(v.floatValue)>double,<v.val><\\>
+<elseif(v.intValue)>int,<v.val><\\>
+<else> Unknown const <v><\\>
+<endif>
+>>
+
+function(f) ::= <<
+<(f.name)>(<f.args:expression(); separator=",">)
+>>

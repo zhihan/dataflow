@@ -5,6 +5,7 @@ import org.antlr.runtime._
 import org.antlr.runtime.tree._
 
 import org.scalatest.FunSuite
+import java.io._
 
 package my.ir.ParserTest {
 
@@ -221,5 +222,17 @@ package my.ir.ParserTest {
       assert(out.length > 10)
       
     }
+    test("Parse file") {
+      val p = new ParseAndCreateIR()
+      val filename = getClass.getResource("/simple.cgel").getFile()
+      //println(filename)
+      val (ast,_) = p.parseFile(filename)
+      //println(ast)
+      val printer = new Print()
+      val out = printer.Procedure(ast)
+      //println(out)
+      assert(out.length > 10)
+    }
+
   }
 }

@@ -1,0 +1,6 @@
+function((),(),main)
+{
+  while( >(@b, const(double,0.0))) {
+    =(y, @x);
+  }
+}

@@ -1,4 +1,5 @@
 import my.ir._
+import my.ir.conversion._
 import org.scalatest.FunSuite
 
 package my.ir.Test {
@@ -25,5 +26,58 @@ package my.ir.Test {
       //println(out)
       assert(out.length() > 10) 
     }
+
+    test("Print file myir format") {
+      val p = new ParseAndCreateIR()
+      val filename = getClass.getResource("/simple.cgel").getFile()
+      //println(filename)
+      val (ast,_) = p.parseFile(filename)
+      //println(ast)
+      val printer = new Print("myir")
+      val out = printer.Procedure(ast)
+      //println(out)
+      assert(out.length > 10)
+    }
+    test("Print myir format if") {
+      val p = new ParseAndCreateIR()
+      val filename = getClass.getResource("/if.cgel").getFile()
+      //println(filename)
+      val (ast,_) = p.parseFile(filename)
+      //println(ast)
+      val printer = new Print("myir")
+      val out = printer.Procedure(ast)
+      //println(out)
+      assert(out.length > 10)
+    }
+
+    test("Print myir format while") {
+      val p = new ParseAndCreateIR()
+      val filename = getClass.getResource("/while.cgel").getFile()
+      //println(filename)
+      val (ast,_) = p.parseFile(filename)
+      //println(ast)
+      val printer = new Print("myir")
+      val out = printer.Procedure(ast)
+      //println(out)
+      assert(out.length > 10)
+    }
+
+    test("Print myir format function-call") {
+      val p = new ParseAndCreateIR()
+      val filename = getClass.getResource("/fcn.cgel").getFile()
+      //println(filename)
+      val (ast,_) = p.parseFile(filename)
+      //println(ast)
+      val printer = new Print("myir")
+      val out = printer.Procedure(ast)
+
+      // We can parse the out as string
+      val (ast2,_) = p.parse(out)
+
+      // println(out)
+      assert(out.length > 10)
+    }
+     
+    
   }
 }
