@@ -30,6 +30,7 @@ package my.ir.ParserTest {
         var(double, y);
       =(y, @x);
       =(y, +(@x, @x)); 
+      =(y, *(@x, @x));
       } """
       val input = new ANTLRStringStream(a)
 
@@ -153,6 +154,66 @@ package my.ir.ParserTest {
       val p = new ParseAndCreateIR()
       val (ast,_) = p.parse(a)
       //println(ast)
+      
+      val printer = new Print()
+      val out = printer.Procedure(ast)
+      //println(out) 
+      assert(out.length > 10)
+      
+    }
+    test("Parse const") {
+      val a = """function((),(),main) 
+      {
+        =(y, const(double,1.0));
+        =(y, const(bool, true));
+        =(y, const(int, 3));
+      }"""
+     /*
+       * ANTLR parsing
+       */ 
+      val input = new ANTLRStringStream(a)
+      val lexer = new CGELLexer(input)
+      val tokens = new CommonTokenStream(lexer)
+      val parser = new CGELParser(tokens)
+
+      val parseResult = parser.function()
+      val t = parseResult.getTree().asInstanceOf[CommonTree]
+      //println(t.toStringTree()) 
+      
+      val p = new ParseAndCreateIR()
+      val (ast,_) = p.parse(a)
+      // println(ast)
+      
+      val printer = new Print()
+      val out = printer.Procedure(ast)
+      // println(out) 
+      assert(out.length > 10)
+      
+    }
+    test("Parse relational operator") {
+      val a = """function((),(),main) 
+      {
+        =(y, ==(@x,@x));
+        =(y, <(@x,@x));
+        =(y, >(@x,@x));
+        =(y, <=(@x,@x));
+        =(y, >=(@x,@x));
+      }"""
+     /*
+       * ANTLR parsing
+       */ 
+      val input = new ANTLRStringStream(a)
+      val lexer = new CGELLexer(input)
+      val tokens = new CommonTokenStream(lexer)
+      val parser = new CGELParser(tokens)
+
+      val parseResult = parser.function()
+      val t = parseResult.getTree().asInstanceOf[CommonTree]
+      // println(t.toStringTree()) 
+      
+      val p = new ParseAndCreateIR()
+      val (ast,_) = p.parse(a)
+      // println(ast)
       
       val printer = new Print()
       val out = printer.Procedure(ast)

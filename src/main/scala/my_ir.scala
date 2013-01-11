@@ -82,6 +82,11 @@ case class Tfloat() extends BaseType
 {
   def isFloat() = true
 }
+case class TInt() extends BaseType
+{
+  def isInt() = true
+}
+
 
 sealed abstract class DataType
 case class Tbase(baseType:BaseType) extends DataType
@@ -106,6 +111,11 @@ case class FloatValue(v:Double) extends BaseValue
 {
   def getVal() = v
   def isFloatValue() = true
+}
+case class IntValue(v:Int) extends BaseValue
+{
+  def getVal() = v
+  def isIntValue() = true
 }
 
 sealed abstract class Exp

@@ -70,7 +70,7 @@ unaryExpression(b) ::= <<
 unaryOperator(o) ::= "<if(o.neg)>-<else>unknown<endif>"
 
 binaryExpression(b) ::= <<
-<expression(b.lhs)> <binaryOperator(b.op)> <expression(b.rhs)>
+(<expression(b.lhs)> <binaryOperator(b.op)> <expression(b.rhs)>)
 >>
 
 binaryOperator(o) ::= <<
@@ -89,8 +89,9 @@ binaryOperator(o) ::= <<
 constant(c) ::= "<constValue(c.value)>"
 
 constValue(v) ::= <<
-<if(v.boolValue)><v.val>:bool<\\>
-<elseif(v.floatValue)><v.val>:float<\\>
+<if(v.boolValue)><v.val><\\>
+<elseif(v.floatValue)><v.val><\\>
+<elseif(v.intValue)><v.val><\\>
 <else> Unknown const <v><\\>
 <endif>
 >>

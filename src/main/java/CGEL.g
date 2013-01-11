@@ -81,18 +81,28 @@ expr:
         | '(' expr (',' expr)* ')' -> ^(FUNCTION_CALL $id expr+)
         )
     
-    | RELATIONAL_OPERATOR '(' e1=expr ',' e2=expr ')' -> ^(RELATIONAL_OPERATOR $e1 $e2)
-        // Syntax predicate for unary operator
-    | (MINUS '(' expr ')') => MINUS '(' expr ')' ->  ^(UNARY_OPERATOR MINUS expr)  
-    | op=binary_operator '(' e1=expr ',' e2=expr ')' -> ^(BINARY_OPERATOR $op $e1 $e2)
-    ;
+    | RELATIONAL_OPERATOR '(' e1=expr ',' e2=expr ')' -> 
+        ^(BINARY_OPERATOR RELATIONAL_OPERATOR $e1 $e2)
 
-const_expr:
-        'const'^ '('! aType ','! const_value ')'! 
+    | (MINUS '(' expr ')') => MINUS '(' expr ')' ->  
+        ^(UNARY_OPERATOR MINUS expr)  
+    | op=binary_operator '(' e1=expr ',' e2=expr ')' -> 
+        ^(BINARY_OPERATOR $op $e1 $e2)
+    | const_expr^ 
+    ;
 
 binary_operator: 
     PLUS | MINUS | MULTIPLY | DIVIDE
     ;
+
+const_expr:
+        'const'^ '('! aType ','! (
+            REAL_NUMBER 
+        | 'true' 
+        | 'false'
+        ) ')'! 
+    ;
+
 
 // 
 // Lexing rules 
@@ -112,6 +122,9 @@ SL_COMMENTS: '//' ( ~ '\n' )* '\n' { skip(); } ;
 
 ID: LETTER (LETTER | '0' .. '9')* 
     ;
-fragment LETTER: ('a' .. 'z' | 'A' .. 'Z'| '_' ) ;
 
+REAL_NUMBER: ('0' .. '9')+ ('.' ('0' .. '9')+)? 
+    ;
+
+fragment LETTER: ('a' .. 'z' | 'A' .. 'Z'| '_' ) ;
 

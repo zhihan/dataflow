@@ -53,8 +53,11 @@ package conversion {
     def visitType(t: AnyRef) = 
     {
       val node = t.asInstanceOf[CommonTree]
-      println(node.getText)
-      println("Don't know what to do yet")
+      node.getText match {
+        case "double" => Tfloat()
+        case "int" => TInt()
+        case "bool" => TBool()
+      }
     }
 
     def visitBinOp(t: AnyRef) = {
@@ -70,6 +73,7 @@ package conversion {
 	    case ">" => OpGt()
 	    case "<=" => OpLe()
 	    case ">=" => OpGe()
+            case "==" => OpEq()
 	  }
       }
     }
@@ -115,10 +119,22 @@ package conversion {
           }
         }
         case _ => node.getText() match {
+          // Match root node text
           case "@" => {
 	    val v =visitVar(adaptor.getChild(t,0))
 	    Deref(v)
 	  }
+          case "const" => {
+            val aType = visitType(adaptor.getChild(t, 0))
+            val valueNode = adaptor.getChild(t, 1).asInstanceOf[CommonTree]
+            val valueText = valueNode.getText()
+            aType match {
+              case TInt() => Const(IntValue(valueText.toInt))
+              case Tfloat() => Const(FloatValue(valueText.toFloat))
+              case TBool() => Const(BoolValue(valueText.toBoolean))
+            }
+          }
+          
         }
       }
     }
@@ -142,6 +158,7 @@ package conversion {
         case _ =>
         node.getText() match {
           case "var" => {
+            // Not implemented yet
 	    Noop("var_decl")
           }
           case "=" => {
