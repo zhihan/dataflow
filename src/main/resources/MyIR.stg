@@ -79,6 +79,10 @@ binaryOperator(o) ::= <<
 <elseif(o.minus)>-<\\>
 <elseif(o.divide)>/<\\>
 <elseif(o.lt)>\<<\\>
+<elseif(o.le)>\<=<\\>
+<elseif(o.gt)>\><\\>
+<elseif(o.ge)>\>=<\\>
+<elseif(o.eq)>==<\\>
 <endif>
 >>
 

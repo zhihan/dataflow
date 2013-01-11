@@ -30,6 +30,22 @@ case class OpLt() extends BinaryOperator
 {
   def isLt() = true
 }
+case class OpGt() extends BinaryOperator
+{
+  def isGt() = true
+}
+case class OpLe() extends BinaryOperator
+{
+  def isLe() = true
+}
+case class OpGe() extends BinaryOperator
+{
+  def isGe() = true
+}
+case class OpEq() extends BinaryOperator
+{
+  def isEq() = true
+}
 
 sealed abstract class UnaryOperator
 case class OpNeg() extends UnaryOperator 

@@ -34,6 +34,10 @@ class Diff(dvar : Map[Var,Var]) {
                                   rhs, rhs)),
                     apply(rhs)))
     case BinExp(OpLt(), lhs, rhs) => Const(FloatValue(0.0)) 
+    case BinExp(OpGt(), lhs, rhs) => Const(FloatValue(0.0))
+    case BinExp(OpLe(), lhs, rhs) => Const(FloatValue(0.0)) 
+    case BinExp(OpGe(), lhs, rhs) => Const(FloatValue(0.0))
+    case BinExp(OpEq(), lhs, rhs) => Const(FloatValue(0.0))
   }
 
   def applyFunction(fcn:String, args:List[Exp]) = fcn match {

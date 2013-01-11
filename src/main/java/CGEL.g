@@ -87,6 +87,9 @@ expr:
     | op=binary_operator '(' e1=expr ',' e2=expr ')' -> ^(BINARY_OPERATOR $op $e1 $e2)
     ;
 
+const_expr:
+        'const'^ '('! aType ','! const_value ')'! 
+
 binary_operator: 
     PLUS | MINUS | MULTIPLY | DIVIDE
     ;

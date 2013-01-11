@@ -64,6 +64,13 @@ package conversion {
 	case CGELLexer.MULTIPLY => OpMul()
         case CGELLexer.MINUS => OpMinus()
         case CGELLexer.DIVIDE => OpDivide()
+	case CGELLexer.RELATIONAL_OPERATOR => 
+	  node.getText() match {
+	    case "<" => OpLt()
+	    case ">" => OpGt()
+	    case "<=" => OpLe()
+	    case ">=" => OpGe()
+	  }
       }
     }
     def visitUniOp(t: AnyRef) = {
