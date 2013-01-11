@@ -512,6 +512,27 @@ object writeGraphviz {
     val vIdMap = createVMap(g)
     header + vListString(g, vIdMap, vw) + eListString(g,vIdMap, ew) + "}\n"
   }
+
+  val defaultTreeNodeW: TreeNode=>String = {_=> ""}
+  private def treeVisit(t: TreeNode,
+                        vw: TreeNode=>String) 
+  : String = {
+    var result = t.id.toString() + vw(t) +"\n"
+    
+    t.children.foreach{ n => 
+      result += t.id.toString() + 
+                " -- " + 
+                n.id.toString() + "\n"
+    }
+    t.children.foreach(n => result += treeVisit(n, vw) )
+    result
+    
+  }
+  def tree(t: TreeNode,
+            vw: TreeNode=>String) = {
+    " graph G {\n" + treeVisit(t,vw) + " } "
+  }
+
 }
 
 class tarjan(val g: Graph) {

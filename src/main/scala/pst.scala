@@ -17,6 +17,7 @@ class Pst(val t:TreeNode, r:Region ) {
   val regions = Map(t.id -> r) // mutable
 }
 
+/* Pst is assumed to be always built bottom-up.*/
 class PstFactory {
   val tf = new TreeNodeFactory()
 

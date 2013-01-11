@@ -105,7 +105,7 @@ class TreeNode( i: Int, c: List[TreeNode]) {
   }
 
   def toDotString() = " graph G {\n" + dotString() + " } "
-  
+
   private def ancestorSubset(vec:Set[Int]): (Set[Int], Set[Int]) = {
     def excludeDescendants(v:TreeNode, s:Set[Int]) = {
       val c = v.getAllDescendantIDs()
@@ -135,6 +135,7 @@ class TreeNode( i: Int, c: List[TreeNode]) {
       if (r.isEmpty) {
 	a.toArray
       } else {
+        println(vec)
 	throw new RuntimeException("No subset found")
       }
     }
