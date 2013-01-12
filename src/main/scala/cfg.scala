@@ -213,3 +213,23 @@ object VarDefine {
   }
 }
 
+object CFGPrint {
+  val p = new Print("myir")
+  private def vLabel(v: Vertex, m:CFGMap) = {
+    val statements = m.getStatements(v)
+    val stmtStr = statements.map( s => 
+      {
+	val sstr = p.Stmt(s)
+	sstr.replace("  ", "") replace("\n","\\n")
+      }	)
+    
+    "[label=\"" + stmtStr.mkString("\\n") + "\"]"
+  }
+
+  def apply(g:Graph, m:CFGMap):String =
+    writeGraphviz(g, { v:Vertex => vLabel(v,m) })
+
+  def apply(g:SeseGraph, m:CFGMap):String = 
+    apply(g.graph, m)
+}
+

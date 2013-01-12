@@ -77,7 +77,5 @@ package my.ir.Test {
       // println(out)
       assert(out.length > 10)
     }
-     
-    
   }
 }

@@ -79,6 +79,8 @@ package my.ir.test.SSATest {
 	println(e._1.sid + ":" + 
 	      e._2.map(_.name).mkString(","))
 		   } */
+      val s = CFGPrint(g, newM)
+      assert(s.length > 10)
       assert(phiMap(v2).length ==2)
       assert(phiMap(v7).length ==2)
     }

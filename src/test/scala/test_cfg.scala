@@ -37,11 +37,10 @@ package my.ir.CFGTest {
       val (ast,_) = p.parse(a)
       val (cfg,m) = Utility.createCFGForList(ast.body)
       // println(cfg.graph.toDotString )
-      //println(writeGraphviz(cfg.graph, 
-      // (v => m.getFirstStatement(v).toString)))
       assert(cfg.graph.V.length == 8)
       assert(cfg.graph.E.length == 8)
-   }
 
+      //println(CFGPrint(cfg,m))
+   }
   }
 }

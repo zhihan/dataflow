@@ -6,6 +6,8 @@ import my.ir._
 import scala.collection.mutable.Set
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ArrayBuffer
+
+
 class SSA {
   def Phi(v:Var, 
 	  length: Int) = {
@@ -18,8 +20,10 @@ class SSA {
   def insertPhi(graph:Graph, 
 		m:CFGMap,
 		df:HashMap[Vertex, Set[Vertex]]) = {
+    // Compute the def sites of the given graph
     def computeDefSites(graph:Graph,
 			m: CFGMap) = {
+
       val defSites = HashMap[Var, ArrayBuffer[Vertex]]()
       val variables = Set[Var]()
       graph.V.foreach{ v => 
@@ -47,13 +51,14 @@ class SSA {
 	val n = w.remove(0) // Remove head
 	df(n).foreach{ y =>
 	  if (!phiMap(y).contains(a)) {
+
 	    // Insert a = phi(a, ...) into y 
 	    val newAssign = Phi(a, graph.pre(y).length)
 	    newM.insertFront(y, newAssign)
 	    phiMap(y).append(a)
+
 	    // Originally defined variables
-	    val origDefined = VarDefine(
-	      m.getStatements(y))
+	    val origDefined = VarDefine(m.getStatements(y))
 	    if (!origDefined.contains(a)) {
 	      // a is not originally defined in y
 	      // it is defined by a phi function
