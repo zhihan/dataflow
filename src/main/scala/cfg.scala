@@ -8,6 +8,12 @@ class CFGMap {
   // a list of simple statement.
   val block = Map[Vertex, List[Statement]]()
 
+  def copy(): CFGMap = {
+    val a = new CFGMap()
+    a.block ++= (for (i <- block) yield(i._1, i._2))
+    a
+  }
+
   def add(v:Vertex, s:Statement) {
     val st = List(s)
     block += v->st
@@ -20,9 +26,13 @@ class CFGMap {
   def update(v:Vertex, ss:List[Statement]) {
     assert(block.contains(v))
     block(v) = ss
-    
-   }
-  
+  }
+
+  def insertFront(v:Vertex, s:Statement) {
+    assert(block.contains(v))
+    block(v) = s :: block(v)
+  }
+
   def getStatements(v:Vertex) = block(v)
   def getFirstStatement(v:Vertex) = block(v).head
  
@@ -127,7 +137,12 @@ object Utility {
 	  g.addEdge(lastEntry, currentV)
 	  lastEntry = currentV
 	}
-
+	case Call(_) => {
+	  val currentV = g.newVertex("")
+	  m.add(currentV, stmt)
+	  g.addEdge(lastEntry, currentV)
+	  lastEntry = currentV
+	}
       }
     }
 
@@ -161,6 +176,7 @@ object VarUse {
       case IfElse(_,_,_) => List()
       case While(_,_) => List()
       case Noop(_) => List()
+      case Call(Function(_,args)) => args.flatMap(x => apply(x)) 
     }
   }
   def apply(s:List[Statement]):List[Var] = 
@@ -186,6 +202,7 @@ object VarDefine {
       }
       case While(_,_) => List()
       case Noop(_) => List()
+      case Call(_) => List()
     }
   }
   def apply(l:List[Statement]):List[Var] = {

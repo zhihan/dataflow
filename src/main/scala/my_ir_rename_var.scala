@@ -35,6 +35,8 @@ object RenameVar{
       case While(e, b) => While(apply(m, e),
 				apply(m, b))
       case Noop(_) => s
+      case Call(Function(n, args)) => 
+	Call(Function(n, args.map(x => apply(m,x))))
     }
   }
   def apply(m:Map[Var,Var], l:List[Statement]):List[Statement] = {

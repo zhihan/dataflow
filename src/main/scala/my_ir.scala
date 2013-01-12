@@ -196,6 +196,11 @@ case class While(e:Exp, body:List[Statement]) extends Statement
   def getBody() = body.toArray
 }
 
+case class Call(f:Function) extends Statement
+{
+  def isCall() = true
+  def getFunction() = f
+}
 
 case class Procedure(body: List[Statement], name:String)
 {

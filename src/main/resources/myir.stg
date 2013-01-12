@@ -11,6 +11,7 @@ stmt(s) ::= <<
 <if(s.assignment)><assignment(s)><\\>
 <elseif(s.ifElse)><if_else(s)><\\>
 <elseif(s.while)><while(s)><\\>
+<elseif(s.call)><call(s)><\\>
 <endif>
 >>
 
@@ -29,6 +30,8 @@ while (<expression(s.cond)>){
     <s.body:stmt(); separator="\n">
 }
 >>
+
+call(s) ::= "<function(s.function)>;"
 
 lref(x) ::= "<if(x.refVar)><refVar(x)><elseif(e.refArray)><refArray(x)><endif>"
 

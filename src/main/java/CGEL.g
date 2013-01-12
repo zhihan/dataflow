@@ -55,7 +55,7 @@ block:
     ; 
 
 stmt:
-        var_decl | assignment | if_else_stmt | while_stmt
+        var_decl | assignment | if_else_stmt | while_stmt | call_stmt
     ;
 
 assignment:
@@ -68,6 +68,9 @@ while_stmt:
         'while' '(' expr ')' b=block -> ^(WHILE expr $b) 
     ;
 
+call_stmt:
+        function_call^ ';'!
+    ;
 
 function_call:
         n=ID '(' expr (',' expr)* ')' -> ^(FUNCTION_CALL $n expr+)

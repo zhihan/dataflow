@@ -224,6 +224,7 @@ class ComputePst() {
 	  listOfRegion.append(pstF.whileR(r))
 	}
 	case Assignment(_,_) => listOfStmt.append(s)
+	case Call(_) => listOfStmt.append(s)
       }	
     }
     finishBasicRegion()

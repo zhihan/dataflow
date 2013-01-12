@@ -155,6 +155,11 @@ package conversion {
 	    val body = visitBlock(adaptor.getChild(t, 1))
 	    While(e, body)
 	  }
+	case CGELLexer.FUNCTION_CALL => 
+	  {
+	    val f = visitExpr(t).asInstanceOf[Function]
+	    Call(f)
+	  }
         case _ =>
         node.getText() match {
           case "var" => {
