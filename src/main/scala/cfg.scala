@@ -217,13 +217,19 @@ object CFGPrint {
   val p = new Print("myir")
   private def vLabel(v: Vertex, m:CFGMap) = {
     val statements = m.getStatements(v)
-    val stmtStr = statements.map( s => 
+    val stmtStr = statements.map( s=> s match {
+      case While(e,_) => p.Exp(e)
+      case IfElse(e,_,_) => p.Exp(e)
+      case _=> 
       {
 	val sstr = p.Stmt(s)
-	sstr.replace("  ", "") replace("\n","\\n")
-      }	)
+	val s1 = sstr.replace("\r", "")
+	s1.replace("\n", "\\l")
+      }	
+    })
     
-    "[label=\"" + stmtStr.mkString("\\n") + "\"]"
+    "[shape=\"box\"]" +
+    "[label=\"" + stmtStr.mkString("\\l") + "\\l\"]"
   }
 
   def apply(g:Graph, m:CFGMap):String =

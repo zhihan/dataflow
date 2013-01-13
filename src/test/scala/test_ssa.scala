@@ -1,5 +1,8 @@
 import my.se._
 import my.ir._
+import my.ir.conversion._
+
+import java.io._
 import org.scalatest.FunSuite
 
 package my.ir.test.SSATest {
@@ -83,6 +86,23 @@ package my.ir.test.SSATest {
       assert(s.length > 10)
       assert(phiMap(v2).length ==2)
       assert(phiMap(v7).length ==2)
+    }
+
+    test("Insert phi function from AST") {
+      val p = new ParseAndCreateIR()
+      val filename = getClass.getResource("/ssa.cgel").getFile()
+      val (ast, _) = p.parseFile(filename)
+      val (cfg, m) = Utility.createCFGForList(ast.body)
+      //println(CFGPrint(cfg,m))
+      val t = new TarjanDominators()
+      val idom =  t.compute(cfg.graph, cfg.entry)
+      val df = t.dominanceFrontier(cfg.entry, idom, cfg.graph)
+      val ssa = new SSA()
+      val (newM, phiMap) = ssa.insertPhi(cfg.graph, m, df)
+      val writer = new PrintWriter("ssa_1.dot")
+      
+      writer.write(CFGPrint(cfg,newM))
+      writer.close()
     }
   }
 }

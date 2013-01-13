@@ -1,0 +1,16 @@
+function((),(),main)
+{
+  =(i,const(int,1));
+  =(j,const(int,1));
+  =(k,const(int,0));
+  while(<(k,const(int,100))) {
+    if (<(j,const(int,20))) {
+      =(j,@i);
+      =(k,+(k,const(int,2)));
+    } else {
+      =(j,@k);
+      =(k,+(@k,const(int,2)));
+    }
+  }
+  return(@j);
+}
