@@ -73,14 +73,17 @@ call_stmt:
     ;
 
 function_call:
-        n=ID '(' expr (',' expr)* ')' -> ^(FUNCTION_CALL $n expr+)
-    ;
+        n=ID (
+            '(' ')' -> ^(FUNCTION_CALL $n)
+        | '(' expr (',' expr)* ')' -> ^(FUNCTION_CALL $n expr+)
+        )
+        ;
 
 expr:
      '@'^ ID
     | id=ID (  // Sub-rule used for left factorization 
-            '(' ')' -> ^(FUNCTION_CALL $id )
-        | -> ^($id)
+            -> ^($id)
+        | '(' ')' -> ^(FUNCTION_CALL $id )
         | '(' expr (',' expr)* ')' -> ^(FUNCTION_CALL $id expr+)
         )
     

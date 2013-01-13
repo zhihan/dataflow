@@ -118,7 +118,7 @@ object Analysis {
     (output, scope)
   }
 
-  // 
+  // Create the update method
   def createUpdate(s:Step, y:List[Var]) = {
     val scope = new VarScope()
     val localMap = Map[Var,Var]()

@@ -111,9 +111,12 @@ package my.ir.ParserTest {
       {
         =(y, fcn()  );
         =(y, fcn(@x));
+        =(y, fcn(@x, @x));
+        fcn();
         fcn(@x);
-       // =(y, fcn(@x, @x));
-      }"""
+        fcn(@x, @y);
+  
+     }"""
       
       /*
        * ANTLR parsing
@@ -133,11 +136,11 @@ package my.ir.ParserTest {
       // println(ast)
       val printer = new Print()
       val out = printer.Procedure(ast)
-      //println(out) 
+      // println(out) 
       assert(out.length > 10)
       val printer2 = new Print("myir")
       val out2 = printer2.Procedure(ast)
-      //println(out2) 
+      // println(out2) 
       assert(out2.length > 10)
 
     }

@@ -11,12 +11,13 @@ trait HasId
 
 abstract class Port extends AnyRef with HasId
 
+// Represent an input port of a block 
 case class Inport(id: Int) extends Port
-{
-}
+{ }
+
+// Represent an output port of a block
 case class Outport(id:Int) extends Port
-{
-}
+{ }
 
 /** Virtual port graph captures the relationship between
  * ports of virtual blocks. It is used to compute the
@@ -47,6 +48,8 @@ class VirtualPortGraph() {
     if (src == dst) {
       throw new RuntimeException("No self-loop is allowed")
     } else {
+      // Check src and dst type
+      assert(nodes(src) != nodes(dst))
       g.addEdge(src, dst)
     }
   }
@@ -105,6 +108,10 @@ class VirtualPortGraph() {
 
 }
 
+/** Virtual block graph is a different edit-time graph that captures
+ * the inter-connection of virtual blocks including Subsystem inports
+ * and outports. */
+
 case class Block(id:Int) extends AnyRef with HasId
 
 class VirtualBlockGraph() {
@@ -138,8 +145,9 @@ class VirtualBlockGraph() {
     writeGraphviz(g, vLabel)
   }
 
+  // For a given set of forward reachable nodes and backward
+  // reachable nodes, compute the set of unreachable nodes. 
   def unreachable(fSrc:Array[Int], bSrc:Array[Int]): Array[Int] = {
-
     val reach = new Reachable(g)
     
     val fwd = if (fSrc!= null) { 
@@ -157,5 +165,4 @@ class VirtualBlockGraph() {
     result.map(_.id).toArray
     
   }
-
 }

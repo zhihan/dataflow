@@ -4,7 +4,8 @@ import my.ir._
 import scala.collection.mutable.Map
 import scala.collection.mutable.ListBuffer
 
-// Expression auto differentiation
+// Algorithmic differentiation of expressions.
+// The dvar gives a map (y -> dydx) for all non-free variables.
 class Diff(dvar : Map[Var,Var]) {
   val dv = dvar
   def applyBinExp(e:BinExp) = e match {
@@ -149,7 +150,6 @@ object Diff {
          (df, scope) = apply(l, sc, x, u) 
        }
     yield (df, scope, x, u)
-    
   }
 
 }

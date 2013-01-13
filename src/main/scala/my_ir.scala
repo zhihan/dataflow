@@ -56,21 +56,15 @@ case class OpNeg() extends UnaryOperator
 /* Variable
  * A variable has a name and an id (integer) 
  */
-sealed class Var(varname: String, varid: Int) {
+sealed case class Var(varname: String, varid: Int) {
   val name = varname
   val id = varid
   
   // Implement getName to use with StringTemplate
   // For property getter of "p", Scala generates "p()", but
   // ST looks for "getP()"
-  def getName = name
+  def getName() = name
 }
-
-// Factory method for Var
-object Var {
-  def apply(varname: String, vid: Int) = new Var(varname, vid)
-}
-
 
 // Base type system
 sealed abstract class BaseType 

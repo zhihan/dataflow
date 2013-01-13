@@ -39,16 +39,23 @@ object RenameVar{
 	Call(Function(n, args.map(x => apply(m,x))))
     }
   }
-  def apply(m:Map[Var,Var], l:List[Statement]):List[Statement] = {
-    l.map( s => apply(m, s) ) 
+
+  def apply(m:Map[Var,Var], l:List[Statement]) : List[Statement] = {
+    l.map(s => apply(m, s)) 
   }
   
+  // For all variables in the map (x -> y), generate the list of
+  // assignments.
+  //  y = x;
   def copyTo(m:Map[Var,Var]) = {
     m.map( kv =>
       Assignment(RefVar(kv._2),Deref(kv._1)) 
       ).toList
   }
-  
+
+  // For all variables in the map ( x->y) generate the list of 
+  // assignments, e.g., 
+  //  x = y;
   def copyFrom(m:Map[Var,Var]) = {
     m.map( kv =>
       Assignment(RefVar(kv._1),Deref(kv._2))).toList
