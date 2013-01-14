@@ -10,7 +10,9 @@ class CFGMap {
 
   def copy(): CFGMap = {
     val a = new CFGMap()
-    a.block ++= (for (i <- block) yield(i._1, i._2))
+    for ((k,v) <- block) {
+      a.block += (k -> v)
+    }
     a
   }
 
@@ -36,6 +38,14 @@ class CFGMap {
   def getStatements(v:Vertex) = block(v)
   def getFirstStatement(v:Vertex) = block(v).head
  
+  def dump(): String = {
+    val print = new Print("myir")
+    "{" + (for ((k,v) <- block) yield (k.id.toString + "->" + 
+                                       (for (elem <- v) yield print.Stmt(elem)).mkString(" "))).mkString("\n") + "}"
+  }
+
+  def apply() = "Error"
+
 }
 
 object Utility {
@@ -179,8 +189,21 @@ object VarUse {
       case Call(Function(_,args)) => args.flatMap(x => apply(x)) 
     }
   }
-  def apply(s:List[Statement]):List[Var] = 
-    s.flatMap(x => apply(x))
+
+  def apply(l:List[Statement]):List[Var] = {
+    val vars = Set[Var]()
+    l.foreach{ st => 
+      vars ++= apply(st) } 
+    vars.toList
+  }
+  
+  def apply(g:Graph, m:CFGMap):List[Var] = {
+    val vars = Set[Var]()
+    g.V.foreach{ v => 
+      vars ++= apply(m.getStatements(v))}
+    vars.toList
+  }
+
 }
 
 object VarDefine {
@@ -211,6 +234,14 @@ object VarDefine {
       s ++= apply(st) } 
     s.toList
   }
+
+  def apply(g:Graph, m:CFGMap): List[Var] = {
+    val vars = Set[Var]()
+    g.V.foreach{ v => 
+      vars ++= apply(m.getStatements(v))}
+    vars.toList
+  }
+
 }
 
 object CFGPrint {

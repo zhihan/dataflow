@@ -62,3 +62,11 @@ object RenameVar{
   }
   
 }
+
+object RenameVarInFunctionArgs {
+  // Rename a var in function arguments
+  def apply(f: Function, varMap: Map[Var,Var]) = {
+    val newArgs = for (a <- f.args) yield RenameVar(varMap, a)
+    Function(f.name, newArgs)
+  }
+}

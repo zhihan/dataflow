@@ -92,6 +92,14 @@ class Graph() {
     ArrayBuffer[Vertex]() ++ r
   }
 
+  def inIndex(src:Vertex, v:Vertex) = {
+    // This function makes the assumption that every call of inE returns the edges
+    // in a fixed order.
+    val in = inE(v)
+    val e = in.find(_.from == src)
+    in.indexOf(e.get)
+  }
+
   def hasSelfLoop(v:Vertex) = succ(v).contains(v)
 
   def pre(v:Vertex) = {

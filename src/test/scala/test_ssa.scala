@@ -7,7 +7,7 @@ import org.scalatest.FunSuite
 
 package my.ir.test.SSATest {
   class Suite extends FunSuite {
-    test("Insert phi function") {
+    test("Convert to SSA") {
       val g = new Graph()
       val m = new CFGMap()
       val i = Var("i",1)
@@ -75,17 +75,22 @@ package my.ir.test.SSATest {
 	       }
       */	
       val ssa = new SSA()
-      val (newM, phiMap) = ssa.insertPhi(g, m, df)
-      // newM.block.foreach{ e=> println(e._1.sid + ":" + e._2)}
+      val (phiM, phiMap) = ssa.insertPhi(g, m, df)
+      // phiM.block.foreach{ e=> println(e._1.sid + ":" + e._2)}
       // println("Phi function inserted")
       /* phiMap.foreach{ e => 
 	println(e._1.sid + ":" + 
 	      e._2.map(_.name).mkString(","))
 		   } */
-      val s = CFGPrint(g, newM)
+      val s = CFGPrint(g, phiM)
       assert(s.length > 10)
       assert(phiMap(v2).length ==2)
       assert(phiMap(v7).length ==2)
+
+      val renamedM = ssa.renameVar(g, v1, phiM, idom)
+      // val writer1 = new PrintWriter("ssa_1.dot")      
+      // writer1.write(CFGPrint(g, renamedM))
+      // writer1.close()
     }
 
     test("Insert phi function from AST") {
@@ -99,10 +104,10 @@ package my.ir.test.SSATest {
       val df = t.dominanceFrontier(cfg.entry, idom, cfg.graph)
       val ssa = new SSA()
       val (newM, phiMap) = ssa.insertPhi(cfg.graph, m, df)
-      val writer = new PrintWriter("ssa_1.dot")
+      //val writer = new PrintWriter("ssa_1.dot")
       
-      writer.write(CFGPrint(cfg,newM))
-      writer.close()
+      //writer.write(CFGPrint(cfg,newM))
+      //writer.close()
     }
   }
 }
