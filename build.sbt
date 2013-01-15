@@ -11,4 +11,8 @@ libraryDependencies += "org.antlr" % "antlr" % "3.5" // java
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "1.8" % "test" // scala
 
-TaskKey[Unit]("antlr") := { }
+seq(sbtantlr.SbtAntlrPlugin.antlrSettings: _*)
+
+libraryDependencies += "org.antlr" % "antlr" % "3.5" % "antlr" // java
+
+
