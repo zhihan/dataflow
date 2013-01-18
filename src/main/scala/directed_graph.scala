@@ -101,6 +101,8 @@ class Graph() {
   }
 
   def hasSelfLoop(v:Vertex) = succ(v).contains(v)
+  
+  def getSelfLoop(v:Vertex) = outE(v).filter( e => e.to == v)
 
   def pre(v:Vertex) = {
     val out = E.filter (e => v.eq(e.to) )
