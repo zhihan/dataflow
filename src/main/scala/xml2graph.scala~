@@ -1,5 +1,3 @@
-package my.se
-
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.DocumentBuilder
 import org.w3c.dom.Document
@@ -54,7 +52,7 @@ class XML2Graph() {
     tid.toInt
   }
 
-   def parseFile(filename: String) = {
+   def parse(filename: String) = {
      val vMap = HashMap.empty[Int, Vertex];
      var g = new Graph()
 
@@ -96,3 +94,51 @@ class XML2Graph() {
    }
 }
 
+/** Tests 
+ *
+ *  
+ */
+
+object TestGraphParser {
+  def main(args: Array[String]) {
+    val p = new XML2Graph()
+    val g = p.parse(args.apply(0))
+    println("Finished") 
+    g.print()
+  }
+}
+
+
+object TestReach {
+  def main(args: Array[String]) {
+    val p = new XML2Graph()
+    val g = p.parse(args.apply(0))
+    
+    g.print()
+    println("Reachable from 0")
+   
+    val reach = new Reachable(g)
+    val v = reach.forward(g.V(0))
+    
+    v.foreach( e => println(e.id))
+  }
+}
+
+
+object TestReachFilter {
+  def main(args: Array[String]) {
+    val p = new XML2Graph()
+    val g = p.parse(args.apply(0))
+    val filter = args.apply(1)
+    val str = filter.slice(1,filter.length()-1).split(',')
+    val inactive = new Inactive(Array[Int](), str.map( s => s.toInt))
+    
+    g.print()
+    println("Reachable from 0")
+   
+    val reach = new Reachable(g)
+    val v = reach.forward(g.V(0), inactive)
+    
+    v.foreach( e => println(e.id))
+  }
+}

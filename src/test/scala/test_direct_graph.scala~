@@ -15,17 +15,7 @@ package my.se.test.GraphTest {
       g.addEdge(v2,v3)
       g
     }
-  
-    test("Self loop") {
-      val g = createLinGraph
-      val v2 = g.getV(2)
-      val v1 = g.getV(1)
-      g.addEdge(v2, v2)
-      assert(g.hasSelfLoop(v2))
-      assert(!g.hasSelfLoop(v1))
-      assert(g.getSelfLoop(v2).length == 1)
-      assert(g.getSelfLoop(v1).isEmpty)
-    }
+    
 
     test("Remove a vertex") {
       val g = createLinGraph  // 1->2->3

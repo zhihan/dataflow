@@ -135,8 +135,8 @@ class Graph() {
     V.foreach( v => 
       {
         result = result + v.id + 
-        "[label=\"" + 
-         v.sid +"\"]\n"
+        "[label=\"" + v.id + 
+        " sid:"+ v.sid +"\"]\n"
       })
     
     E.foreach( e =>
@@ -144,7 +144,7 @@ class Graph() {
 	      e.from.id + " -> " + 
 	      e.to.id + 
 	      "[label=\"" + e.id + "\"]\n")
-    result + " }\n" 
+    result + (" } ") 
   }
   
   private def fromID(ids: Array[Int]) = {
