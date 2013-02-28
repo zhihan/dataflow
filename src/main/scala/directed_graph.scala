@@ -400,10 +400,10 @@ class Reachable(graph: Graph) {
   }
   
   private def guardedSuccessor(v:Vertex, stop:Set[Vertex]) = 
-    if (v==stop) ArrayBuffer[Vertex]() else graph.succ(v)
+    if (stop contains v) ArrayBuffer[Vertex]() else graph.succ(v)
 
   private def guardedPredecessor(v:Vertex, stop:Set[Vertex]) =
-    if (v==stop) ArrayBuffer[Vertex]() else graph.pre(v)
+    if (stop contains v) ArrayBuffer[Vertex]() else graph.pre(v)
   
   def backward(start:Array[Int], stop:Set[Vertex]) = {
     val bfs = new BFS((v:Vertex) => guardedPredecessor(v, stop))
