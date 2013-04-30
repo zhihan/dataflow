@@ -98,6 +98,21 @@ class DataflowGraph() {
     forwardReachable(src).filter( i=> !isProc(nodes(i))).toArray
   }
 
+  def forwardReachableProcs(src:Array[Int],
+    inactive:Inactive) = {
+    val reach  = new Reachable(g)
+    val allReached = reach.forward(src, inactive)
+    allReached.filter( i=> isProc(nodes(i))).toArray
+  }
+
+  def forwardReachableVars(src:Array[Int],
+    inactive:Inactive) = {
+    val reach  = new Reachable(g)
+    val allReached = reach.forward(src, inactive)
+    allReached.filter( i=> isProc(nodes(i))).toArray
+  }
+
+
   def backwardReachable(src:Array[Int]): Array[Int] = {
     val reach = new Reachable(g)
     reach.backward(src)
