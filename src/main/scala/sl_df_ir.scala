@@ -109,7 +109,7 @@ class DataflowGraph() {
     inactive:Inactive) = {
     val reach  = new Reachable(g)
     val allReached = reach.forward(src, inactive)
-    allReached.filter( i=> isProc(nodes(i))).toArray
+    allReached.filter( i=> !isProc(nodes(i))).toArray
   }
 
 
