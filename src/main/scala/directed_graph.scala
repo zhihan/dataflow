@@ -21,21 +21,13 @@ abstract class LabelOp[Label] {
  * and in- out- edges. The edges are ArrayBuffer, which are
  * mutable data members.
  */
-class Vertex(_id: Int, s: String) {
-  val id = _id
-  val sid = s
-
+class Vertex(val id: Int, val sid: String) {
   def deepCopy = new Vertex(id, sid)
 }
 
 /* Edge class consists of id, and the two end vertices
  */
-class Edge(_id: Int,  _from:Vertex, _to:Vertex) {
-  val id = _id
-  val from = _from
-  val to = _to
-  
-}
+class Edge(val id: Int,  val from:Vertex, val to:Vertex) 
 
 /*
  * Graph class implements a simple graph using edgelist.

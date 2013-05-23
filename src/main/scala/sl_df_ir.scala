@@ -32,6 +32,9 @@ class DataflowGraph() {
   // Get the node for a given Id
   val nodes = Map[Int, DataflowNode]()
 
+  def nNodes = g.V.size
+  def nEdges = g.E.size
+
   private def isProc(n:DataflowNode) = {
     n match {
       case Var(_) => false
@@ -176,7 +179,12 @@ class DataflowGraph() {
   def outEId(which:Int) = g.outE(getV(which)).toArray
 
 
-
+  // Reduce variable nodes
+  def reduceVarNodes {
+    val varNodes = g.V.filter(v => !isProc(nodes(v.id)))
+    varNodes.foreach ( v => g.reduceVertex(v))
+  }
+  
 }
 
 

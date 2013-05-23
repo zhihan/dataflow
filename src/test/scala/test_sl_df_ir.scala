@@ -27,6 +27,13 @@ class DfGraphTest extends FunSuite {
     assert(s.length > 20)
   }
 
+  test("Simple DFG reduce var") {
+    val cfg = createSimpleGraph
+    cfg.reduceVarNodes
+    val s = cfg.toDotString
+    //println(s)
+    assert(cfg.nNodes == 1)
+  }
 
   test("simple DFG reachability") {
     val dfg = createSimpleGraph
