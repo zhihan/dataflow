@@ -1,6 +1,7 @@
 package my.se
 
 import scala.collection.immutable.Set
+import scala.collection.immutable.Map
 import scala.collection.JavaConversions._ 
 
 import my.utility._ // Gensym
@@ -161,6 +162,29 @@ class TreeNode( i: Int, c: List[TreeNode]) {
       val r:Set[Int] = removePartialAncestors(s)
       r.toArray
     }
+  }
+
+  private def computeParentPair: List[(Int,Int)] = {
+    val m = (for (c <- children) yield (c.id, this.id) )
+    m ++ children.flatMap( c => c.computeParentPair)
+  }
+
+  private def computeParentMap = computeParentPair.toMap
+  
+  /** Compute the ancestors of a node using the parent map*/
+  private def ancestors(m:Map[Int,Int], i:Int) = {
+    def addParent(l:Set[Int], k:Int): Set[Int] = {
+      if (m.contains(k)) 
+        addParent(l + m(k), m(k))
+      else
+        l
+    }
+    addParent(Set[Int](), i)
+  }
+  
+  def computeAncestors(vec:Array[Int]):Array[Int] = {
+    val m = computeParentMap
+    vec.flatMap(v => ancestors(m,v)).toSet.toArray
   }
 }
 
