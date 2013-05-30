@@ -17,6 +17,11 @@ switch deblank(name)
             'lib','scala-library.jar'));
         javaaddpath(fullfile('/local-ssd/zhan/jars', ...
             'antlr-3.5-complete-no-st3.jar'));
+    case 'Bo-Songs-MacBook-Pro.local' % My macbook pro
+        javaaddpath(fullfile(pwd, 'se_2.9.2-1.0.jar'));
+        javaaddpath(fullfile('/Users/zhihan/scala-2.9.2', ...
+            'lib','scala-library.jar'));
+        
     otherwise
         error('Don''t know what to do yet')
 end

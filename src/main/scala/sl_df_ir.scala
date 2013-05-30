@@ -85,8 +85,12 @@ class DataflowGraph() {
       val label = "[label=\"" + v.sid + "\"]"
       shape + label
     }
+  
+    def eLabel(e:Edge):String = {
+      "[label=\"" + e.id + "\"]"
+    }
 
-    writeGraphviz(g, vLabel)
+    writeGraphviz(g, vLabel, eLabel)
   }
 
   private def forwardReachable(src:Array[Int]) : Array[Int] = {
