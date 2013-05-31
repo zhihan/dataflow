@@ -22,12 +22,12 @@ class PstFactory {
   val tf = new TreeNodeFactory()
 
   def basic() = {
-    val root = tf.make()
+    val root = tf.make
     // println("Basic: " + root.id)
     new Pst(root, BasicRegion())
    }
   def chain(l:List[Pst]) = {
-    val root = tf.make()
+    val root = tf.make
     // println("Chain: " + root.id)
 
     val pst = new Pst(root, ChainRegion())
@@ -38,7 +38,7 @@ class PstFactory {
     pst
   }
   def ifElse(b1:Pst, b2:Pst) = {
-    val root =tf.make()
+    val root =tf.make
     // println("If: " + root.id)
 
     root.addChild(b1.t)
@@ -50,7 +50,7 @@ class PstFactory {
   }
 
   def whileR(b:Pst) = {
-    val root =tf.make()
+    val root =tf.make
     // println("While: " + root.id)
     root.addChild(b.t)
     val pst = new Pst(root, WhileRegion()) 

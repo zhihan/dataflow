@@ -40,7 +40,7 @@ class SystemNodeFactory {
   val sysInfo = Map[Int, SystemInfo]()
 
   def make(n:String):SystemNode = {
-    val newTree = tf.make()
+    val newTree = tf.make
     val node = new SystemNode(newTree) 
     sysInfo += (node.id -> new SystemInfo(n))
     node

@@ -192,7 +192,7 @@ class TreeNode( i: Int, c: List[TreeNode]) {
 class TreeNodeFactory () {
   val gensym = new Gensym()
 
-  def make() = {
+  def make  = {
     new TreeNode(gensym(), List[TreeNode]())
   }
 }
