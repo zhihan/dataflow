@@ -1,3 +1,4 @@
+/** Intermediate representation for Simulink graphic objects*/
 package sl.ir
 
 import my.se._
@@ -9,7 +10,9 @@ trait HasId
   val id:Int  // A simple trait specifying it has an Id field.
 }
 
-abstract class Port extends AnyRef with HasId
+/** There are two kinds of ports, inport accepts input signals
+ * outport generate output signals. */
+abstract sealed class Port extends AnyRef with HasId
 
 // Represent an input port of a block 
 case class Inport(id: Int) extends Port
@@ -18,6 +21,7 @@ case class Inport(id: Int) extends Port
 // Represent an output port of a block
 case class Outport(id:Int) extends Port
 { }
+
 
 /** Virtual port graph captures the relationship between
  * ports of virtual blocks. It is used to compute the
