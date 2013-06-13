@@ -166,6 +166,13 @@ class DataflowGraph() {
     out.filter( e => idSet.contains (e.to.id)
              ).map(e => e.id
                  ).toArray
+  }
+
+  def outEIdsFiltered(src:Array[Int], ids:Array[Int]) = {
+    val idSet = ids.toSet
+    src.flatMap( v => 
+      g.outE(getV(v)).filter( e => idSet.contains (e.to.id)) 
+    ).map( e => e.id).toArray
   } 
 
   // Delegate methods to 
