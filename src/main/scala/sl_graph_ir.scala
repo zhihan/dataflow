@@ -54,7 +54,11 @@ class VirtualPortGraph() {
     } else {
       // Check src and dst type
       assert(nodes(src) != nodes(dst))
-      g.addEdge(src, dst)
+      // Graphical graph is not a multi-graph
+      if (!g.hasE(src,dst)) 
+        g.addEdge(src, dst)
+      else 
+        g.getEdge(src, dst)
     }
   }
 
@@ -89,15 +93,11 @@ class VirtualPortGraph() {
    *  where the connections are out1 -> in1, out2 -> in2 ,.... outn -> inn.
    *
    */
-  def forwardReachablePairs(src:Int): Array[Int] = {
-    val reach = new Reachable(g)
-    val reachSet = reach.forward(src).toSet
-    val reachOutports = reachSet.filter(isOutport)
 
-    val outList = reachOutports.toList
+  private def getIOPorts(outList:List[Int], reachSet:Set[Int]):Array[Int] = {
     val ioList = new ListBuffer[Int]()
     outList.foreach( oId => {
-      val oV = g.getV(oId)
+      val oV = g.getV(oId) // outV
       val eList = g.E.filter(e => ((e.from == oV) &&
                                   (reachSet.contains(e.to.id))))
       val iVList = eList.map(_.to)
@@ -107,7 +107,27 @@ class VirtualPortGraph() {
       })
     })
                   
-    ioList.toArray
+    ioList.toArray    
+  }
+
+  def forwardReachablePairs(src:Int): Array[Int] = {
+    val reach = new Reachable(g)
+    val reachSet = reach.forward(src).toSet
+    val reachOutports = reachSet.filter(isOutport)
+
+    val outList = reachOutports.toList
+    getIOPorts(outList, reachSet)
+  }
+
+  def reachablePairs(src:Array[Int], dst:Array[Int]) = {
+    val reach = new Reachable(g)
+    val fwd = reach.forward(src).toSet
+    val bwd = reach.backward(dst).toSet
+    val both = fwd & bwd
+    val reachOutports = both.filter(isOutport)
+
+    getIOPorts(reachOutports.toList, both)
+
   }
 
 }

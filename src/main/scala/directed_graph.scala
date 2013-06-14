@@ -162,15 +162,27 @@ class Graph() {
     which.map(x => getV(x))
   }
 
-  def getE(from: Int, to: Int) = {
+  def hasE(from:Int, to:Int):Boolean = {
     val vFrom = getV(from)
     val e = outE(vFrom).find( e => e.to.id ==to)
     e match {
-      case Some(x) => x.id
+      case Some(x) => true
+      case None => false
+    }
+  }
+
+  def getEdge(from:Int, to:Int) = {
+    val vFrom = getV(from)
+    val e = outE(vFrom).find( e => e.to.id ==to)
+    e match {
+      case Some(x) => x
       case None => throw new RuntimeException(
         "Cannot find edge from " + from + " to " + to)
     }
   }
+
+  def getE(from: Int, to: Int) = getEdge(from, to).id
+  
 
 }
 
@@ -270,8 +282,9 @@ class Reachable(graph: Graph) {
     bfs.initialize(start)
     bfs.run()
     bfs.visited.toArray
-    
   }
+
+
   def forward(start:Int):Array[Int] = {
     val f = forward(graph.getV(start))
     f.map(v => v.id)
@@ -285,7 +298,6 @@ class Reachable(graph: Graph) {
    
     val vertices = bfs.visited.toArray
     vertices.map(v => v.id)
-    
   }
 
   private def filteredSuccessor(v:Vertex, inactive:Inactive) = {
