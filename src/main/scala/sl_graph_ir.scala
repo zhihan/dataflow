@@ -25,7 +25,7 @@ case class Outport(id:Int) extends Port
 
 /** Virtual port graph captures the relationship between
  * ports of virtual blocks. It is used to compute the
- * virtual blocks in  a signal pathway*/
+ * virtual blocks in  a signal pathway. */
 
 class VirtualPortGraph() {
 
@@ -86,20 +86,24 @@ class VirtualPortGraph() {
     }
   }
 
-  /** Compute reachable ports and return them in input-output pairs
-   *
-   *  The return array is alternating list of out and in ports.
-   * [out1 in1 out2 in2 ... outn inn]
-   *  where the connections are out1 -> in1, out2 -> in2 ,.... outn -> inn.
-   *
-   */
+  /*
+    Compute the reachable I/O port from a list of output port Ids. 
 
+    Given a list of outport and a set of reachable ports, compute all
+   outport-inport pairs and return them in an array with alternating
+   outport and inport ids.
+   [ out1 in1 out2 in2 ... out_n in_n] 
+   
+  */
   private def getIOPorts(outList:List[Int], reachSet:Set[Int]):Array[Int] = {
     val ioList = new ListBuffer[Int]()
     outList.foreach( oId => {
-      val oV = g.getV(oId) // outV
+      // Get the vertex from its id
+      val oV = g.getV(oId) 
+      // Get the list of out-going edges that reaches vertices in the reach set 
       val eList = g.E.filter(e => ((e.from == oV) &&
                                   (reachSet.contains(e.to.id))))
+      // Get the destination of the out-going edges
       val iVList = eList.map(_.to)
       iVList.foreach( iV => {
         ioList.append(oV.id)
@@ -110,6 +114,9 @@ class VirtualPortGraph() {
     ioList.toArray    
   }
 
+  /** Compute reachable ports and return them in input-output pairs
+   */
+
   def forwardReachablePairs(src:Int): Array[Int] = {
     val reach = new Reachable(g)
     val reachSet = reach.forward(src).toSet
@@ -118,6 +125,13 @@ class VirtualPortGraph() {
     val outList = reachOutports.toList
     getIOPorts(outList, reachSet)
   }
+  
+  /**
+    Compute reachable ports form a set of sources (outports) and a 
+  set of detinations (inports). The algorithm computes the intersection
+  of the forward reach set from the sources and te backward reach set
+  from the destinations.
+  */
 
   def reachablePairs(src:Array[Int], dst:Array[Int]) = {
     val reach = new Reachable(g)
