@@ -38,14 +38,14 @@ class VirtualPortGraph() {
     val p = g.newVertex(name)
     val n = Outport(p.id)
     nodes(p.id) = n
-    n
+    p.id
   }
 
   def newInport(name:String) = {
     val p = g.newVertex(name)
     val n = Inport(p.id)
     nodes(p.id) = n
-    n
+    p.id
   }
 
   def addEdge(src:Int, dst:Int): Edge= { 
@@ -79,7 +79,7 @@ class VirtualPortGraph() {
     writeGraphviz(g, vLabel)
   }
   
-  private def isOutport(n: Int) = {
+  def isOutport(n: Int) = {
     nodes(n) match {
       case Outport(_) => true
       case Inport(_) =>false
