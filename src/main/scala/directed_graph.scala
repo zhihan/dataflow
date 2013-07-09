@@ -3,6 +3,7 @@ package my.se
 import java.util.Arrays
 
 import scala.collection.mutable.Queue
+import scala.collection.mutable.BitSet
 import scala.collection.mutable.Set
 import scala.collection.mutable.ArrayBuffer
 
@@ -261,8 +262,8 @@ class BFS(callback: Vertex => ArrayBuffer[Vertex]){
  * */
 class Inactive(vArray: Array[Int], eArray:Array[Int])
 {
-  val v = if (vArray != null ) vArray.toSet else Set[Int]()
-  val e = if (eArray != null ) eArray.toSet else Set[Int]()
+  val v = if (vArray != null ) BitSet() ++ vArray else BitSet()
+  val e = if (eArray != null ) BitSet() ++ eArray else BitSet()
 }
 
 /* Reachable
