@@ -147,6 +147,26 @@ class DataflowGraph() {
     allReached.filter( i => !isProc(nodes(i))).toArray
   }
 
+  // Combine forward reach and backward reach 
+  def reachableProcs(src: Array[Int],
+                    sink: Array[Int],
+                    inactive:Inactive) = {
+    val reach = new Reachable(g)
+    val fwd = reach.forward(src, inactive).toSet
+    val bwd = reach.backward(sink, inactive).toSet
+    (fwd & bwd).filter ( i => isProc(nodes(i))).toArray
+  }
+
+  // Combine forward reach and backward reach 
+  def reachableVars(src: Array[Int],
+                    sink: Array[Int],
+                    inactive:Inactive) = {
+    val reach = new Reachable(g)
+    val fwd = reach.forward(src, inactive).toSet
+    val bwd = reach.backward(sink, inactive).toSet
+    (fwd & bwd).filter ( i => !isProc(nodes(i))).toArray
+  }
+
 
   def allProcsButID(ids:Array[Int]) = {
     val idSet = ids.toSet
@@ -156,8 +176,6 @@ class DataflowGraph() {
                                  ).toArray
     result.map(v => v.id)
   }
-
-  
 
   /** Compute ids of the out edges for a given node filtered by the target nodes */
   def outEIdFilteredByTarget(which:Int, ids:Array[Int]) = {
