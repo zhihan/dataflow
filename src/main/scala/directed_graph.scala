@@ -18,6 +18,13 @@ abstract class LabelOp[Label] {
   def max(l:Label, r:Label):Label
 }
 
+abstract class SetOp[SetType] {
+  type T = SetType
+  def isSubset(l:SetType, r:SetType): Boolean
+  def minus(l:SetType, r:SetType): SetType
+  def union(l:SetType, r:SetType): SetType
+}
+
 /** Vertex class consists of an id, a string for sid
  * and in- out- edges. The edges are ArrayBuffer, which are
  * mutable data members.
@@ -254,6 +261,12 @@ class BFS(callback: Vertex => ArrayBuffer[Vertex]){
       }
     }
   }
+
+  // Run the DFS until an external condition is 
+  // true
+  def runUntil(stop:(Vertex)=>Boolean) {
+    
+  }
 }
 
 
@@ -464,6 +477,13 @@ class PropagateLabel[LabelT] (graph: Graph,
   def backward(start:Array[Int], l:HashMap[Int,LabelT]) {
     propagate(graph.getV(start), l, predecessor)
   }
+}
+
+class PropagateSet[SetT](graph: Graph,
+			 op: SetOp,
+			 inactive: Inactive)
+{
+  
 }
 
 /**

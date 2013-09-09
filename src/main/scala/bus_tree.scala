@@ -249,5 +249,8 @@ case class Bus (val name: String, val children:List[BusElement]) extends BusElem
 
 }
 
-object Bus {
+// Sub bus record, use it to propagate sub-bus reachability
+// information in the dataflow algorithm
+case class SubBus(val bus: Bus, val elements:Set[Int]) {
+  
 }
