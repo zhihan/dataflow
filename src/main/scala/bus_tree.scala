@@ -113,7 +113,8 @@ case class Bus (val name: String, val children:List[BusElement]) extends BusElem
               if (sel(start))
                 leafIds(start + b.size, acc ++ allIds(b, start), sel, t)
               else
-                leafIds(start + b.size, acc, sel, t)
+                // Continue to recurse into sub structure
+                leafIds(start + b.size, acc ++ selIds(b, start, sel), sel, t)
           }
         case Nil => acc
       }
@@ -123,8 +124,15 @@ case class Bus (val name: String, val children:List[BusElement]) extends BusElem
     // Local function for recursion
     def allIds(b:Bus, n:Int):Set[Int] = leafIds(n+1, Set[Int](), 
                                                 (_:Int)=> true, b.children)
+    def selIds(b:Bus, n:Int, sel:(Int)=>Boolean) = 
+      leafIds(n+1, Set[Int](), sel, b.children)
 
-    leafIds(1, Set[Int](), (x:Int)=> s.contains(x), children )
+    // Special case:
+    // If s contains 0, return all elements
+    if (s.contains(0)) 
+      leavesId
+    else
+      leafIds(1, Set[Int](), (x:Int)=> s.contains(x), children )
   }
 
   
@@ -211,6 +219,34 @@ case class Bus (val name: String, val children:List[BusElement]) extends BusElem
     val (res, _) = compactBus(this, 0, s)
     res
   }
+
+  // Subset operations
+  // Set union
+  def union(a:Set[Int], b:Set[Int]): Set[Int] = {
+    // Use leaf representation for the computation
+    val aLeaves = leavesIdOf(a)
+    val bLeaves = leavesIdOf(b)
+    aLeaves ++ bLeaves
+  }
+
+  // Set intersect
+  def intersect(a:Set[Int], b:Set[Int]): Set[Int] = {
+    // Use leaf representation for the computation
+    val aLeaves = leavesIdOf(a)
+    val bLeaves = leavesIdOf(b)
+    aLeaves & bLeaves
+  }
+  // Set difference
+  def diff(a:Set[Int], b:Set[Int]): Set[Int] = {
+    // Use leaf representation for the computation
+    val aLeaves = leavesIdOf(a)
+    val bLeaves = leavesIdOf(b)
+    aLeaves -- bLeaves
+  }
+  // Set compliment
+  def compl(a:Set[Int]) = diff(Set(0), a)
+  
+
 }
 
 object Bus {
