@@ -140,22 +140,51 @@ class DataflowGraph() {
         case Proc(_) => 
           if (busProcs.contains(v.id)) {
             busProcs(v.id) match {
-              case BusSelect(_,_) | BusPass(_) => 
+              case BusSelect(b,_) => 
                 for (p <- pred) {
                   val current = busReached(v.id)
-                  val before = busReached.getOrElse(p.id, SubBusOp.empty(current))
+                  val before = busReached.getOrElse(p.id, SubBus(b, Set[Int]()))
+                  if (! SubBusOp.isSubset(current, before)) {
+	            busReached(p.id) = SubBusOp.union(current, before)
+                    next += p
+                  }
+                }
+              case BusPass(b) => 
+                for (p <- pred) {
+                  val current = busReached(v.id)
+                  val before = busReached.getOrElse(p.id, SubBus(b, Set[Int]()))
                   if (! SubBusOp.isSubset(current, before)) {
 	            busReached(p.id) = SubBusOp.union(current, before)
                     next += p
                   }
                 }
               case BusCreate(b) => {
-                val children = b.children
-                
+                val reached = busReached(v.id).distribute
+                var i = 0 // Index into array
+                for ((c,r) <- reached) {
+                  val p = pred(i)
+                  c match {
+                    case _:AtomicElement => 
+                      if (!r.isEmpty) {
+                        // bus element is reached
+                        if (!bfs.visited.contains(p)) next += p
+                      }
+                    case bc:Bus => {
+                      val current = SubBus(bc, r)
+                      val before = busReached.getOrElse(p.id, SubBus(bc, Set[Int]()))
+                      if (! SubBusOp.isSubset(current, before)) {
+	                busReached(p.id) = SubBusOp.union(current, before)
+                        next += p
+                      }
+                    }
+                  }
+                  i += 1
+                }
               }
                 
             }
           } else {
+            // Non-bus proc
             for (p <- pred) {
               if (!bfs.visited.contains(p)) next += p
             }
@@ -166,7 +195,18 @@ class DataflowGraph() {
     }
 
     val bfs = new BFS(visitBackward)
-    
+
+    def run(start:Array[Int]) = {
+      bfs.initialize(graph.getV(start))
+      bfs.runAlways()
+      (bfs.visited, busReached)
+    }
+  }
+
+  def backreachBus(src:Array[Int], inactive:Inactive, 
+                   busProcs:Map[Int,BusAction]) = {
+    val reach = new BusReachBack(g, busProcs,  inactive)
+    reach.run(src)
   }
 
   private def forwardReachable(src:Array[Int]) : Array[Int] = {

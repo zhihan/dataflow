@@ -279,6 +279,10 @@ extends BusElement
 // Sub bus record, use it to propagate sub-bus reachability
 // information in the dataflow algorithm
 case class SubBus(val bus: Bus, val elements:Set[Int]) {
+  def distribute = {
+    val e = bus.distribute(elements)
+    bus.children.zip(e)
+  }
 }
 
 
