@@ -23,6 +23,7 @@ abstract class SetOp[SetType] {
   def isSubset(l:SetType, r:SetType): Boolean
   def minus(l:SetType, r:SetType): SetType
   def union(l:SetType, r:SetType): SetType
+  def empty(n:SetType): SetType
 }
 
 /** Vertex class consists of an id, a string for sid
@@ -262,10 +263,14 @@ class BFS(callback: Vertex => ArrayBuffer[Vertex]){
     }
   }
 
-  // Run the DFS until an external condition is 
-  // true
-  def runUntil(stop:(Vertex)=>Boolean) {
-    
+  // Run the DFS disregarding the visited flag
+  def runAlways() {
+    while ( !q.isEmpty() ) {
+      val e = q.dequeue()
+      val next = cb(e)
+      visited.add(e)
+      for (c <- next) q.enqueue(c)
+    }
   }
 }
 
@@ -480,10 +485,44 @@ class PropagateLabel[LabelT] (graph: Graph,
 }
 
 class PropagateSet[SetT](graph: Graph,
-			 op: SetOp,
+			 op: SetOp[SetT],
 			 inactive: Inactive)
 {
-  
+  val m = HashMap[Int,SetT]()
+
+  private def filteredPredecessor(v:Vertex) = {
+    val out = graph.inE(v)
+    val filteredOut = out.filter(e => !inactive.e.contains(e.id))
+    val filteredSucc = filteredOut.map(e => e.from)
+    filteredSucc.filter(v => !inactive.v.contains(v.id))
+  }
+
+  private def visitBackward(v:Vertex):ArrayBuffer[Vertex] = {
+    val pred = filteredPredecessor(v)
+    val next = ArrayBuffer[Vertex]()
+    for ( i <- pred ) {
+      // Before visiting the node, the set at i
+      val current = m(v.id)
+      val before = m.getOrElse(i.id, op.empty(current))
+      if (! op.isSubset(current, before)) {
+        next += i
+      }
+    }
+    next
+  }
+
+
+  def backward(start:Array[Int], startE:Array[SetT]) = {
+    val bfs = new BFS(visitBackward)
+    // Initialize
+    for ((v, s) <- start.zip(startE)) {
+      m(v) = s
+    }
+    bfs.initialize(graph.getV(start))
+    bfs.runAlways()
+    m
+  }
+
 }
 
 /**

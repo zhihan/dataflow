@@ -10,11 +10,13 @@ import scala.annotation.tailrec
 
 abstract sealed class BusElement 
 
-case class AtomicElement (val name: String, val width: Int) extends BusElement
+case class AtomicElement (val name: String, val width: Int) 
+extends BusElement
 {
 }
 
-case class Bus (val name: String, val children:List[BusElement]) extends BusElement
+case class Bus (val name: String, val children:List[BusElement]) 
+extends BusElement
 {
   lazy val width:Int = {
     children.foldLeft (0) {
