@@ -2,6 +2,7 @@ package sl.ir
 
 import my.se._
 import scala.collection.mutable.Map
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * A dataflow node can be either a variable node or a proc node.
@@ -20,6 +21,8 @@ case class Var(override val id:Int) extends DataflowNode
 case class Proc(override val id:Int) extends DataflowNode
 {
 }
+
+
 
 /**
  * A Simulink dataflow graph consists of a set of dataflow nodes
@@ -91,6 +94,79 @@ class DataflowGraph() {
     }
 
     writeGraphviz(g, vLabel, eLabel)
+  }
+
+  // Bus analysis
+  val busActions = Map[Int, BusAction]()
+  def setBusAction(p:Proc, a:BusAction) {
+    busActions(p.id) = a
+  }
+
+  class BusReachBack(graph:Graph, busProcs:Map[Int,BusAction],  inactive:Inactive) {
+
+    val busReached = Map[Int, SubBus]()
+
+    // Reachability in terms of buses
+    private def visitBackward(v:Vertex):ArrayBuffer[Vertex] = {
+      // In the BFS, need to distinguish between Var and Proc and
+      // handle bus logics
+      val pred = Graph.filteredPredecessor(graph,v,inactive)
+      val next = ArrayBuffer[Vertex]()
+      nodes(v.id) match {
+        case Var(_) => 
+          for (p <- pred) {
+              if (busProcs.contains(p.id)) {
+                busProcs(p.id) match {
+                  case BusCreate(_) | BusPass(_) => {
+                    val current = busReached(v.id)
+                    val before = busReached.getOrElse(p.id, SubBusOp.empty(current))
+                    if (! SubBusOp.isSubset(current, before)) {
+	              busReached(p.id) = SubBusOp.union(current, before)
+                      next += p
+                    }
+                  }
+                  case BusSelect(b, i) => {
+                    if (!bfs.visited.contains(p)) {
+                      busReached(p.id) = SubBus(b, Set(i))
+                      next += p
+                    }
+                  }
+                }
+              } else {
+                // Non-bus proc
+                if (!bfs.visited.contains(p)) next += p
+              }
+            }
+        case Proc(_) => 
+          if (busProcs.contains(v.id)) {
+            busProcs(v.id) match {
+              case BusSelect(_,_) | BusPass(_) => 
+                for (p <- pred) {
+                  val current = busReached(v.id)
+                  val before = busReached.getOrElse(p.id, SubBusOp.empty(current))
+                  if (! SubBusOp.isSubset(current, before)) {
+	            busReached(p.id) = SubBusOp.union(current, before)
+                    next += p
+                  }
+                }
+              case BusCreate(b) => {
+                val children = b.children
+                
+              }
+                
+            }
+          } else {
+            for (p <- pred) {
+              if (!bfs.visited.contains(p)) next += p
+            }
+          }
+        
+      }
+      next
+    }
+
+    val bfs = new BFS(visitBackward)
+    
   }
 
   private def forwardReachable(src:Array[Int]) : Array[Int] = {

@@ -190,8 +190,24 @@ class Graph() {
   }
 
   def getE(from: Int, to: Int) = getEdge(from, to).id
-  
+}
 
+/* Inactive class implements a mechanism to filter nodes
+ and edges in the BFS search.
+ * */
+class Inactive(vArray: Array[Int], eArray:Array[Int])
+{
+  val v = if (vArray != null ) BitSet() ++ vArray else BitSet()
+  val e = if (eArray != null ) BitSet() ++ eArray else BitSet()
+}
+
+object Graph {
+  def filteredPredecessor(g:Graph, v:Vertex, inactive:Inactive) = {
+    val out = g.inE(v)
+    val filteredOut = out.filter(e => !inactive.e.contains(e.id))
+    val filteredSucc = filteredOut.map(e => e.from)
+    filteredSucc.filter(v => !inactive.v.contains(v.id))
+  }
 }
 
 class SeseGraph(g: Graph, en:Vertex, ex:Vertex) 
@@ -273,15 +289,6 @@ class BFS(callback: Vertex => ArrayBuffer[Vertex]){
   }
 }
 
-
-/* Inactive class implements a mechanism to filter nodes
- and edges in the BFS search.
- * */
-class Inactive(vArray: Array[Int], eArray:Array[Int])
-{
-  val v = if (vArray != null ) BitSet() ++ vArray else BitSet()
-  val e = if (eArray != null ) BitSet() ++ eArray else BitSet()
-}
 
 /* Reachable
  * Compute graph reachability using BFS search.
@@ -387,10 +394,7 @@ class Reachable(graph: Graph) {
   }
 
   private def filteredPredecessor(v:Vertex, inactive:Inactive) = {
-    val out = graph.inE(v)
-    val filteredOut = out.filter(e => !inactive.e.contains(e.id))
-    val filteredSucc = filteredOut.map(e => e.from)
-    val r = filteredSucc.filter(v => !inactive.v.contains(v.id))
+    val r = Graph.filteredPredecessor(graph, v, inactive)
     ArrayBuffer[Vertex]() ++ r
   }
 
@@ -483,21 +487,15 @@ class PropagateLabel[LabelT] (graph: Graph,
   }
 }
 
+// Abstract class that propagate sets in the dataflow graph
 class PropagateSet[SetT](graph: Graph,
 			 op: SetOp[SetT],
 			 inactive: Inactive)
 {
   val m = HashMap[Int,SetT]()
 
-  private def filteredPredecessor(v:Vertex) = {
-    val out = graph.inE(v)
-    val filteredOut = out.filter(e => !inactive.e.contains(e.id))
-    val filteredSucc = filteredOut.map(e => e.from)
-    filteredSucc.filter(v => !inactive.v.contains(v.id))
-  }
-
   private def visitBackward(v:Vertex):ArrayBuffer[Vertex] = {
-    val pred = filteredPredecessor(v)
+    val pred = Graph.filteredPredecessor(graph, v, inactive)
     val next = ArrayBuffer[Vertex]()
     for ( i <- pred ) {
       // Before visiting the node, the set at i

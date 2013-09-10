@@ -153,6 +153,29 @@ class BusTest extends FunSuite {
 
   }
 
+  test("Distribute subset to children") {
+    // Bus structure 
+    val busb = testBus
+    val c = busb.children
+    val ac = busb.distribute(Set(0))
+    assert(ac(1) == Set(0))
+    c(0) match {
+      case b:Bus => assert(b.compact(ac(0)) == Set(0))
+      case _ => assert(true)
+    }
+  }
+
+  test("Distribute subset to children 2") {
+    val busb = testBus
+    val c = busb.children
+    val ac = busb.distribute(Set(1,2))
+    assert(ac(1) == Set())
+    c(0) match {
+      case b:Bus => assert(b.compact(ac(0)) == Set(0))
+      case _ => assert(true)
+    }
+  }
+
 }
 
 class BusGraphTest extends FunSuite {

@@ -9,10 +9,14 @@ import scala.collection.immutable.Range
 import scala.annotation.tailrec
 
 abstract sealed class BusElement 
+{
+  def size: Int
+}
 
 case class AtomicElement (val name: String, val width: Int) 
 extends BusElement
 {
+  val size = 1
 }
 
 case class Bus (val name: String, val children:List[BusElement]) 
@@ -38,8 +42,8 @@ extends BusElement
         }
       )
     }
-  lazy val size = nDescendants +1
 
+  lazy val size = nDescendants +1
   /* Indexing: bus elements are assumed to be DFS-indexed,
    * this allows use of a single id to find the element */
   def get(n:Int) : BusElement = {
@@ -253,6 +257,23 @@ extends BusElement
     val bLeaves = leavesIdOf(b)
     aLeaves.subsetOf(bLeaves)
   }
+
+  // Distribute the subset onto its children
+  def distribute(s:Set[Int]) = {
+    val leaves = leavesIdOf(s)
+    @tailrec
+    def rec(offset:Int, acc:List[Set[Int]], l:List[BusElement]):List[Set[Int]] = {
+      l match {
+        case h::t => {
+          val myl = leaves.filter( x => (x >= offset && x < offset + h.size)
+                                ).map(x => x-offset)
+          rec(offset + h.size, myl :: acc, t)
+        }
+        case Nil => acc.reverse
+      }
+    }
+    rec(1, List[Set[Int]](), children)
+  }
 }
 
 // Sub bus record, use it to propagate sub-bus reachability
@@ -276,8 +297,14 @@ object SubBusOp extends SetOp[SubBus] {
     assert(comparable(l,r))
     val e = l.bus.union(l.elements,r.elements)
     SubBus(l.bus, e)
-  }
-
-  
+  }  
 }
+
+/* SL Bus behavior */
+sealed abstract class BusAction
+// Regular object should also support pattern matching
+case class BusCreate(bus:Bus) extends BusAction
+case class BusSelect(bus:Bus, i:Int) extends BusAction
+case class BusPass(bus:Bus) extends BusAction
+
 
