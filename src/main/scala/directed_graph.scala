@@ -208,6 +208,14 @@ object Graph {
     val filteredSucc = filteredOut.map(e => e.from)
     filteredSucc.filter(v => !inactive.v.contains(v.id))
   }
+
+  def filteredSuccessor(g:Graph, v:Vertex, inactive:Inactive) = {
+    val out = g.outE(v)
+    val filteredOut = out.filter(e => !inactive.e.contains(e.id))
+    val filteredSucc = filteredOut.map(e => e.to)
+    filteredSucc.filter(v => !inactive.v.contains(v.id))
+  }
+
 }
 
 class SeseGraph(g: Graph, en:Vertex, ex:Vertex) 
@@ -326,11 +334,7 @@ class Reachable(graph: Graph) {
   }
 
   private def filteredSuccessor(v:Vertex, inactive:Inactive) = {
-    val out = graph.outE(v)
-    val filteredOut = out.filter(e => !inactive.e.contains(e.id))
-    val filteredSucc = filteredOut.map(e => e.to)
-    val r = filteredSucc.filter(v => !inactive.v.contains(v.id))
-    ArrayBuffer[Vertex]() ++ r
+    ArrayBuffer[Vertex]() ++ Graph.filteredSuccessor(graph, v, inactive)
   }
 
   private def errorOutIfInSet(v: Int, s: scala.collection.Set[Int]):Unit = {

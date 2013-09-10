@@ -175,7 +175,16 @@ class BusTest extends FunSuite {
       case _ => assert(true)
     }
   }
+  
+  test("Collect subset from children") {
+    // Bus structure 
+    val busb = testBus
+    val all = busb.collect(List(Set(0), Set(0)))
+    assert(busb.compact(all) == Set(0))
 
+    val ac = busb.collect(List(Set(1), Set(0)))
+    assert(busb.compact(ac) == Set(2,4))
+  }
 }
 
 class BusGraphTest extends FunSuite {

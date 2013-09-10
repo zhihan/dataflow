@@ -274,6 +274,24 @@ extends BusElement
     }
     rec(1, List[Set[Int]](), children)
   }
+
+  // Collect the elements from children
+  def collect(cs:List[Set[Int]]) = {
+    @tailrec 
+    def rec(offset:Int, acc:Set[Int], s:List[Set[Int]],l:List[BusElement]):
+    Set[Int] = {
+      l match {
+        case h::t => {
+          val m = s.head.map(x => x + offset)
+          val nextAcc = acc ++ m
+          rec(offset + h.size, nextAcc, s.tail, t)
+        }
+        case Nil => acc
+      }
+    }
+    assert(cs.length == children.length)
+    rec(1, Set[Int](), cs, children)
+  }
 }
 
 // Sub bus record, use it to propagate sub-bus reachability
