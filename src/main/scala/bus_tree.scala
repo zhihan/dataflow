@@ -276,7 +276,7 @@ extends BusElement
   }
 
   // Collect the elements from children
-  def collect(cs:List[Set[Int]]) = {
+  def collect(cs:List[Set[Int]]):Set[Int] = {
     @tailrec 
     def rec(offset:Int, acc:Set[Int], s:List[Set[Int]],l:List[BusElement]):
     Set[Int] = {
@@ -292,6 +292,8 @@ extends BusElement
     assert(cs.length == children.length)
     rec(1, Set[Int](), cs, children)
   }
+
+
 }
 
 // Sub bus record, use it to propagate sub-bus reachability
@@ -325,7 +327,7 @@ object SubBusOp extends SetOp[SubBus] {
 /* SL Bus behavior */
 sealed abstract class BusAction
 // Regular object should also support pattern matching
-case class BusCreate(bus:Bus) extends BusAction
+case class BusCreate(bus:Bus, children:List[Int]) extends BusAction
 case class BusSelect(bus:Bus, i:Int) extends BusAction
 case class BusPass(bus:Bus) extends BusAction
 

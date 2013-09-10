@@ -146,7 +146,8 @@ class DfGraphTest extends FunSuite {
     val bt = AtomicElement("b",1)
     val ct = AtomicElement("c",1)
     val bus = Bus("Bus", List(at,bt,ct))
-    val busProc = Map[Int,BusAction](BC.id -> BusCreate(bus),
+    val busVars = List(a.id, b.id, c.id)
+    val busProc = Map[Int,BusAction](BC.id -> BusCreate(bus,busVars),
                       P.id -> BusPass(bus),
                       BS1.id -> BusSelect(bus,1),
                       BS2.id -> BusSelect(bus,2))

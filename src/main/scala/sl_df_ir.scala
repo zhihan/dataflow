@@ -108,7 +108,7 @@ class DataflowGraph() {
     private def visitVarWithBusProc(v:Vertex,
                                     p:Vertex):Boolean = {
       busProcs(p.id) match {
-          case BusCreate(_) | BusPass(_) => {
+          case BusCreate(_,_) | BusPass(_) => {
             val current = busReached(v.id)
             val before = busReached.getOrElse(p.id, SubBusOp.empty(current))
             if (! SubBusOp.isSubset(current, before)) {
@@ -150,28 +150,29 @@ class DataflowGraph() {
           updatePred(b)
         case BusPass(b) => 
           updatePred(b)
-        case BusCreate(b) => {
+        case BusCreate(b,srcVars) => {
           val next = ArrayBuffer[Vertex]()
           val reached = busReached(v.id).distribute
-          var i = 0 // Index into array
+          var src = srcVars // Index into array
           for ((c,r) <- reached) {
-            val p = pred(i)
-              c match {
-                case _:AtomicElement => 
-                  if (!r.isEmpty) {
+            val srcVar = src.head
+            val p = graph.getV(srcVar)
+            c match {
+              case _:AtomicElement => 
+                if (!r.isEmpty) {
                     // bus element is reached
-                      if (!bfs.visited.contains(p)) next += p
-                  }
-                case bc:Bus => {
-                  val current = SubBus(bc, r)
-                  val before = busReached.getOrElse(p.id, SubBus(bc, Set[Int]()))
-                  if (! SubBusOp.isSubset(current, before)) {
-	            busReached(p.id) = SubBusOp.union(current, before)
-                    next += p
-                  }
+                  if (!bfs.visited.contains(p)) next += p
+                }
+              case bc:Bus => {
+                val current = SubBus(bc, r)
+                val before = busReached.getOrElse(p.id, SubBus(bc, Set[Int]()))
+                if (! SubBusOp.isSubset(current, before)) {
+	          busReached(p.id) = SubBusOp.union(current, before)
+                  next += p
                 }
               }
-            i += 1
+            }
+            src = src.tail
           }
           next
         }
@@ -225,6 +226,149 @@ class DataflowGraph() {
     val reach = new BusReachBack(g, busProcs,  inactive)
     reach.run(src)
   }
+
+  // Forward reach
+  class BusReachFor(graph:Graph, busProcs:Map[Int,BusAction],  inactive:Inactive) {
+
+    val busReached = Map[Int, SubBus]()
+
+    // Visit a Var node with a bus-capable reader
+    private def visitVarWithBusProc(v:Vertex,
+                                    p:Vertex):Boolean = {
+      busProcs(p.id) match {
+          case BusSelect(_,_) | BusPass(_) => {
+            val current = busReached(v.id)
+            val before = busReached.getOrElse(p.id, SubBusOp.empty(current))
+            if (! SubBusOp.isSubset(current, before)) {
+	      busReached(p.id) = SubBusOp.union(current, before)
+              true
+            } else 
+              false
+          }
+        case BusCreate(b, srcVars) => {
+          val cs = srcVars.map(i => if (v.id == i) Set[Int](0) else Set[Int]())
+          val current = SubBus(b, b.collect(cs))
+          val before = busReached.getOrElse(p.id, SubBusOp.empty(current))
+            if (! SubBusOp.isSubset(current, before)) {
+	      busReached(p.id) = SubBusOp.union(current, before)
+              true
+            } else 
+              false
+        }
+      }
+    }
+    
+    // Visit a bus-capable proc
+    private def visitBusProc(v:Vertex,
+                             pred:ArrayBuffer[Vertex]): ArrayBuffer[Vertex] = {
+      
+      busProcs(v.id) match {
+        case BusSelect(b,i) => {
+          // Depends on whether the i-th element is bus
+          val cs = (0 until b.children.length).map( x => 
+            if (x==i) Set(0) else Set[Int]()).toList
+          val sel = b.collect(cs)
+          val reached = busReached(v.id)
+          val inter = b.intersect(sel, reached.elements)
+
+          if (!inter.isEmpty){ 
+            assert(pred.length == 1)
+            val p = pred(0)
+            val child = b.children(i)
+            child match {
+              case sb:Bus => {
+                val c = b.distribute(inter)
+                val current = SubBus(sb, c(i))
+                val before = busReached.getOrElse(p.id, SubBus(sb, Set[Int]()))
+                if (!SubBusOp.isSubset(current, before)) {
+                  busReached(p.id) = current
+                  ArrayBuffer(p)
+                } else 
+                  ArrayBuffer[Vertex]()
+              }
+              case _:AtomicElement => {
+                if (!bfs.visited.contains(p)) ArrayBuffer(p) 
+                else ArrayBuffer[Vertex]()
+              }   
+            }
+          } else ArrayBuffer[Vertex]()
+        }
+          
+        case BusPass(b) => {
+          val next = ArrayBuffer[Vertex]()
+          for (p <- pred) {
+            val current = busReached(v.id)
+            val before = busReached.getOrElse(p.id, SubBus(b, Set[Int]()))
+            if (! SubBusOp.isSubset(current, before)) {
+	      busReached(p.id) = SubBusOp.union(current, before)
+              next += p
+            }
+          }
+          next
+        }
+        case BusCreate(b, _) => {
+          val next = ArrayBuffer[Vertex]()
+          for (p <- pred) {
+            val current = busReached(v.id)
+            val before = busReached.getOrElse(p.id, SubBus(b, Set[Int]()))
+            if (! SubBusOp.isSubset(current, before)) {
+	      busReached(p.id) = SubBusOp.union(current, before)
+              next += p
+            }
+          }
+          next
+        }
+      }  
+    }
+
+    // Reachability in terms of buses
+    private def visitForward(v:Vertex):ArrayBuffer[Vertex] = {
+      // In the BFS, need to distinguish between Var and Proc and
+      // handle bus logics
+      val pred = Graph.filteredSuccessor(graph,v,inactive)
+      nodes(v.id) match {
+        case Var(_) => {
+          val next = ArrayBuffer[Vertex]()
+          for (p <- pred) {
+            if (busProcs.contains(p.id)) {
+              if (visitVarWithBusProc(v, p)) next += p
+            } else {
+              // Non-bus proc
+              if (!bfs.visited.contains(p)) next += p
+            }
+          }
+          next
+        }
+        case Proc(_) => 
+          if (busProcs.contains(v.id)) {
+            visitBusProc(v, pred)
+          } else {
+            val next = ArrayBuffer[Vertex]()
+            // Non-bus proc
+            for (p <- pred) {
+              if (!bfs.visited.contains(p)) next += p
+            }
+            next
+          }
+        
+      }
+    }
+
+    val bfs = new BFS(visitForward)
+
+    def run(start:Array[Int]) = {
+      bfs.initialize(graph.getV(start))
+      bfs.runAlways()
+      (bfs.visited, busReached)
+    }
+  }
+
+  def reachBus(src:Array[Int], inactive:Inactive, 
+               busProcs:Map[Int,BusAction]) = {
+    val reach = new BusReachFor(g, busProcs,  inactive)
+    reach.run(src)
+  }
+
 
   private def forwardReachable(src:Array[Int]) : Array[Int] = {
     val reach = new Reachable(g)
