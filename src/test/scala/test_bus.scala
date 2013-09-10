@@ -154,3 +154,42 @@ class BusTest extends FunSuite {
   }
 
 }
+
+class BusGraphTest extends FunSuite {
+  def testBus = {
+    // (abb) -+--- (ab) +---- a
+    //        |         +---- b
+    //        +--- b
+    //
+    val a = AtomicElement("a",1)
+    val b = AtomicElement("b",2)
+    val bus = Bus("ab", List(a,b))
+    val c = AtomicElement("b",2)
+    Bus("abb", List(bus, b))
+
+  }
+
+  test("Backward") {
+    //             #==> v2
+    //  v0 => v1 ==
+    //             #==> v3
+    val g = new Graph()
+    val v0 = g.newVertex("v0")
+    val v1 = g.newVertex("v1")
+    val v2 = g.newVertex("v2")
+    val v3 = g.newVertex("v3")
+    g.addEdge(v0, v1)
+    g.addEdge(v1, v2)
+    g.addEdge(v1, v3)
+
+    val bbus = testBus
+    val a = SubBus(bbus, Set(2))
+    val b = SubBus(bbus, Set(3))
+    val inactive = new Inactive(Array[Int](), Array[Int]())
+
+    val p = new PropagateSet[SubBus](g, SubBusOp, inactive)
+    val m = p.backward(Array(v2.id, v3.id), 
+		       Array(a, b))
+    assert(bbus.compact(m(v0.id).elements) == Set(1))
+  }
+}

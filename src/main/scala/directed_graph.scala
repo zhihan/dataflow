@@ -21,7 +21,6 @@ abstract class LabelOp[Label] {
 abstract class SetOp[SetType] {
   type T = SetType
   def isSubset(l:SetType, r:SetType): Boolean
-  def minus(l:SetType, r:SetType): SetType
   def union(l:SetType, r:SetType): SetType
   def empty(n:SetType): SetType
 }
@@ -505,6 +504,7 @@ class PropagateSet[SetT](graph: Graph,
       val current = m(v.id)
       val before = m.getOrElse(i.id, op.empty(current))
       if (! op.isSubset(current, before)) {
+	m(i.id) = op.union(current, before)
         next += i
       }
     }

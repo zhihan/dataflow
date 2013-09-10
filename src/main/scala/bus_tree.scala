@@ -248,11 +248,36 @@ extends BusElement
   // Set compliment
   def compl(a:Set[Int]) = diff(Set(0), a)
   
-
+  def subsetOf(a:Set[Int], b:Set[Int]) = {
+    val aLeaves = leavesIdOf(a)
+    val bLeaves = leavesIdOf(b)
+    aLeaves.subsetOf(bLeaves)
+  }
 }
 
 // Sub bus record, use it to propagate sub-bus reachability
 // information in the dataflow algorithm
 case class SubBus(val bus: Bus, val elements:Set[Int]) {
+}
+
+
+object SubBusOp extends SetOp[SubBus] {
+  def comparable(l:SubBus, r:SubBus) = {
+    l.bus == r.bus
+  }
+
+  def isSubset(l:SubBus, r:SubBus) = {
+    assert(comparable(l,r))
+    l.bus.subsetOf(l.elements,r.elements)
+  }
+
+  def empty(b:SubBus) = SubBus(b.bus, Set[Int]())
+  def union(l:SubBus, r:SubBus) = {
+    assert(comparable(l,r))
+    val e = l.bus.union(l.elements,r.elements)
+    SubBus(l.bus, e)
+  }
+
   
 }
+
