@@ -99,6 +99,72 @@ class DfGraphTest extends FunSuite {
   }
 
 
+  test("SL DF with nonvirtual buses for") {
+    //
+    // |A| -> |       |                  | Bus   |
+    //        |       |   |      |    +=>| Select| ---> |Ua|
+    // |B| -> | Bus   |==>| Pass | ==>+
+    //        |Create |   |      |    +=>| Bus   | ---> |Ub|
+    // |C| -> |       |                  | Select|  
+    //
+    val dfg = new DataflowGraph()
+    val A = dfg.newProcNode("A")
+    val a = dfg.newVarNode("a")
+    dfg.addEdge(A,a)
+    val B = dfg.newProcNode("B")
+    val b = dfg.newVarNode("b")
+    dfg.addEdge(B,b)
+    val C = dfg.newProcNode("C")
+    val c = dfg.newVarNode("c")
+    dfg.addEdge(C,c)
+    val BC = dfg.newProcNode("BC")
+    val bc = dfg.newVarNode("bc")
+    dfg.addEdge(BC,bc)
+    dfg.addEdge(C,c)
+    dfg.addEdge(a,BC)
+    dfg.addEdge(b,BC)
+    dfg.addEdge(c,BC)
+    val P = dfg.newProcNode("P")
+    val p = dfg.newVarNode("p")
+    dfg.addEdge(P,p)
+    dfg.addEdge(bc,P)
+    val BS1 = dfg.newProcNode("BS1")
+    val bs1 = dfg.newVarNode("bs1")
+    dfg.addEdge(p,BS1)
+    dfg.addEdge(BS1,bs1)
+    val Ua = dfg.newProcNode("Ua")
+    dfg.addEdge(bs1, Ua)
+    val BS2 = dfg.newProcNode("BS2")
+    val bs2 = dfg.newVarNode("bs2")
+    dfg.addEdge(p,BS2)
+    dfg.addEdge(BS2,bs2)
+    val Ub = dfg.newProcNode("Ub")
+    dfg.addEdge(bs2, Ub)
+    val BS3 = dfg.newProcNode("BS3")
+    val bs3 = dfg.newVarNode("bs3")
+    dfg.addEdge(p,BS3)
+    dfg.addEdge(BS3,bs3)
+    val Uc = dfg.newProcNode("Uc")
+    dfg.addEdge(bs3, Uc)
+    
+    val inact = new Inactive(Array[Int](), Array[Int]())
+    val at = AtomicElement("a",1)
+    val bt = AtomicElement("b",1)
+    val ct = AtomicElement("c",1)
+    val bus = Bus("Bus", List(at,bt,ct))
+    val busVars = List(a.id, b.id, c.id)
+    val busProc = Map[Int,BusAction](BC.id -> BusCreate(bus,busVars),
+				     P.id -> BusPass(bus),
+				     BS1.id -> BusSelect(bus,1),
+				     BS2.id -> BusSelect(bus,2),
+				     BS3.id -> BusSelect(bus,3))
+    val (v,busReached) = dfg.reachBus(Array(A.id,B.id),
+                                      inact,
+                                      busProc)
+    assert(v.contains(dfg.g.getV(Ua.id)))
+    assert(v.contains(dfg.g.getV(Ub.id)))
+    assert(!v.contains(dfg.g.getV(Uc.id)))
+  }
   test("SL DF with nonvirtual buses") {
     //
     // |A| -> |       |                  | Bus   |

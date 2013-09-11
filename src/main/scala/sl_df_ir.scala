@@ -265,7 +265,7 @@ class DataflowGraph() {
       busProcs(v.id) match {
         case BusSelect(b,i) => {
           // Depends on whether the i-th element is bus
-          val cs = (0 until b.children.length).map( x => 
+          val cs = (1 to b.children.length).map( x => 
             if (x==i) Set(0) else Set[Int]()).toList
           val sel = b.collect(cs)
           val reached = busReached(v.id)
