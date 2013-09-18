@@ -120,7 +120,6 @@ class DfGraphTest extends FunSuite {
     val BC = dfg.newProcNode("BC")
     val bc = dfg.newVarNode("bc")
     dfg.addEdge(BC,bc)
-    dfg.addEdge(C,c)
     dfg.addEdge(a,BC)
     dfg.addEdge(b,BC)
     dfg.addEdge(c,BC)
@@ -159,4 +158,74 @@ class DfGraphTest extends FunSuite {
     assert(!v.contains(dfg.g.getV(C.id)))
   }
 
+
+  test("SL DF with nested nv bus") {
+    //
+    // |A| -> |       |              
+    //        | BC1   |   |      |   
+    // |B| ->          ==>| Pass | ==>+=>| BS1 |-->|BS2|---> |Ub|
+    //        |   BC2 |   |      |    
+    // |C| -> |       |                 
+    //
+    val dfg = new DataflowGraph()
+    val A = dfg.newProcNode("A")
+    val a = dfg.newVarNode("a")
+    dfg.addEdge(A,a)
+    val B = dfg.newProcNode("B")
+    val b = dfg.newVarNode("b")
+    dfg.addEdge(B,b)
+    val BC1 = dfg.newProcNode("BC1")
+    val bc1 = dfg.newVarNode("bc1")
+    dfg.addEdge(BC1,bc1)
+    dfg.addEdge(a,BC1)
+    dfg.addEdge(b,BC1)
+    
+    val C = dfg.newProcNode("C")
+    val c = dfg.newVarNode("c")
+    dfg.addEdge(C,c)
+
+    val BC2 = dfg.newProcNode("BC2")
+    val bc2 = dfg.newVarNode("bc2")
+    dfg.addEdge(BC2,bc2)
+    dfg.addEdge(bc1,BC2)    
+    dfg.addEdge(c,BC2)
+
+    val P = dfg.newProcNode("P")
+    val p = dfg.newVarNode("p")
+    dfg.addEdge(P,p)
+    dfg.addEdge(bc2,P)
+    val BS1 = dfg.newProcNode("BS1")
+    val bs1 = dfg.newVarNode("bs1")
+    dfg.addEdge(p,BS1)
+    dfg.addEdge(BS1,bs1)
+    val BS2 = dfg.newProcNode("BS2")
+    val bs2 = dfg.newVarNode("bs2")
+    dfg.addEdge(bs1,BS2)
+    dfg.addEdge(BS2,bs2)
+    val Ub = dfg.newProcNode("Ub")
+    dfg.addEdge(bs2, Ub)
+    
+    val inact = new Inactive(Array[Int](), Array[Int]())
+    val at = AtomicElement("a",1)
+    val bt = AtomicElement("b",1)
+    val bus1 = Bus("Bus1", List(at,bt))
+
+    val ct = AtomicElement("c",1)
+    val bus2 = Bus("Bus2", List(bus1, ct))
+
+    val bus1Vars = List(a.id, b.id)
+    val bus2Vars = List(bc1.id, c.id)
+
+    val busProc = Map[Int,BusAction](BC1.id -> BusCreate(bus1,bus1Vars),
+                                     BC2.id -> BusCreate(bus2,bus2Vars),
+                                     P.id -> BusPass(bus2),
+                                     BS1.id -> BusSelect(bus2,1),
+                                     BS2.id -> BusSelect(bus1,2))
+    val (v,busReached) = dfg.backreachBus(Array(Ub.id),
+                                          inact,
+                                          busProc)
+    assert(!v.contains(dfg.g.getV(A.id)))
+    assert(v.contains(dfg.g.getV(B.id)))
+    assert(!v.contains(dfg.g.getV(C.id)))
+  }
 }

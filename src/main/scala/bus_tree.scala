@@ -43,7 +43,7 @@ extends BusElement
       )
     }
 
-  lazy val size = nDescendants +1
+  def size = nDescendants +1
   /* Indexing: bus elements are assumed to be DFS-indexed,
    * this allows use of a single id to find the element */
   def get(n:Int) : BusElement = {
@@ -192,7 +192,7 @@ extends BusElement
     @tailrec 
     def cIds(start:Int, acc:Set[Int], r:Set[Int], 
          accIncluded:Boolean, l:List[BusElement]): (Set[Int], Boolean) = 
-           if (r.isEmpty) 
+           if (r.isEmpty || r.max < start) 
              (acc, accIncluded && l.isEmpty)
            else 
              l match {
@@ -200,13 +200,13 @@ extends BusElement
                    h match {
                      case _:AtomicElement => 
                        if (r.contains(start))
-                         cIds(start+1, acc+start, r-start, accIncluded, t)
+                         cIds(start+1, acc+start, r, accIncluded, t)
                        else 
                          cIds(start+1, acc, r, false, t)
                      case b:Bus => {
                        val (s, all) = compactBus(b, start, r)
-                       val nR = r -- (start to start + b.nDescendants)
-                       cIds(start + b.size, acc ++ s, nR, accIncluded && all, t)
+                       // val nR = r -- (start to start + b.nDescendants)
+                       cIds(start + b.size, acc ++ s, r, accIncluded && all, t)
                      }
                    }
                case Nil =>
@@ -291,6 +291,24 @@ extends BusElement
     }
     assert(cs.length == children.length)
     rec(1, Set[Int](), cs, children)
+  }
+
+  def singleton(i:Int, c:Set[Int]): Set[Int] = {
+    @tailrec
+    def rec(offset:Int, number:Int, l:List[BusElement]): Set[Int] = {
+      number match {
+        case x if x==i  => c.map( x=> x+offset)
+        case n if n < i => {
+          l match {
+            case h::t =>
+              rec(offset + h.size, n+1, t)
+            case _ => throw new RuntimeException("Cannot happen")
+          }
+        }
+        case _ => throw new RuntimeException("Cannot haxpen")
+      }
+    }
+    rec(1, 1, children)
   }
 
 

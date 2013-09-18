@@ -108,18 +108,21 @@ class DataflowGraph() {
     private def visitVarWithBusProc(v:Vertex,
                                     p:Vertex):Boolean = {
       busProcs(p.id) match {
-          case BusCreate(_,_) | BusPass(_) => {
-            val current = busReached(v.id)
-            val before = busReached.getOrElse(p.id, SubBusOp.empty(current))
-            if (! SubBusOp.isSubset(current, before)) {
-	      busReached(p.id) = SubBusOp.union(current, before)
-              true
-            } else 
-              false
-          }
+        case BusCreate(_,_) | BusPass(_) => {
+          val current = busReached(v.id)
+          val before = busReached.getOrElse(p.id, SubBusOp.empty(current))
+          if (! SubBusOp.isSubset(current, before)) {
+	    busReached(p.id) = SubBusOp.union(current, before)
+            true
+          } else 
+            false
+        }
         case BusSelect(b, i) => {
+          val vReached = busReached.getOrElse(v.id, SubBus(b,Set[Int](0)))
+          val current = b.singleton(i, vReached.elements)
+          
           if (!bfs.visited.contains(p)) {
-            busReached(p.id) = SubBus(b, Set(i))
+            busReached(p.id) = SubBus(b,current)
             true
           } else
             false
