@@ -346,7 +346,7 @@ object SubBusOp extends SetOp[SubBus] {
 sealed abstract class BusAction
 // Regular object should also support pattern matching
 case class BusCreate(bus:Bus, children:List[Int]) extends BusAction
-case class BusSelect(bus:Bus, i:Int) extends BusAction
+case class BusSelect(bus:Bus, i:Int) extends BusAction // 1-based
 case class BusPass(bus:Bus) extends BusAction
 
 
