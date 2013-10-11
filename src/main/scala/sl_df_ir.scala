@@ -123,7 +123,7 @@ class DataflowGraph() {
         case BusSelect(b) => {
           val vReached = busReached.getOrElse(v.id, SubBus(b,Set[Int](0)))
 	  val i = busElementVar(v.id)
-          val current = SubBus(b, b.singleton(i, vReached.elements))
+          val current = SubBus(b, b.descendantSubset(i, vReached.elements))
 	  val cs = (1 to b.children.length).map( x => 
             if (x==i) Set(0) else Set[Int]()).toList
 	  val sel = b.collect(cs)

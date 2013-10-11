@@ -313,6 +313,12 @@ extends BusElement
     rec(1, 1, children)
   }
 
+  // For the subset of a descendant, the subset from the 
+  // root is simply calculated by adding the dfs numbers.
+  def descendantSubset(i:Int, c:Set[Int]): Set[Int] = {
+    c.map(x => x + i)
+  }
+
 
 }
 
