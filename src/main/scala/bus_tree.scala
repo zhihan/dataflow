@@ -293,6 +293,8 @@ extends BusElement
     rec(1, Set[Int](), cs, children)
   }
 
+  // Make a SubBus out of a SubBus object who correspond to the i-th child
+  // of the current bus. 
   def singleton(i:Int, c:Set[Int]): Set[Int] = {
     @tailrec
     def rec(offset:Int, number:Int, l:List[BusElement]): Set[Int] = {
@@ -346,7 +348,9 @@ object SubBusOp extends SetOp[SubBus] {
 sealed abstract class BusAction
 // Regular object should also support pattern matching
 case class BusCreate(bus:Bus, children:List[Int]) extends BusAction
-case class BusSelect(bus:Bus, i:Int) extends BusAction // 1-based
+// Bus select does not store the selected index, in Simulink
+// the selected index is associated with the port (variable).
+case class BusSelect(bus:Bus) extends BusAction 
 case class BusPass(bus:Bus) extends BusAction
 
 
