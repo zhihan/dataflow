@@ -199,6 +199,8 @@ class DataflowGraph() {
                 val current = SubBus(bc, r)
                 val before = busReached.getOrElse(p.id, SubBus(bc, Set[Int]()))
                 if (! SubBusOp.isSubset(current, before)) {
+                  // (XXX) Need to consider where there are virtual BusSelector
+                  // in the path
 	          busReached(p.id) = SubBusOp.union(current, before)
                   next += p
                 }
