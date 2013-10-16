@@ -152,7 +152,7 @@ class DataflowGraph() {
 	if (busReached.contains(proc.id)) busReached(proc.id).elements else Set(0)
       val i = bs.i
       // Compute the corresponding reached at (BusVar)
-      val current = SubBus(b, b.descendantSubset(i, vReached))
+      val current = SubBus(b, b.fromDescendant(i, vReached))
       val before = busReached.getOrElse(v.id, SubBusOp.empty(current))
       
       if (!SubBusOp.isSubset(current,before)) {
