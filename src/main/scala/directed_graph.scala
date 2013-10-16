@@ -169,6 +169,14 @@ class Graph() {
   def getV(which: Array[Int]): Array[Vertex] = {
     which.map(x => getV(x))
   }
+  
+  def getE(which: Int) = {
+    val e = E.find( x => x.id == which)
+    e match {
+      case Some(v) => v
+      case None => throw new RuntimeException("Wrong id given")
+    }
+  }
 
   def hasE(from:Int, to:Int):Boolean = {
     val vFrom = getV(from)
@@ -189,7 +197,7 @@ class Graph() {
     }
   }
 
-  def getE(from: Int, to: Int) = getEdge(from, to).id
+  def getEId(from: Int, to: Int) = getEdge(from, to).id
 }
 
 /* Inactive class implements a mechanism to filter nodes
@@ -207,6 +215,10 @@ object Graph {
     val filteredOut = out.filter(e => !inactive.e.contains(e.id))
     val filteredSucc = filteredOut.map(e => e.from)
     filteredSucc.filter(v => !inactive.v.contains(v.id))
+  }
+
+  def filteredInEdges(g:Graph, v: Vertex, inactive:Inactive) = {
+    g.inE(v).filter(e => !inactive.e.contains(e.id))
   }
 
   def filteredSuccessor(g:Graph, v:Vertex, inactive:Inactive) = {

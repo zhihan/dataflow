@@ -244,7 +244,7 @@ extends BusElement
   }
   // Set difference
   def diff(a:Set[Int], b:Set[Int]): Set[Int] = {
-    // Use leaf representation for the computation
+     // Use leaf representation for the computation
     val aLeaves = leavesIdOf(a)
     val bLeaves = leavesIdOf(b)
     aLeaves -- bLeaves
@@ -319,6 +319,11 @@ extends BusElement
     c.map(x => x + i)
   }
 
+  // Calculate the subset of descendant i
+  def toDescendant(i:Int, c:Set[Int]): Set[Int] = {
+    val x = intersect(Set(i), c)
+    x.map(e => e -i)
+  }
 
 }
 
@@ -354,9 +359,9 @@ object SubBusOp extends SetOp[SubBus] {
 sealed abstract class BusAction
 // Regular object should also support pattern matching
 case class BusCreate(bus:Bus, children:List[Int]) extends BusAction
-// Bus select does not store the selected index, in Simulink
-// the selected index is associated with the port (variable).
-case class BusSelect(bus:Bus) extends BusAction 
 case class BusPass(bus:Bus) extends BusAction
 
+// Bus selector block becomes virtual, the bus selection action is
+// then associated with an edge.
+case class BusSelect(val bus:Bus, val i:Int)
 

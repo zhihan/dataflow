@@ -121,38 +121,38 @@ class DfGraphTest extends FunSuite {
     val bc = dfg.newVarNode("bc")
     dfg.addEdge(BC,bc)
     dfg.addEdge(C,c)
-    dfg.addEdge(a,BC)
-    dfg.addEdge(b,BC)
-    dfg.addEdge(c,BC)
+    val ea = dfg.addEdge(a,BC)
+    val eb = dfg.addEdge(b,BC)
+    val ec = dfg.addEdge(c,BC)
     val P = dfg.newProcNode("P")
     val p = dfg.newVarNode("p")
     dfg.addEdge(P,p)
     dfg.addEdge(bc,P)
-    val BS1 = dfg.newProcNode("BS1")
-    val bs1 = dfg.newVarNode("bs1")
-    val bs2 = dfg.newVarNode("bs2")
-    val bs3 = dfg.newVarNode("bs3")
-    dfg.addEdge(p,BS1)
-    dfg.addEdge(BS1,bs1)
-    dfg.addEdge(BS1,bs2)
-    dfg.addEdge(BS1,bs3)
+    val BS = dfg.newProcNode("BS")
+    val bs = dfg.newVarNode("bs")
+ 
+    dfg.addEdge(p,BS)
+    dfg.addEdge(BS,bs)
+
     val Ua = dfg.newProcNode("Ua")
-    dfg.addEdge(bs1, Ua)
+    val ua = dfg.addEdge(bs, Ua)
     val Ub = dfg.newProcNode("Ub")
-    dfg.addEdge(bs2, Ub)
+    val ub = dfg.addEdge(bs, Ub)
     val Uc = dfg.newProcNode("Uc")
-    dfg.addEdge(bs3, Uc)
+    val uc = dfg.addEdge(bs, Uc)
     
     val inact = new Inactive(Array[Int](), Array[Int]())
     val at = AtomicElement("a",1)
     val bt = AtomicElement("b",1)
     val ct = AtomicElement("c",1)
     val bus = Bus("Bus", List(at,bt,ct))
-    val busVars = List(a.id, b.id, c.id)
+    val busVars = List(ea.id, eb.id, ec.id)
     val busProc = Map[Int,BusAction](BC.id -> BusCreate(bus,busVars),
 				     P.id -> BusPass(bus),
-				     BS1.id -> BusSelect(bus))
-    val busElemVar = Map[Int, Int](bs1.id -> 1, bs2.id -> 2, bs3.id -> 3)
+				     BS.id -> BusPass(bus))
+    val busElemVar = Map[Int, BusSelect](ua.id -> BusSelect(bus,1), 
+				   ub.id -> BusSelect(bus,2), 
+				   uc.id -> BusSelect(bus,3))
     val (v,busReached) = dfg.reachBus(Array(A.id,B.id),
                                       inact,
                                       busProc, busElemVar)
@@ -160,11 +160,13 @@ class DfGraphTest extends FunSuite {
     assert(v.contains(dfg.g.getV(Ub.id)))
     assert(!v.contains(dfg.g.getV(Uc.id)))
   }
+  
+   
   test("SL DF with nonvirtual buses") {
     //
     // |A| -> |       |                  | Bus   |
     //        |       |   |      |       | Select| ---> |Ua|
-    // |B| -> | Bus   |==>| Pass | ==>+  |       |
+    // |B| -> | Bus   |==>| Pass | ==>   |       |
     //        |Create |   |      |       |       | ---> |Ub|
     // |C| -> |       |                  |       | 
     //
@@ -181,38 +183,37 @@ class DfGraphTest extends FunSuite {
     val BC = dfg.newProcNode("BC")
     val bc = dfg.newVarNode("bc")
     dfg.addEdge(BC,bc)
-    dfg.addEdge(a,BC)
-    dfg.addEdge(b,BC)
-    dfg.addEdge(c,BC)
+    val ea = dfg.addEdge(a,BC)
+    val eb = dfg.addEdge(b,BC)
+    val ec = dfg.addEdge(c,BC)
     val P = dfg.newProcNode("P")
     val p = dfg.newVarNode("p")
     dfg.addEdge(P,p)
     dfg.addEdge(bc,P)
     val BS1 = dfg.newProcNode("BS1")
     val bs1 = dfg.newVarNode("bs1")
-    val bs2 = dfg.newVarNode("bs2")
     dfg.addEdge(p,BS1)
     dfg.addEdge(BS1,bs1)
-    dfg.addEdge(BS1,bs2)
     val Ua = dfg.newProcNode("Ua")
-    dfg.addEdge(bs1, Ua)
+    val ua = dfg.addEdge(bs1, Ua)
     val Ub = dfg.newProcNode("Ub")
-    dfg.addEdge(bs2, Ub)
+    val ub = dfg.addEdge(bs1, Ub)
     
     val inact = new Inactive(Array[Int](), Array[Int]())
     val at = AtomicElement("a",1)
     val bt = AtomicElement("b",1)
     val ct = AtomicElement("c",1)
     val bus = Bus("Bus", List(at,bt,ct))
-    val busVars = List(a.id, b.id, c.id)
+    val busVars = List(ea.id, eb.id, ec.id)
     val busProc = Map[Int,BusAction](BC.id -> BusCreate(bus,busVars),
                       P.id -> BusPass(bus),
-                      BS1.id -> BusSelect(bus))
-    val busElemVars = Map[Int, Int](bs1.id -> 1, bs2.id -> 2)
+                      BS1.id -> BusPass(bus))
+    val busElemEdge = Map[Int, BusSelect](ua.id -> BusSelect(bus,1), 
+					  ub.id -> BusSelect(bus,2))
     val (v,busReached) = dfg.backreachBus(Array(Ua.id,Ub.id),
                                           inact,
                                           busProc,
-					  busElemVars)
+					  busElemEdge)
     assert(v.contains(dfg.g.getV(A.id)))
     assert(v.contains(dfg.g.getV(B.id)))
     assert(!v.contains(dfg.g.getV(C.id)))
@@ -223,7 +224,7 @@ class DfGraphTest extends FunSuite {
     //
     // |A| -> |       |              
     //        | BC1   |   |      |   
-    // |B| ->          ==>| Pass | ==>+=>| BS1 |-->|BS2|---> |Ub|
+    // |B| ->          ==>| Pass | ==>+=>| BS1 | ---> |Ub|
     //        |   BC2 |   |      |    
     // |C| -> |       |                 
     //
@@ -237,8 +238,8 @@ class DfGraphTest extends FunSuite {
     val BC1 = dfg.newProcNode("BC1")
     val bc1 = dfg.newVarNode("bc1")
     dfg.addEdge(BC1,bc1)
-    dfg.addEdge(a,BC1)
-    dfg.addEdge(b,BC1)
+    val ea = dfg.addEdge(a,BC1)
+    val eb = dfg.addEdge(b,BC1)
     
     val C = dfg.newProcNode("C")
     val c = dfg.newVarNode("c")
@@ -247,8 +248,8 @@ class DfGraphTest extends FunSuite {
     val BC2 = dfg.newProcNode("BC2")
     val bc2 = dfg.newVarNode("bc2")
     dfg.addEdge(BC2,bc2)
-    dfg.addEdge(bc1,BC2)    
-    dfg.addEdge(c,BC2)
+    val eab = dfg.addEdge(bc1,BC2)    
+    val ec = dfg.addEdge(c,BC2)
 
     val P = dfg.newProcNode("P")
     val p = dfg.newVarNode("p")
@@ -258,12 +259,8 @@ class DfGraphTest extends FunSuite {
     val bs1 = dfg.newVarNode("bs1")
     dfg.addEdge(p,BS1)
     dfg.addEdge(BS1,bs1)
-    val BS2 = dfg.newProcNode("BS2")
-    val bs2 = dfg.newVarNode("bs2")
-    dfg.addEdge(bs1,BS2)
-    dfg.addEdge(BS2,bs2)
     val Ub = dfg.newProcNode("Ub")
-    dfg.addEdge(bs2, Ub)
+    val e1 = dfg.addEdge(bs1, Ub)
     
     val inact = new Inactive(Array[Int](), Array[Int]())
     val at = AtomicElement("a",1)
@@ -273,21 +270,21 @@ class DfGraphTest extends FunSuite {
     val ct = AtomicElement("c",1)
     val bus2 = Bus("Bus2", List(bus1, ct))
 
-    val bus1Vars = List(a.id, b.id)
-    val bus2Vars = List(bc1.id, c.id)
+    val bus1Vars = List(ea.id, eb.id)
+    val bus2Vars = List(eab.id, ec.id)
 
     val busProc = Map[Int,BusAction](BC1.id -> BusCreate(bus1,bus1Vars),
                                      BC2.id -> BusCreate(bus2,bus2Vars),
                                      P.id -> BusPass(bus2),
-                                     BS1.id -> BusSelect(bus2),
-                                     BS2.id -> BusSelect(bus1))
-    val busVar = Map[Int, Int](bs1.id -> 1, bs2.id -> 2)
+                                     BS1.id -> BusPass(bus2))
+    val busE = Map[Int, BusSelect](e1.id -> BusSelect(bus2, 3))
     val (v,busReached) = dfg.backreachBus(Array(Ub.id),
                                           inact,
                                           busProc,
-					  busVar)
+					  busE)
     assert(!v.contains(dfg.g.getV(A.id)))
     assert(v.contains(dfg.g.getV(B.id)))
     assert(!v.contains(dfg.g.getV(C.id)))
   }
+
 }

@@ -175,6 +175,19 @@ class BusTest extends FunSuite {
       case _ => assert(true)
     }
   }
+
+  test("Push bus to children") {
+    val busb = testBus
+    val c = Set(1)
+    val ca = busb.toDescendant(2,c)
+    assert(ca == Set(0))
+    val cb = busb.toDescendant(3,c)
+    assert(cb == Set(0))
+    val cc = busb.toDescendant(4,c)
+    assert(cc == Set())
+   
+    
+  }
   
   test("Collect subset from children") {
     // Bus structure 
