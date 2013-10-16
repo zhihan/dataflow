@@ -287,4 +287,59 @@ class DfGraphTest extends FunSuite {
     assert(!v.contains(dfg.g.getV(C.id)))
   }
 
+  test("SL DF with exchange nv bus") {
+    //
+    // |A| -> |       |              
+    //        | BC1   |                   |    |
+    // |B| -> |       |  -----b-------->  |BC2 | --b->|Ub|
+    //                             |C| -> |    | 
+    val dfg = new DataflowGraph()
+    val A = dfg.newProcNode("A")
+    val a = dfg.newVarNode("a")
+    dfg.addEdge(A,a)
+    val B = dfg.newProcNode("B")
+    val b = dfg.newVarNode("b")
+    dfg.addEdge(B,b)
+    val BC1 = dfg.newProcNode("BC1")
+    val bc1 = dfg.newVarNode("bc1")
+    dfg.addEdge(BC1,bc1)
+    val ea = dfg.addEdge(a,BC1)
+    val eb = dfg.addEdge(b,BC1)
+ 
+    val C = dfg.newProcNode("C")
+    val c = dfg.newVarNode("c")
+    dfg.addEdge(C,c)
+
+    val BC2 = dfg.newProcNode("BC2")
+    val bc2 = dfg.newVarNode("bc2")
+    val sb1 = dfg.addEdge(bc1,BC2)
+    dfg.addEdge(BC2, bc2)
+    val ec = dfg.addEdge(c, BC2)
+
+    val Ub = dfg.newProcNode("Ub")
+    val e1 = dfg.addEdge(bc2, Ub)
+
+    val inact = new Inactive(Array[Int](), Array[Int]())
+    val at = AtomicElement("a",1)
+    val bt = AtomicElement("b",1)
+    val bus1 = Bus("Bus1", List(at,bt))
+
+    val ct = AtomicElement("c",1)
+    val bus2 = Bus("Bus2", List(bt, ct))
+
+    val bus1Vars = List(ea.id, eb.id)
+    val bus2Vars = List(sb1.id, ec.id)
+
+    val busProc = Map[Int,BusAction](BC1.id -> BusCreate(bus1,bus1Vars),
+                                     BC2.id -> BusCreate(bus2,bus2Vars))
+    val busE = Map[Int, BusSelect](sb1.id -> BusSelect(bus1, 2),
+                                   e1.id -> BusSelect(bus2, 1))
+    val (v,busReached) = dfg.backreachBus(Array(Ub.id),
+                                          inact,
+                                          busProc,
+					  busE)
+    assert(!v.contains(dfg.g.getV(A.id)))
+    assert(v.contains(dfg.g.getV(B.id)))
+    assert(!v.contains(dfg.g.getV(C.id)))
+  }
 }

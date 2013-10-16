@@ -125,18 +125,23 @@ class DataflowGraph() {
 
     // Visit a Var node with a bus-capable writer
     private def visitVarWithBusWriter(v:Vertex,
-                                    p:Vertex):Boolean = {
+                                      p:Vertex):Boolean = {
       busProcs(p.id) match {
         case BusCreate(_,_) | BusPass(_) => {
-          val current = busReached(v.id)
-          val before = busReached.getOrElse(p.id, SubBusOp.empty(current))
-          if (! SubBusOp.isSubset(current, before)) {
-	    busReached(p.id) = SubBusOp.union(current, before)
+          if (busReached.contains(v.id)) {
+
+            val current = busReached(v.id)
+            val before = busReached.getOrElse(p.id, SubBusOp.empty(current))
+            if (! SubBusOp.isSubset(current, before)) {
+	      busReached(p.id) = SubBusOp.union(current, before)
+              true
+            } else 
+              false
+          } else {
+            throw new RuntimeException("Error here" + p.sid + "=>" + v.sid)
             true
-          } else 
-            false
-        }
- 
+          }
+        } 
       }
     }
 
@@ -179,30 +184,61 @@ class DataflowGraph() {
 	      busReached(p.id) = SubBusOp.union(current, before)
               next += p
             }
-          }
+            
+          } 
           next
         }
         case BusCreate(b,srcEdges) => {
+          // For virtual bus selector, get the sub-bus at the source
+          def getSrcBusSel(srcEId:Int, dstSet:Set[Int]) = {
+            val busSelection = busElementEdge(srcEId)
+            val srcBus = busSelection.bus
+            val i = busSelection.i
+            (srcBus, SubBus(srcBus, srcBus.fromDescendant(i, dstSet)))
+          }
+
           val next = ArrayBuffer[Vertex]()
           val reached = busReached(v.id).distribute
 	  var src = srcEdges // Index into array
           for ((c,r) <- reached) {
             val srcEId = src.head
+            // (p)--->[v]
             val p = graph.getE(srcEId).from
             c match {
               case _:AtomicElement => 
                 if (!r.isEmpty) {
+                  if (busElementEdge.contains(srcEId)) {
+                    // (p)==Bus Select==>[v]
+                    // First get the sub-bus of the signal at target inport
+                    val (srcBus, current) = getSrcBusSel(srcEId, Set(0))
+                    val before = busReached.getOrElse(p.id, SubBus(srcBus, Set[Int]()))
+                    if (!SubBusOp.isSubset(current, before)) {
+                      busReached(p.id) = SubBusOp.union(current, before)
+                      next += p
+                    } 
+                  } else {
                     // bus element is reached
-                  if (!bfs.visited.contains(p)) next += p
+                    if (!bfs.visited.contains(p)) next += p
+                  }
                 }
               case bc:Bus => {
-                val current = SubBus(bc, r)
-                val before = busReached.getOrElse(p.id, SubBus(bc, Set[Int]()))
-                if (! SubBusOp.isSubset(current, before)) {
-                  // (XXX) Need to consider where there are virtual BusSelector
-                  // in the path
-	          busReached(p.id) = SubBusOp.union(current, before)
-                  next += p
+                if (busElementEdge.contains(srcEId)) {
+                  // (p)==Bus Select==>[v]
+                  // First get the sub-bus of the signal at target inport
+                  val (srcBus,current) = getSrcBusSel(srcEId, r)
+                  val before = busReached.getOrElse(p.id, SubBus(srcBus, Set[Int]()))
+                  if (!SubBusOp.isSubset(current, before)) {
+                    busReached(p.id) = SubBusOp.union(current, before)
+                    next += p
+                  } 
+                } else {
+                  // (p)==bus==>[v]
+                  val current = SubBus(bc, r)
+                  val before = busReached.getOrElse(p.id, SubBus(bc, Set[Int]()))
+                  if (! SubBusOp.isSubset(current, before)) {
+	            busReached(p.id) = SubBusOp.union(current, before)
+                    next += p
+                  }
                 }
               }
             }
