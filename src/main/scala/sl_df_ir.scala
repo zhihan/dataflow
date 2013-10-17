@@ -149,22 +149,35 @@ class DataflowGraph() {
     //   (BusVar) --> [proc] 
     private def visitBusReader(proc:Vertex,
 			       v:Vertex): Boolean = {
+      def result(current:SubBus) = {
+        val before = busReached.getOrElse(v.id, SubBusOp.empty(current))
+        if (!SubBusOp.isSubset(current,before)) {
+          busReached(v.id) = SubBusOp.union(current, before)
+          true
+        } else
+          false
+      }
+
       val e = graph.getEdge(v.id, proc.id)
-      val bs = busElementEdge(e.id)
-      val b = bs.bus
-      // Reached elements at [proc]
-      val vReached = 
-	if (busReached.contains(proc.id)) busReached(proc.id).elements else Set(0)
-      val i = bs.i
-      // Compute the corresponding reached at (BusVar)
-      val current = SubBus(b, b.fromDescendant(i, vReached))
-      val before = busReached.getOrElse(v.id, SubBusOp.empty(current))
-      
-      if (!SubBusOp.isSubset(current,before)) {
-        busReached(v.id) = SubBusOp.union(current, before)
-        true
-      } else
-        false
+      if (busElementEdge.contains(e.id)) {
+        // There is a selection between busVar and proc
+        val bs = busElementEdge(e.id)
+        val b = bs.bus
+        // Reached elements at [proc]
+        val vReached = 
+	  if (busReached.contains(proc.id)) busReached(proc.id).elements else Set(0)
+        val i = bs.i
+        // Compute the corresponding reached at (BusVar)
+        val current = SubBus(b, b.fromDescendant(i, vReached))
+        
+        result(current)
+      } else {
+        // There is no selection between busVar and proc
+        assert(busReached.contains(proc.id))
+        val current = busReached(proc.id)
+        result(current)
+      }
+
     }
 
     // Visit a bus-capable proc
