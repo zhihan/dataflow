@@ -146,19 +146,21 @@ class DataflowGraph() {
       }
     }
 
+    // Update the reach set and return the comparison result 
+    def updateResult(v:Vertex, current:SubBus) = {
+      val before = busReached.getOrElse(v.id, SubBusOp.empty(current))
+      if (!SubBusOp.isSubset(current,before)) {
+        busReached(v.id) = SubBusOp.union(current, before)
+        true
+      } else
+        false
+    }
+
     // Visiting a regular proc which reads a sub-bus from a var.
     //   (BusVar) --> [proc]
     // The block is not a bus creator or bus pass.
     private def visitBusReader(proc:Vertex,
 			       v:Vertex): Boolean = {
-      def result(current:SubBus) = {
-        val before = busReached.getOrElse(v.id, SubBusOp.empty(current))
-        if (!SubBusOp.isSubset(current,before)) {
-          busReached(v.id) = SubBusOp.union(current, before)
-          true
-        } else
-          false
-      }
 
       val e = graph.getEdge(v.id, proc.id)
       if (busElementEdge.contains(e.id)) {
@@ -172,7 +174,7 @@ class DataflowGraph() {
         // Compute the corresponding reached at (BusVar)
         val current = SubBus(b, b.fromDescendant(i, vReached))
         
-        result(current)
+        updateResult(v, current)
       } else {
         // There is no selection between busVar and proc
 	throw new RuntimeException("A non-bus proc reading bus signal")
@@ -180,7 +182,7 @@ class DataflowGraph() {
 	// regular bus pass.
         assert(busReached.contains(proc.id))
         val current = busReached(proc.id)
-        result(current)
+        updateResult(v, current)
       }
 
     }
@@ -191,29 +193,31 @@ class DataflowGraph() {
     //  (b) ---> |      |
     private def visitBusProc(v:Vertex,
                              pred:ArrayBuffer[Vertex]): ArrayBuffer[Vertex] = {
+      // For virtual bus selector, get the sub-bus at the source
+      def getSrcBusSel(srcEId:Int, dstSet:Set[Int]) = {
+        val busSelection = busElementEdge(srcEId)
+        val srcBus = busSelection.bus
+        val i = busSelection.i
+        (srcBus, SubBus(srcBus, srcBus.fromDescendant(i, dstSet)))
+      }
       
       busProcs(v.id) match {
         case BusPass(b) => { 
 	  val next = ArrayBuffer[Vertex]()
+	  assert(pred.size == 1)
           for (p <- pred) {
-            val current = busReached(v.id)
-            val before = busReached.getOrElse(p.id, SubBus(b, Set[Int]()))
-            if (! SubBusOp.isSubset(current, before)) {
-	      busReached(p.id) = SubBusOp.union(current, before)
-              next += p
+	    val srcE = graph.getEdge(p.id, v.id) 
+	    if (busElementEdge.contains(srcE.id)) {
+	      val (_, current) = getSrcBusSel(srcE.id, Set(0))
+	      if (updateResult(p, current)) next += p
+            } else {
+              val current = busReached(v.id)
+	      if (updateResult(p, current)) next += p
             }
-            
-          } 
+	  }
           next
         }
         case BusCreate(b,srcEdges) => {
-          // For virtual bus selector, get the sub-bus at the source
-          def getSrcBusSel(srcEId:Int, dstSet:Set[Int]) = {
-            val busSelection = busElementEdge(srcEId)
-            val srcBus = busSelection.bus
-            val i = busSelection.i
-            (srcBus, SubBus(srcBus, srcBus.fromDescendant(i, dstSet)))
-          }
 
           val next = ArrayBuffer[Vertex]()
           val reached = busReached(v.id).distribute
