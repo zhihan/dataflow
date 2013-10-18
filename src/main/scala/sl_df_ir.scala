@@ -124,12 +124,13 @@ class DataflowGraph() {
     }
 
     // Visit a Var node with a bus-capable writer
-    private def visitVarWithBusWriter(v:Vertex,
-                                      p:Vertex):Boolean = {
+    // The bus capable writer is either a pass or 
+    // a creator of bus.
+    private def visitVarBus(v:Vertex,
+                            p:Vertex):Boolean = {
       busProcs(p.id) match {
         case BusCreate(_,_) | BusPass(_) => {
           if (busReached.contains(v.id)) {
-
             val current = busReached(v.id)
             val before = busReached.getOrElse(p.id, SubBusOp.empty(current))
             if (! SubBusOp.isSubset(current, before)) {
@@ -145,8 +146,9 @@ class DataflowGraph() {
       }
     }
 
-    // Visiting a proc which reads a sub-bus from a var.
-    //   (BusVar) --> [proc] 
+    // Visiting a regular proc which reads a sub-bus from a var.
+    //   (BusVar) --> [proc]
+    // The block is not a bus creator or bus pass.
     private def visitBusReader(proc:Vertex,
 			       v:Vertex): Boolean = {
       def result(current:SubBus) = {
@@ -173,6 +175,9 @@ class DataflowGraph() {
         result(current)
       } else {
         // There is no selection between busVar and proc
+	throw new RuntimeException("A non-bus proc reading bus signal")
+	// If the above exception is removed we treat the block as
+	// regular bus pass.
         assert(busReached.contains(proc.id))
         val current = busReached(proc.id)
         result(current)
@@ -219,8 +224,10 @@ class DataflowGraph() {
             val p = graph.getE(srcEId).from
             c match {
               case _:AtomicElement => 
+		// Create bus from atomic element
                 if (!r.isEmpty) {
                   if (busElementEdge.contains(srcEId)) {
+		    // Case 1: the atomic element is a selected signal
                     // (p)==Bus Select==>[v]
                     // First get the sub-bus of the signal at target inport
                     val (srcBus, current) = getSrcBusSel(srcEId, Set(0))
@@ -230,7 +237,7 @@ class DataflowGraph() {
                       next += p
                     } 
                   } else {
-                    // bus element is reached
+                    // Case 2: regular atomic element
                     if (!bfs.visited.contains(p)) next += p
                   }
                 }
@@ -273,7 +280,7 @@ class DataflowGraph() {
           val next = ArrayBuffer[Vertex]()
           for (p <- pred) {
             if (busProcs.contains(p.id)) {
-              if (visitVarWithBusWriter(v, p)) next += p
+              if (visitVarBus(v, p)) next += p
             } else {
               // Non-bus proc
               if (!bfs.visited.contains(p)) next += p
