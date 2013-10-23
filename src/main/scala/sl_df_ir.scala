@@ -22,6 +22,26 @@ case class Proc(override val id:Int) extends DataflowNode
 {
 }
 
+
+object DataflowUtil {
+  def isVarBus(graph:Graph, 
+	       v:Vertex, 
+	       busProcs: Map[Int, BusAction]):Boolean = {
+    val inEdges = graph.inE(v)
+    if (inEdges.size == 1) {
+      val writerP = inEdges(0).from
+      if (busProcs.contains(writerP.id)) true
+      else false
+    } else { 
+      // shared data cannot be bus (XXX)
+      val writerP = inEdges(0).from
+      if (busProcs.contains(writerP.id)) true
+      else false
+    }
+  }
+}
+
+
 /**
  * A Simulink dataflow graph consists of a set of dataflow nodes
  * and dataflow edges. Multiple edges can exists between two distinct nodes.
@@ -100,9 +120,11 @@ class DataflowGraph() {
     busActions(p.id) = a
   }
 
+ 
   class BusReachBack(graph:Graph, 
 		     busProcs: Map[Int,BusAction],  
-		     busElementEdge: Map[Int, BusSelect],
+		     busElementEdge: Map[Int, VBusSelect],
+		     busElementVar: Map[Int, Int],
 		     inactive: Inactive) {
 
     val busReached = Map[Int, SubBus]()
@@ -110,40 +132,7 @@ class DataflowGraph() {
     // Test if a variable vertex is bus by testing its one and 
     // only writer.
     private def isVarBus(v:Vertex) = {
-      val inE = graph.inE(v)
-      if (inE.size == 1) {
-	val writerP = inE(0).from
-	if (busProcs.contains(writerP.id)) true
-	else false
-      } else { 
-	// shared data cannot be bus (XXX)
-	val writerP = inE(0).from
-	if (busProcs.contains(writerP.id)) true
-	else false
-      }
-    }
-
-    // Visit a Var node with a bus-capable writer
-    // The bus capable writer is either a pass or 
-    // a creator of bus.
-    private def visitVarBus(v:Vertex,
-                            p:Vertex):Boolean = {
-      busProcs(p.id) match {
-        case BusCreate(_,_) | BusPass(_) => {
-          if (busReached.contains(v.id)) {
-            val current = busReached(v.id)
-            val before = busReached.getOrElse(p.id, SubBusOp.empty(current))
-            if (! SubBusOp.isSubset(current, before)) {
-	      busReached(p.id) = SubBusOp.union(current, before)
-              true
-            } else 
-              false
-          } else {
-            throw new RuntimeException("Error here" + p.sid + "=>" + v.sid)
-            true
-          }
-        } 
-      }
+      DataflowUtil.isVarBus(graph, v, busProcs)
     }
 
     // Update the reach set and return the comparison result 
@@ -154,6 +143,33 @@ class DataflowGraph() {
         true
       } else
         false
+    }
+
+    // Visit a Var node with a bus-capable writer
+    // The bus capable writer is either a pass or 
+    // a creator of bus; in some cases, the bus capable
+    // writer might be a BusSelector too.
+    private def visitVarBus(v:Vertex,
+                            p:Vertex):Boolean = {
+      busProcs(p.id) match {
+        case BusCreate(_,_) | BusPass(_) => {
+          if (busReached.contains(v.id)) {
+            val current = busReached(v.id)
+	    updateResult(p, current)
+          } else {
+            throw new RuntimeException("Error here" + p.sid + "=>" + v.sid)
+            true
+          }
+        }
+
+	case BusSelect(b) => {
+	  // Bus selector is selecting a sub-bus from a bus signal
+          val vReached = busReached.getOrElse(v.id, SubBus(b,Set[Int](0)))
+	  val i = busElementVar(v.id)
+          val pReached = SubBus(b, b.fromDescendant(i, vReached.elements))
+	  updateResult(p, pReached) 
+	}
+      }
     }
 
     // Visiting a regular proc which reads a sub-bus from a var.
@@ -201,24 +217,29 @@ class DataflowGraph() {
         (srcBus, SubBus(srcBus, srcBus.fromDescendant(i, dstSet)))
       }
       
+      // For bus pass or bus select, pass the reached part to
+      // the variable at input. Handle the case where the incoming
+      // edge is virtual bus selector.
+      def predBusPass(b:Bus) = {
+	val next = ArrayBuffer[Vertex]()
+	assert(pred.size == 1)
+        for (p <- pred) {
+	  val srcE = graph.getEdge(p.id, v.id) 
+	  if (busElementEdge.contains(srcE.id)) {
+	    val (_, current) = getSrcBusSel(srcE.id, Set(0))
+	    if (updateResult(p, current)) next += p
+          } else {
+            val current = busReached(v.id)
+	    if (updateResult(p, current)) next += p
+          }
+	}
+        next
+      }
+      
       busProcs(v.id) match {
-        case BusPass(b) => { 
-	  val next = ArrayBuffer[Vertex]()
-	  assert(pred.size == 1)
-          for (p <- pred) {
-	    val srcE = graph.getEdge(p.id, v.id) 
-	    if (busElementEdge.contains(srcE.id)) {
-	      val (_, current) = getSrcBusSel(srcE.id, Set(0))
-	      if (updateResult(p, current)) next += p
-            } else {
-              val current = busReached(v.id)
-	      if (updateResult(p, current)) next += p
-            }
-	  }
-          next
-        }
+        case BusPass(b) => predBusPass(b)
+	case BusSelect(b) => predBusPass(b)
         case BusCreate(b,srcEdges) => {
-
           val next = ArrayBuffer[Vertex]()
           val reached = busReached(v.id).distribute
 	  var src = srcEdges // Index into array
@@ -270,6 +291,8 @@ class DataflowGraph() {
           }
           next
         }
+
+
       }  
     }
 
@@ -323,33 +346,54 @@ class DataflowGraph() {
 
   def backreachBus(src:Array[Int], inactive:Inactive, 
                    busProcs:Map[Int,BusAction],
-		   busElemEdge: Map[Int, BusSelect]) = {
-    val reach = new BusReachBack(g, busProcs, busElemEdge, inactive)
+		   busElemEdge: Map[Int, VBusSelect],
+		   busElemVars: Map[Int, Int]) = {
+    val reach = new BusReachBack(g, busProcs, busElemEdge, 
+				 busElemVars, inactive)
     reach.run(src)
   }
 
-  // Forward reach
+  // Forward reach with support for nonvirtual buses
   class BusReachFor(graph:Graph, 
 		    busProcs:Map[Int,BusAction], 
-		    busElemEdge: Map[Int, BusSelect],
+		    busElemEdge: Map[Int, VBusSelect],
+		    busElemVar: Map[Int, Int],
 		    inactive:Inactive) {
 
+    private def isVarBus(v:Vertex) = DataflowUtil.isVarBus(graph, v, busProcs)
+
+    private def isEdgeSelection(v:Vertex, reader:Vertex) = {
+      val e = graph.getEdge(v.id, reader.id)
+      busElemEdge.contains(e.id)
+    }
+
+     // Update the reach set and return the comparison result 
+    def updateResult(v:Vertex, current:SubBus) = {
+      val before = busReached.getOrElse(v.id, SubBusOp.empty(current))
+      if (!SubBusOp.isSubset(current,before)) {
+        busReached(v.id) = SubBusOp.union(current, before)
+        true
+      } else
+        false
+    }
+   
+
     val busReached = Map[Int, SubBus]()
+
 
     // Visit a Var node with a bus-capable reader
     private def visitVarWithBusReader(v:Vertex,
                                       p:Vertex,
 				      reached: Set[Int]):Boolean = {
+      // Reached set is already computed to take into consideration
+      // of the possible edge selections. 
+      def busPassSet(b:Bus, r:Set[Int]) = {
+	updateResult(p, SubBus(b, r))
+      }
+ 
       busProcs(p.id) match {
-          case BusPass(_) => {
-            val current = busReached(v.id)
-            val before = busReached.getOrElse(p.id, SubBusOp.empty(current))
-            if (! SubBusOp.isSubset(current, before)) {
-	      busReached(p.id) = SubBusOp.union(current, before)
-              true
-            } else 
-              false
-          }
+        case BusPass(b) => busPassSet(b, reached) 
+	case BusSelect(b) => busPassSet(b, reached)
         case BusCreate(b, srcEdges) => {
 	  val e = graph.getEdge(v.id, p.id)
           val cs = srcEdges.map(i => if (e.id == i) Set[Int](0) else Set[Int]())
@@ -364,13 +408,13 @@ class DataflowGraph() {
       }
     }
     
-    // Utility function, visit a variable that is the output of a selector
-    // returns
+    // Utility function, visit a variable that is feeding a block via
+    // virtual bus selector.
     //
     //  (bus) -- ... (virtual selector) ... --> [reader]
     // 
-    private def visitBusVarReader(v: Vertex, 
-				  reader: Vertex) : Option[(Vertex,Set[Int])] = {
+    private def visitBusVarWithEdgeSelect(v: Vertex, 
+					  reader: Vertex) : Option[(Vertex,Set[Int])] = {
       val reached = busReached(v.id) // reached subbus
       val b = reached.bus
       val e = graph.getEdge(v.id, reader.id)
@@ -398,12 +442,56 @@ class DataflowGraph() {
       } else None
     }
 
+    // Utility function, visit a variable that is the output of a selector
+    // and returns whether need to visit v and 
+    // the new reach set if it needs update.
+    private def varSelection(b:Bus, proc: Vertex, v: Vertex) : 
+    (Boolean, Option[SubBus]) = {
+      val i = busElemVar(v.id)
+      val select = b.fromDescendant(i, Set(0))
+      val reached = busReached(proc.id)
+      val inter = b.intersect(select, reached.elements)
+      
+      if (!inter.isEmpty){ 
+        b.get(i) match {
+	  case sb:Bus => {
+            val current = SubBus(sb, b.toDescendant(i, inter))
+            val before = busReached.getOrElse(v.id, SubBus(sb, Set[Int]()))
+            if (!SubBusOp.isSubset(current, before)) {
+              (true, Some(current))
+            } else 
+              (false, None)
+	  }
+	  case _:AtomicElement => {
+            if (!bfs.visited.contains(v)) (true, None) 
+            else (false, None)
+	  }   
+        }
+      } else  // Intersection of selection and reached is empty
+	(false, None)
+    }
+
     // Visit a bus-capable proc
     // [v] => (vars)
     private def visitBusProc(v:Vertex,
                              vars:ArrayBuffer[Vertex]): ArrayBuffer[Vertex] = {
       
       busProcs(v.id) match {
+	case BusSelect(b) => {
+	  val next = ArrayBuffer[Vertex]()
+	  for ( p <- vars ) {
+            // Depends on whether the i-th element is bus
+	    val (isNew, optV) = varSelection(b, v, p) 
+	    if (isNew) {
+	      optV match {
+		case Some(reached) => busReached(p.id) = reached
+		case None => {}
+		}
+	      next += p
+	    }
+	  }
+	  next
+	}
         case BusPass(b) => {
           val next = ArrayBuffer[Vertex]()
           for (p <- vars) {
@@ -431,26 +519,6 @@ class DataflowGraph() {
       }  
     }
 
-    // Test if a variable vertex is bus by testing its one and 
-    // only writer.
-    private def isVarBus(v:Vertex) = {
-      val inE = graph.inE(v)
-      if (inE.size == 1) {
-	val writerP = inE(0).from
-	if (busProcs.contains(writerP.id)) true
-	else false
-      } else { 
-	// shared data cannot be bus (XXX)
-	val writerP = inE(0).from
-	if (busProcs.contains(writerP.id)) true
-	else false
-      }
-    }
-
-    private def isVarSelection(v:Vertex, reader:Vertex) = {
-      val e = graph.getEdge(v.id, reader.id)
-      busElemEdge.contains(e.id)
-    }
 
     // Reachability in terms of buses
     private def visitForward(v:Vertex):ArrayBuffer[Vertex] = {
@@ -461,18 +529,22 @@ class DataflowGraph() {
         case Var(_) => {
           val next = ArrayBuffer[Vertex]()
           for (p <- pred) {
-	    val opt = if (isVarSelection(v, p)) visitBusVarReader(v,p)
-		      else {
-			if (busReached.contains(v.id)) {
-			  // v is bus and it does not pass through a selection
-			  val reached = busReached(v.id)
-			  Some(p, reached.elements)
-			} else {
-			  // v is not a bus signal
-			  Some(p, Set(0))
-			}
-		      }
-
+	    // Compute the reach set at incoming of the proc.
+	    // Note that if the proc is bus creator it might need
+	    // to be 'lifted' to the created bus.
+	    val opt = if (isEdgeSelection(v, p)) { 
+	      visitBusVarWithEdgeSelect(v,p)
+	    } else {
+	      if (busReached.contains(v.id)) {
+		// v is bus and it does not pass through a selection
+		val reached = busReached(v.id)
+		Some(p, reached.elements)
+	      } else {
+		// v is not a bus signal
+		Some(p, Set(0))
+	      }
+	    }
+	    
 	    opt match {
 	      case Some((_, el)) =>
 		if (busProcs.contains(p.id)) {
@@ -512,9 +584,11 @@ class DataflowGraph() {
 
   def reachBus(src:Array[Int], inactive:Inactive, 
                busProcs:Map[Int,BusAction], 
-	       busElemEdge:Map[Int, BusSelect]) = {
+	       busElemEdge:Map[Int, VBusSelect],
+	       busElemVar:Map[Int, Int]) = {
     val reach = new BusReachFor(g, busProcs,  
-				busElemEdge, inactive)
+				busElemEdge, busElemVar, 
+				inactive)
     reach.run(src)
   }
 

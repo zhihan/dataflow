@@ -101,11 +101,11 @@ class DfGraphTest extends FunSuite {
 
   test("SL DF with nonvirtual buses for") {
     //
-    // |A| -> |       |                  | Bus   |
-    //        |       |   |      |       | Select| ---> |Ua|
-    // |B| -> | Bus   |==>| Pass | =====>|       |
-    //        |Create |   |      |       |       | ---> |Ub|
-    // |C| -> |       |                  |       |  
+    // |A| -> |       |                  | P2    | ---> |Ua|
+    //        |       |   |      |       |       | 
+    // |B| -> | Bus   |==>| Pass | =====>|       | ---> |Ub|
+    //        |Create |   |      |       |       | 
+    // |C| -> |       |                  |       | ---> |Uc| 
     //
     val dfg = new DataflowGraph()
     val A = dfg.newProcNode("A")
@@ -128,18 +128,18 @@ class DfGraphTest extends FunSuite {
     val p = dfg.newVarNode("p")
     dfg.addEdge(P,p)
     dfg.addEdge(bc,P)
-    val BS = dfg.newProcNode("BS")
-    val bs = dfg.newVarNode("bs")
+    val P2 = dfg.newProcNode("P2")
+    val p2 = dfg.newVarNode("p2")
  
-    dfg.addEdge(p,BS)
-    dfg.addEdge(BS,bs)
+    dfg.addEdge(p,P2)
+    dfg.addEdge(P2,p2)
 
     val Ua = dfg.newProcNode("Ua")
-    val ua = dfg.addEdge(bs, Ua)
+    val ua = dfg.addEdge(p2, Ua)
     val Ub = dfg.newProcNode("Ub")
-    val ub = dfg.addEdge(bs, Ub)
+    val ub = dfg.addEdge(p2, Ub)
     val Uc = dfg.newProcNode("Uc")
-    val uc = dfg.addEdge(bs, Uc)
+    val uc = dfg.addEdge(p2, Uc)
     
     val inact = new Inactive(Array[Int](), Array[Int]())
     val at = AtomicElement("a",1)
@@ -149,13 +149,22 @@ class DfGraphTest extends FunSuite {
     val busVars = List(ea.id, eb.id, ec.id)
     val busProc = Map[Int,BusAction](BC.id -> BusCreate(bus,busVars),
 				     P.id -> BusPass(bus),
-				     BS.id -> BusPass(bus))
-    val busElemVar = Map[Int, BusSelect](ua.id -> BusSelect(bus,1), 
-				   ub.id -> BusSelect(bus,2), 
-				   uc.id -> BusSelect(bus,3))
+				     P2.id -> BusPass(bus))
+    val busElemVar = Map(ua.id -> VBusSelect(bus,1), 
+			 ub.id -> VBusSelect(bus,2), 
+			 uc.id -> VBusSelect(bus,3))
+    val busV = Map[Int, Int]()
     val (v,busReached) = dfg.reachBus(Array(A.id,B.id),
                                       inact,
-                                      busProc, busElemVar)
+                                      busProc, busElemVar, busV)
+    /* for (x <- v) {
+      print(" " + x.sid)
+      if (busReached.contains(x.id)) {
+	print("{") 
+	val elems = busReached(x.id)
+	print(elems + "}")
+      }
+    } */
     assert(v.contains(dfg.g.getV(Ua.id)))
     assert(v.contains(dfg.g.getV(Ub.id)))
     assert(!v.contains(dfg.g.getV(Uc.id)))
@@ -208,12 +217,14 @@ class DfGraphTest extends FunSuite {
     val busProc = Map[Int,BusAction](BC.id -> BusCreate(bus,busVars),
                       P.id -> BusPass(bus),
                       BS1.id -> BusPass(bus))
-    val busElemEdge = Map[Int, BusSelect](ua.id -> BusSelect(bus,1), 
-					  ub.id -> BusSelect(bus,2))
+    val busElemEdge = Map(ua.id -> VBusSelect(bus,1), 
+			  ub.id -> VBusSelect(bus,2))
+    val busV = Map[Int, Int]()
+
     val (v,busReached) = dfg.backreachBus(Array(Ua.id,Ub.id),
                                           inact,
                                           busProc,
-					  busElemEdge)
+					  busElemEdge, busV)
     assert(v.contains(dfg.g.getV(A.id)))
     assert(v.contains(dfg.g.getV(B.id)))
     assert(!v.contains(dfg.g.getV(C.id)))
@@ -277,11 +288,13 @@ class DfGraphTest extends FunSuite {
                                      BC2.id -> BusCreate(bus2,bus2Vars),
                                      P.id -> BusPass(bus2),
                                      BS1.id -> BusPass(bus2))
-    val busE = Map[Int, BusSelect](e1.id -> BusSelect(bus2, 3))
+    val busE = Map(e1.id -> VBusSelect(bus2, 3))
+    val busV = Map[Int, Int]()
     val (v,busReached) = dfg.backreachBus(Array(Ub.id),
                                           inact,
                                           busProc,
-					  busE)
+					  busE,
+					  busV)
     assert(!v.contains(dfg.g.getV(A.id)))
     assert(v.contains(dfg.g.getV(B.id)))
     assert(!v.contains(dfg.g.getV(C.id)))
@@ -332,12 +345,13 @@ class DfGraphTest extends FunSuite {
 
     val busProc = Map[Int,BusAction](BC1.id -> BusCreate(bus1,bus1Vars),
                                      BC2.id -> BusCreate(bus2,bus2Vars))
-    val busE = Map[Int, BusSelect](sb1.id -> BusSelect(bus1, 2),
-                                   e1.id -> BusSelect(bus2, 1))
+    val busE = Map[Int, VBusSelect](sb1.id -> VBusSelect(bus1, 2),
+                                   e1.id -> VBusSelect(bus2, 1))
+    val busV = Map[Int, Int]()
     val (v,busReached) = dfg.backreachBus(Array(Ub.id),
                                           inact,
                                           busProc,
-					  busE)
+					  busE, busV)
     assert(!v.contains(dfg.g.getV(A.id)))
     assert(v.contains(dfg.g.getV(B.id)))
     assert(!v.contains(dfg.g.getV(C.id)))

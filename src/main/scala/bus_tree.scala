@@ -360,8 +360,9 @@ sealed abstract class BusAction
 // Regular object should also support pattern matching
 case class BusCreate(bus:Bus, children:List[Int]) extends BusAction
 case class BusPass(bus:Bus) extends BusAction
+case class BusSelect(val bus:Bus) extends BusAction
 
 // Bus selector block becomes virtual, the bus selection action is
 // then associated with an edge.
-case class BusSelect(val bus:Bus, val i:Int)
+case class VBusSelect(val bus:Bus, val i:Int)
 
