@@ -5,36 +5,46 @@ import scala.collection.mutable.Map
 import scala.collection.mutable.ArrayBuffer
 
 /**
- * A dataflow node can be either a variable node or a proc node.
+ * A dataflow node can be either a variable node or a proc node, or special
+ * input node.
  *
  * - Variable node models variables used for signals, state and data stores.
+ * 
  * - Proc node models block methods that uses or writes to the variables.
+ *
+ * - Input node is associated with block input, it can be combined of multiple
+ *   varialbles. Thererfore the need. It is particularly useful in defining the
+ *   behavior of bus creators.
  *
  */
 
 import sl.ir._
 
-abstract class DataflowNode extends AnyRef with HasId
+sealed abstract class DataflowNode extends AnyRef with HasId
 case class Var(override val id:Int) extends DataflowNode 
 {
 }
 case class Proc(override val id:Int) extends DataflowNode
 {
 }
+case class Input(override val id: Int) extends DataflowNode
+{
+}
+
 
 
 object DataflowUtil {
   def isVarBus(graph:Graph, 
 	       v:Vertex, 
 	       busProcs: Map[Int, BusAction]):Boolean = {
-    val inEdges = graph.inE(v)
+    val inEdges = graph.outE(v)
     if (inEdges.size == 1) {
-      val writerP = inEdges(0).from
+      val writerP = inEdges(0).to
       if (busProcs.contains(writerP.id)) true
       else false
     } else { 
       // shared data cannot be bus (XXX)
-      val writerP = inEdges(0).from
+      val writerP = inEdges(0).to
       if (busProcs.contains(writerP.id)) true
       else false
     }
@@ -60,6 +70,7 @@ class DataflowGraph() {
     n match {
       case Var(_) => false
       case Proc(_) => true 
+      case Input(_) => false
     }
   }
 
@@ -77,6 +88,13 @@ class DataflowGraph() {
   def newProcNode(name:String) = {
     val v = g.newVertex(name)
     val n = Proc(v.id)
+    nodes(v.id) = n
+    n
+  }
+
+  def newInputNode(name:String) = {
+    val v = g.newVertex(name)
+    val n = Input(v.id)
     nodes(v.id) = n
     n
   }
@@ -102,6 +120,7 @@ class DataflowGraph() {
         n match {
           case Var(_) => "[shape=\"ellipse\"]"
           case Proc(_) => "[shape=\"box\"]"
+	  case Input(_) => "[shape=\"diamond\"]"
       }
       val label = "[label=\"" + v.sid + "\"]"
       shape + label
@@ -171,44 +190,12 @@ class DataflowGraph() {
 	}
       }
     }
+    
+    // Visit an input node which might be aggregated var nodes
+    //  (var) --- bus selection --> <input>
+    private def visitBusInput(in: Vertex,
+			      varNode:Vertex): Boolean = {
 
-    // Visiting a regular proc which reads a sub-bus from a var.
-    //   (BusVar) --> [proc]
-    // The block is not a bus creator or bus pass.
-    private def visitBusReader(proc:Vertex,
-			       v:Vertex): Boolean = {
-
-      val e = graph.getEdge(v.id, proc.id)
-      if (busElementEdge.contains(e.id)) {
-        // There is a selection between busVar and proc
-        val bs = busElementEdge(e.id)
-        val b = bs.bus
-        // Reached elements at [proc]
-        val vReached = 
-	  if (busReached.contains(proc.id)) busReached(proc.id).elements else Set(0)
-        val i = bs.i
-        // Compute the corresponding reached at (BusVar)
-        val current = SubBus(b, b.fromDescendant(i, vReached))
-        
-        updateResult(v, current)
-      } else {
-        // There is no selection between busVar and proc
-	throw new RuntimeException("A non-bus proc reading bus signal")
-	// If the above exception is removed we treat the block as
-	// regular bus pass.
-        assert(busReached.contains(proc.id))
-        val current = busReached(proc.id)
-        updateResult(v, current)
-      }
-
-    }
-
-    // Visit a bus-capable proc
-    // 
-    //  (a) ---> | proc |
-    //  (b) ---> |      |
-    private def visitBusProc(v:Vertex,
-                             pred:ArrayBuffer[Vertex]): ArrayBuffer[Vertex] = {
       // For virtual bus selector, get the sub-bus at the source
       def getSrcBusSel(srcEId:Int, dstSet:Set[Int]) = {
         val busSelection = busElementEdge(srcEId)
@@ -217,6 +204,51 @@ class DataflowGraph() {
         (srcBus, SubBus(srcBus, srcBus.fromDescendant(i, dstSet)))
       }
       
+      val processedE = Set[Int]() 
+      val edges  = graph.getEdges(varNode.id, in.id)
+      var updated = false
+      for (e <- edges) {
+	if (!processedE.contains(e.id)) {
+	  // Prevent repeating
+	  if (busElementEdge.contains(e.id)) {
+            // There is a selection between busVar and in
+            // Reached elements at <in>
+            val vReached = 
+	      if (busReached.contains(in.id)) busReached(in.id).elements else Set(0)
+            // Compute the corresponding reached at (BusVar)
+            val (_,current) = getSrcBusSel(e.id, vReached)
+            
+            if (updateResult(varNode, current)) updated = true
+	  } else {
+	    // No selection, pass the reached to input
+	    if (updateResult(varNode, busReached(in.id))) updated = true
+	  }
+	}
+      }
+      updated
+    }
+
+    // Visiting a regular proc which reads a sub-bus from a var.
+    //   <input> --> [proc]
+    // The block is not a bus creator or bus pass.
+    private def visitBusReader(proc:Vertex,
+			       in:Vertex): Boolean = {
+
+      if (graph.inE(proc).size > 1) {
+	throw new RuntimeException("Expecting single input bus reader")
+      }
+      assert(busReached.contains(proc.id))
+
+      updateResult(in, busReached(proc.id))
+    }
+
+    // Visit a bus-capable proc
+    // 
+    //  (in) ---> | proc |
+    // 
+    private def visitBusProc(v:Vertex,
+                             pred:ArrayBuffer[Vertex]): ArrayBuffer[Vertex] = {
+      
       // For bus pass or bus select, pass the reached part to
       // the variable at input. Handle the case where the incoming
       // edge is virtual bus selector.
@@ -224,14 +256,8 @@ class DataflowGraph() {
 	val next = ArrayBuffer[Vertex]()
 	assert(pred.size == 1)
         for (p <- pred) {
-	  val srcE = graph.getEdge(p.id, v.id) 
-	  if (busElementEdge.contains(srcE.id)) {
-	    val (_, current) = getSrcBusSel(srcE.id, Set(0))
-	    if (updateResult(p, current)) next += p
-          } else {
-            val current = busReached(v.id)
-	    if (updateResult(p, current)) next += p
-          }
+          val current = busReached(v.id)
+	  if (updateResult(p, current)) next += p
 	}
         next
       }
@@ -239,55 +265,30 @@ class DataflowGraph() {
       busProcs(v.id) match {
         case BusPass(b) => predBusPass(b)
 	case BusSelect(b) => predBusPass(b)
-        case BusCreate(b,srcEdges) => {
+        case BusCreate(b,srcInputs) => {
           val next = ArrayBuffer[Vertex]()
           val reached = busReached(v.id).distribute
-	  var src = srcEdges // Index into array
+	  var srcVar = srcInputs
           for ((c,r) <- reached) {
-            val srcEId = src.head
-            // (p)--->[v]
-            val p = graph.getE(srcEId).from
+            var srcIn = srcVar.head
+            // <p>--->[v]
+            val p = graph.getV(srcIn)
             c match {
               case _:AtomicElement => 
 		// Create bus from atomic element
                 if (!r.isEmpty) {
-                  if (busElementEdge.contains(srcEId)) {
-		    // Case 1: the atomic element is a selected signal
-                    // (p)==Bus Select==>[v]
-                    // First get the sub-bus of the signal at target inport
-                    val (srcBus, current) = getSrcBusSel(srcEId, Set(0))
-                    val before = busReached.getOrElse(p.id, SubBus(srcBus, Set[Int]()))
-                    if (!SubBusOp.isSubset(current, before)) {
-                      busReached(p.id) = SubBusOp.union(current, before)
-                      next += p
-                    } 
-                  } else {
-                    // Case 2: regular atomic element
-                    if (!bfs.visited.contains(p)) next += p
-                  }
+                  if (!bfs.visited.contains(p)) next += p
                 }
               case bc:Bus => {
-                if (busElementEdge.contains(srcEId)) {
-                  // (p)==Bus Select==>[v]
-                  // First get the sub-bus of the signal at target inport
-                  val (srcBus,current) = getSrcBusSel(srcEId, r)
-                  val before = busReached.getOrElse(p.id, SubBus(srcBus, Set[Int]()))
-                  if (!SubBusOp.isSubset(current, before)) {
-                    busReached(p.id) = SubBusOp.union(current, before)
-                    next += p
-                  } 
-                } else {
-                  // (p)==bus==>[v]
-                  val current = SubBus(bc, r)
-                  val before = busReached.getOrElse(p.id, SubBus(bc, Set[Int]()))
-                  if (! SubBusOp.isSubset(current, before)) {
-	            busReached(p.id) = SubBusOp.union(current, before)
-                    next += p
-                  }
+                val current = SubBus(bc, r)
+                val before = busReached.getOrElse(p.id, SubBus(bc, Set[Int]()))
+                if (! SubBusOp.isSubset(current, before)) {
+	          busReached(p.id) = SubBusOp.union(current, before)
+                  next += p
                 }
               }
             }
-            src = src.tail
+            srcVar = srcVar.tail
           }
           next
         }
@@ -331,6 +332,20 @@ class DataflowGraph() {
             }
             next
           }
+	
+	case Input(_) => {
+	  val next = ArrayBuffer[Vertex]()
+          for (p <- pred) {
+	    if (isVarBus(p)) {
+	      // Variable is bus signal
+	      if (visitBusInput(v, p)) next+=p 
+	    } else {
+	      // Variable is atomic signal
+	      if (!bfs.visited.contains(p)) next += p
+	    }
+          }
+	  next
+	}
         
       }
     }

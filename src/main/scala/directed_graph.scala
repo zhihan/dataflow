@@ -197,6 +197,10 @@ class Graph() {
     }
   }
 
+  def getEdges(from:Int, to:Int) = {
+    ArrayBuffer[Edge]() ++ E.filter(e => (e.from.id ==from) && (e.to.id ==to)) 
+  }
+
   def getEId(from: Int, to: Int) = getEdge(from, to).id
 }
 
