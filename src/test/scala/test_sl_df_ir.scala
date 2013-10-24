@@ -328,8 +328,8 @@ class DfGraphTest extends FunSuite {
     val busE = Map[Int, VBusSelect](sb1.id -> VBusSelect(bus1, 2),
                                    e1.id -> VBusSelect(bus2, 1))
     val busV = Map[Int, Int]()
-    println(dfg.toDotString)
-    println(busE)
+    //println(dfg.toDotString)
+    //println(busE)
     val (v,busReached) = dfg.backreachBus(Array(ubp.id),
                                           inact,
                                           busProc,
