@@ -13,10 +13,14 @@ class DfGraphTest extends FunSuite {
     val y = dfg.newVarNode("y")
     val x = dfg.newVarNode("x")
     val u = dfg.newVarNode("u")
+    val a = dfg.newInputNode("a")
+    val b = dfg.newInputNode("b")
     val plus = dfg.newProcNode("+")
     
-    dfg.addEdge(x, plus)
-    dfg.addEdge(u, plus)
+    dfg.addEdge(x, a)
+    dfg.addEdge(u, b)
+    dfg.addEdge(a, plus)
+    dfg.addEdge(b, plus)
     dfg.addEdge(plus, y)
     dfg
   }
@@ -30,9 +34,9 @@ class DfGraphTest extends FunSuite {
 
   test("Simple DFG reduce var") {
     val cfg = createSimpleGraph
-    cfg.reduceVarNodes
+    cfg.reduceNonProcNodes
     val s = cfg.toDotString
-    //println(s)
+    // println(s)
     assert(cfg.nNodes == 1)
   }
 
@@ -41,7 +45,7 @@ class DfGraphTest extends FunSuite {
     val y = dfg.getVarNodes("y") // Only one node
     val yId = y.map( v => v.id)
     val result = dfg.backwardReachable(yId.toArray)
-    assert(result.length == 4)
+    assert(result.length == 6)
     // result.foreach{ vid => println(dfg.nodes( vid ))}
   }
 
@@ -59,23 +63,31 @@ class DfGraphTest extends FunSuite {
     // A simple dfg for
     //  y = x + u
     //  z = x * u   
-    val dfg = new DataflowGraph()
-    val y = dfg.newVarNode("y")
-    val x = dfg.newVarNode("x")
-    val u = dfg.newVarNode("u")
-    val plus = dfg.newProcNode("+")
-    val z = dfg.newVarNode("z")
-    val prod = dfg.newProcNode("*")
-
-    dfg.addEdge(x, plus)
-    dfg.addEdge(u, plus)
-    dfg.addEdge(plus, y)
+   val dfg = new DataflowGraph()
+   val y = dfg.newVarNode("y")
+   val x = dfg.newVarNode("x")
+   val u = dfg.newVarNode("u")
+   val plus = dfg.newProcNode("+")
+   val p1 = dfg.newInputNode("p1")
+   val p2 = dfg.newInputNode("p2")
+   val z = dfg.newVarNode("z")
+   val prod = dfg.newProcNode("*")
+   val m1 = dfg.newInputNode("m1")
+   val m2 = dfg.newInputNode("m2")
+   
+   dfg.addEdge(x, p1)
+   dfg.addEdge(p1, plus)
+   dfg.addEdge(u, p2)
+   dfg.addEdge(p2, plus)
+   dfg.addEdge(plus, y)
     
-    dfg.addEdge(x, prod)
-    dfg.addEdge(u, prod)
-    dfg.addEdge(prod, z)
+   dfg.addEdge(x, m1)
+   dfg.addEdge(m1, prod)
+   dfg.addEdge(u, m2)
+   dfg.addEdge(m2, prod)
+   dfg.addEdge(prod, z)
 
-    dfg
+   dfg
   }
 
 
@@ -98,7 +110,7 @@ class DfGraphTest extends FunSuite {
     assert(result4.length == 0)    
   }
 
-
+  
   test("SL DF with nonvirtual buses for") {
     //
     // |A| -> |       |                  | P2    | ---> |Ua|
@@ -108,56 +120,49 @@ class DfGraphTest extends FunSuite {
     // |C| -> |       |                  |       | ---> |Uc| 
     //
     val dfg = new DataflowGraph()
-    val A = dfg.newProcNode("A")
-    val a = dfg.newVarNode("a")
-    dfg.addEdge(A,a)
-    val B = dfg.newProcNode("B")
-    val b = dfg.newVarNode("b")
-    dfg.addEdge(B,b)
-    val C = dfg.newProcNode("C")
-    val c = dfg.newVarNode("c")
-    dfg.addEdge(C,c)
-    val BC = dfg.newProcNode("BC")
-    val bc = dfg.newVarNode("bc")
-    dfg.addEdge(BC,bc)
-    dfg.addEdge(C,c)
-    val ea = dfg.addEdge(a,BC)
-    val eb = dfg.addEdge(b,BC)
-    val ec = dfg.addEdge(c,BC)
-    val P = dfg.newProcNode("P")
-    val p = dfg.newVarNode("p")
-    dfg.addEdge(P,p)
-    dfg.addEdge(bc,P)
-    val P2 = dfg.newProcNode("P2")
-    val p2 = dfg.newVarNode("p2")
- 
-    dfg.addEdge(p,P2)
-    dfg.addEdge(P2,p2)
+    val (_,ap,a) = dfg.createNodes("A", 0, 1)
+    val (_,bp,b) = dfg.createNodes("B", 0, 1)
+    val (_,cp,c) = dfg.createNodes("C", 0, 1)
 
-    val Ua = dfg.newProcNode("Ua")
-    val ua = dfg.addEdge(p2, Ua)
-    val Ub = dfg.newProcNode("Ub")
-    val ub = dfg.addEdge(p2, Ub)
-    val Uc = dfg.newProcNode("Uc")
-    val uc = dfg.addEdge(p2, Uc)
-    
+    val (bci,bcp,bc) = dfg.createNodes("BC", 3, 1)
+
+    dfg.addEdge(a(0), bci(0))
+    dfg.addEdge(b(0), bci(1))
+    dfg.addEdge(c(0), bci(2))
+
+    val (pi, pp, p) = dfg.createNodes("P", 1, 1)
+    dfg.addEdge(bc(0), pi(0))
+
+    val (p2i, p2p, p2) = dfg.createNodes("P2", 1, 1)
+    dfg.addEdge(p(0), p2i(0))
+
+    val (uai, uap, _) = dfg.createNodes("Ua", 1, 0)
+    val uae = dfg.addEdge(p2(0), uai(0))
+    val (ubi, ubp, _) = dfg.createNodes("Ub", 1, 0)
+    val ube = dfg.addEdge(p2(0), ubi(0))
+    val (uci, ucp, _) = dfg.createNodes("Uc", 1, 0)
+    val uce = dfg.addEdge(p2(0), uci(0))
+
     val inact = new Inactive(Array[Int](), Array[Int]())
     val at = AtomicElement("a",1)
     val bt = AtomicElement("b",1)
     val ct = AtomicElement("c",1)
     val bus = Bus("Bus", List(at,bt,ct))
-    val busVars = List(ea.id, eb.id, ec.id)
-    val busProc = Map[Int,BusAction](BC.id -> BusCreate(bus,busVars),
-				     P.id -> BusPass(bus),
-				     P2.id -> BusPass(bus))
-    val busElemVar = Map(ua.id -> VBusSelect(bus,1), 
-			 ub.id -> VBusSelect(bus,2), 
-			 uc.id -> VBusSelect(bus,3))
+    val busVars = bci.map( x => x.id).toList
+    val busProc = Map[Int,BusAction](bcp.id -> BusCreate(bus,busVars),
+				     pp.id -> BusPass(bus),
+				     p2p.id -> BusPass(bus))
+    val busElemEdge  = Map(uae.id -> VBusSelect(bus,1), 
+			 ube.id -> VBusSelect(bus,2), 
+			 uce.id -> VBusSelect(bus,3))
     val busV = Map[Int, Int]()
-    val (v,busReached) = dfg.reachBus(Array(A.id,B.id),
+    // println(dfg.toDotString)
+    // println(busElemEdge)
+    val (v,busReached) = dfg.reachBus(Array(ap.id,bp.id),
                                       inact,
-                                      busProc, busElemVar, busV)
-    /* for (x <- v) {
+                                      busProc, busElemEdge, busV)
+    /*
+    for (x <- v) {
       print(" " + x.sid)
       if (busReached.contains(x.id)) {
 	print("{") 
@@ -165,9 +170,9 @@ class DfGraphTest extends FunSuite {
 	print(elems + "}")
       }
     } */
-    assert(v.contains(dfg.g.getV(Ua.id)))
-    assert(v.contains(dfg.g.getV(Ub.id)))
-    assert(!v.contains(dfg.g.getV(Uc.id)))
+    assert(v.contains(dfg.g.getV(uap.id)))
+    assert(v.contains(dfg.g.getV(ubp.id)))
+    assert(!v.contains(dfg.g.getV(ucp.id)))
   }
   
    
@@ -180,54 +185,49 @@ class DfGraphTest extends FunSuite {
     // |C| -> |       |                  |       | 
     //
     val dfg = new DataflowGraph()
-    val A = dfg.newProcNode("A")
-    val a = dfg.newVarNode("a")
-    dfg.addEdge(A,a)
-    val B = dfg.newProcNode("B")
-    val b = dfg.newVarNode("b")
-    dfg.addEdge(B,b)
-    val C = dfg.newProcNode("C")
-    val c = dfg.newVarNode("c")
-    dfg.addEdge(C,c)
-    val BC = dfg.newProcNode("BC")
-    val bc = dfg.newVarNode("bc")
-    dfg.addEdge(BC,bc)
-    val ea = dfg.addEdge(a,BC)
-    val eb = dfg.addEdge(b,BC)
-    val ec = dfg.addEdge(c,BC)
-    val P = dfg.newProcNode("P")
-    val p = dfg.newVarNode("p")
-    dfg.addEdge(P,p)
-    dfg.addEdge(bc,P)
-    val BS1 = dfg.newProcNode("BS1")
-    val bs1 = dfg.newVarNode("bs1")
-    dfg.addEdge(p,BS1)
-    dfg.addEdge(BS1,bs1)
-    val Ua = dfg.newProcNode("Ua")
-    val ua = dfg.addEdge(bs1, Ua)
-    val Ub = dfg.newProcNode("Ub")
-    val ub = dfg.addEdge(bs1, Ub)
-    
+     val (_,ap,a) = dfg.createNodes("A", 0, 1)
+    val (_,bp,b) = dfg.createNodes("B", 0, 1)
+    val (_,cp,c) = dfg.createNodes("C", 0, 1)
+
+    val (bci,bcp,bc) = dfg.createNodes("BC", 3, 1)
+
+    dfg.addEdge(a(0), bci(0))
+    dfg.addEdge(b(0), bci(1))
+    dfg.addEdge(c(0), bci(2))
+
+    val (pi, pp, p) = dfg.createNodes("P", 1, 1)
+    dfg.addEdge(bc(0), pi(0))
+
+    val (p2i, p2p, p2) = dfg.createNodes("P2", 1, 1)
+    dfg.addEdge(p(0), p2i(0))
+
+    val (uai, uap, _) = dfg.createNodes("Ua", 1, 1)
+    val uae = dfg.addEdge(p2(0), uai(0))
+    val (ubi, ubp, _) = dfg.createNodes("Ub", 1, 1)
+    val ube = dfg.addEdge(p2(0), ubi(0))
+    val (uci, ucp, _) = dfg.createNodes("Uc", 1, 1)
+    val uce = dfg.addEdge(p2(0), uci(0))
+
     val inact = new Inactive(Array[Int](), Array[Int]())
     val at = AtomicElement("a",1)
     val bt = AtomicElement("b",1)
     val ct = AtomicElement("c",1)
     val bus = Bus("Bus", List(at,bt,ct))
-    val busVars = List(ea.id, eb.id, ec.id)
-    val busProc = Map[Int,BusAction](BC.id -> BusCreate(bus,busVars),
-                      P.id -> BusPass(bus),
-                      BS1.id -> BusPass(bus))
-    val busElemEdge = Map(ua.id -> VBusSelect(bus,1), 
-			  ub.id -> VBusSelect(bus,2))
+    val busVars = bci.map( x => x.id).toList
+    val busProc = Map[Int,BusAction](bcp.id -> BusCreate(bus,busVars),
+				     pp.id -> BusPass(bus),
+				     p2p.id -> BusPass(bus))
+    val busElemEdge = Map(uae.id -> VBusSelect(bus,1), 
+			 ube.id -> VBusSelect(bus,2), 
+			 uce.id -> VBusSelect(bus,3))
     val busV = Map[Int, Int]()
-
-    val (v,busReached) = dfg.backreachBus(Array(Ua.id,Ub.id),
+    val (v,busReached) = dfg.backreachBus(Array(uap.id,ubp.id),
                                           inact,
                                           busProc,
 					  busElemEdge, busV)
-    assert(v.contains(dfg.g.getV(A.id)))
-    assert(v.contains(dfg.g.getV(B.id)))
-    assert(!v.contains(dfg.g.getV(C.id)))
+    assert(v.contains(dfg.g.getV(ap.id)))
+    assert(v.contains(dfg.g.getV(bp.id)))
+    assert(!v.contains(dfg.g.getV(cp.id)))
   }
 
 
@@ -240,38 +240,26 @@ class DfGraphTest extends FunSuite {
     // |C| -> |       |                 
     //
     val dfg = new DataflowGraph()
-    val A = dfg.newProcNode("A")
-    val a = dfg.newVarNode("a")
-    dfg.addEdge(A,a)
-    val B = dfg.newProcNode("B")
-    val b = dfg.newVarNode("b")
-    dfg.addEdge(B,b)
-    val BC1 = dfg.newProcNode("BC1")
-    val bc1 = dfg.newVarNode("bc1")
-    dfg.addEdge(BC1,bc1)
-    val ea = dfg.addEdge(a,BC1)
-    val eb = dfg.addEdge(b,BC1)
+    val (_,ap,a) = dfg.createNodes("A", 0, 1)
+    val (_,bp,b) = dfg.createNodes("B", 0, 1)
+    val (bci, bcp, bc) = dfg.createNodes("BC", 2, 1)
+    dfg.addEdge(a(0), bci(0))
+    dfg.addEdge(b(0), bci(1))
     
-    val C = dfg.newProcNode("C")
-    val c = dfg.newVarNode("c")
-    dfg.addEdge(C,c)
+    val (_,cp,c) = dfg.createNodes("C", 0, 1)
 
-    val BC2 = dfg.newProcNode("BC2")
-    val bc2 = dfg.newVarNode("bc2")
-    dfg.addEdge(BC2,bc2)
-    val eab = dfg.addEdge(bc1,BC2)    
-    val ec = dfg.addEdge(c,BC2)
+    val (bc2i, bc2p, bc2) = dfg.createNodes("BC2", 2, 1)
+    dfg.addEdge(bc(0), bc2i(0))
+    dfg.addEdge(c(0), bc2i(1))
 
-    val P = dfg.newProcNode("P")
-    val p = dfg.newVarNode("p")
-    dfg.addEdge(P,p)
-    dfg.addEdge(bc2,P)
-    val BS1 = dfg.newProcNode("BS1")
-    val bs1 = dfg.newVarNode("bs1")
-    dfg.addEdge(p,BS1)
-    dfg.addEdge(BS1,bs1)
-    val Ub = dfg.newProcNode("Ub")
-    val e1 = dfg.addEdge(bs1, Ub)
+    val (pi, pp, p) = dfg.createNodes("P", 1, 1)
+    dfg.addEdge(bc2(0), pi(0))
+
+    val (bsi, bsp, bs) = dfg.createNodes("BS", 1, 1)
+    dfg.addEdge(p(0),bsi(0))
+
+    val (ubi, ubp, _) = dfg.createNodes("Ub", 1, 0)
+    val e1 = dfg.addEdge(bs(0), ubi(0))
     
     val inact = new Inactive(Array[Int](), Array[Int]())
     val at = AtomicElement("a",1)
@@ -281,23 +269,25 @@ class DfGraphTest extends FunSuite {
     val ct = AtomicElement("c",1)
     val bus2 = Bus("Bus2", List(bus1, ct))
 
-    val bus1Vars = List(ea.id, eb.id)
-    val bus2Vars = List(eab.id, ec.id)
+    val bus1Vars = bci.map( x => x.id).toList
+    val bus2Vars = bc2i.map( x => x.id).toList
 
-    val busProc = Map[Int,BusAction](BC1.id -> BusCreate(bus1,bus1Vars),
-                                     BC2.id -> BusCreate(bus2,bus2Vars),
-                                     P.id -> BusPass(bus2),
-                                     BS1.id -> BusPass(bus2))
+    val busProc = Map[Int,BusAction](bcp.id -> BusCreate(bus1,bus1Vars),
+                                     bc2p.id -> BusCreate(bus2,bus2Vars),
+                                     pp.id -> BusPass(bus2),
+                                     bsp.id -> BusPass(bus2))
     val busE = Map(e1.id -> VBusSelect(bus2, 3))
     val busV = Map[Int, Int]()
-    val (v,busReached) = dfg.backreachBus(Array(Ub.id),
+    // println(dfg.toDotString)
+    // println(busE)
+    val (v,busReached) = dfg.backreachBus(Array(ubp.id),
                                           inact,
                                           busProc,
 					  busE,
 					  busV)
-    assert(!v.contains(dfg.g.getV(A.id)))
-    assert(v.contains(dfg.g.getV(B.id)))
-    assert(!v.contains(dfg.g.getV(C.id)))
+    assert(!v.contains(dfg.g.getV(ap.id)))
+    assert(v.contains(dfg.g.getV(bp.id)))
+    assert(!v.contains(dfg.g.getV(cp.id)))
   }
 
   test("SL DF with exchange nv bus") {
@@ -307,30 +297,20 @@ class DfGraphTest extends FunSuite {
     // |B| -> |       |  -----b-------->  |BC2 | --b->|Ub|
     //                             |C| -> |    | 
     val dfg = new DataflowGraph()
-    val A = dfg.newProcNode("A")
-    val a = dfg.newVarNode("a")
-    dfg.addEdge(A,a)
-    val B = dfg.newProcNode("B")
-    val b = dfg.newVarNode("b")
-    dfg.addEdge(B,b)
-    val BC1 = dfg.newProcNode("BC1")
-    val bc1 = dfg.newVarNode("bc1")
-    dfg.addEdge(BC1,bc1)
-    val ea = dfg.addEdge(a,BC1)
-    val eb = dfg.addEdge(b,BC1)
+    val (_,ap,a) = dfg.createNodes("A", 0, 1)
+    val (_,bp,b) = dfg.createNodes("B", 0, 1)
+    val (bci, bcp, bc) = dfg.createNodes("BC", 2, 1)
+    dfg.addEdge(a(0), bci(0))
+    dfg.addEdge(b(0), bci(1))
  
-    val C = dfg.newProcNode("C")
-    val c = dfg.newVarNode("c")
-    dfg.addEdge(C,c)
+    val (_,cp,c) = dfg.createNodes("C", 0, 1)
 
-    val BC2 = dfg.newProcNode("BC2")
-    val bc2 = dfg.newVarNode("bc2")
-    val sb1 = dfg.addEdge(bc1,BC2)
-    dfg.addEdge(BC2, bc2)
-    val ec = dfg.addEdge(c, BC2)
+    val (bc2i, bc2p, bc2) = dfg.createNodes("BC2", 2, 1)
+    val sb1 = dfg.addEdge(bc(0), bc2i(0))
+    dfg.addEdge(c(0), bc2i(1))
 
-    val Ub = dfg.newProcNode("Ub")
-    val e1 = dfg.addEdge(bc2, Ub)
+    val (ubi, ubp, _) = dfg.createNodes("Ub", 1, 0)
+    val e1 = dfg.addEdge(bc2(0), ubi(0))
 
     val inact = new Inactive(Array[Int](), Array[Int]())
     val at = AtomicElement("a",1)
@@ -340,20 +320,22 @@ class DfGraphTest extends FunSuite {
     val ct = AtomicElement("c",1)
     val bus2 = Bus("Bus2", List(bt, ct))
 
-    val bus1Vars = List(ea.id, eb.id)
-    val bus2Vars = List(sb1.id, ec.id)
+    val bus1Vars = bci.map( x => x.id).toList
+    val bus2Vars = bc2i.map( x => x.id).toList
 
-    val busProc = Map[Int,BusAction](BC1.id -> BusCreate(bus1,bus1Vars),
-                                     BC2.id -> BusCreate(bus2,bus2Vars))
+    val busProc = Map[Int,BusAction](bcp.id -> BusCreate(bus1,bus1Vars),
+                                     bc2p.id -> BusCreate(bus2,bus2Vars))
     val busE = Map[Int, VBusSelect](sb1.id -> VBusSelect(bus1, 2),
                                    e1.id -> VBusSelect(bus2, 1))
     val busV = Map[Int, Int]()
-    val (v,busReached) = dfg.backreachBus(Array(Ub.id),
+    println(dfg.toDotString)
+    println(busE)
+    val (v,busReached) = dfg.backreachBus(Array(ubp.id),
                                           inact,
                                           busProc,
 					  busE, busV)
-    assert(!v.contains(dfg.g.getV(A.id)))
-    assert(v.contains(dfg.g.getV(B.id)))
-    assert(!v.contains(dfg.g.getV(C.id)))
+    assert(!v.contains(dfg.g.getV(ap.id)))
+    assert(v.contains(dfg.g.getV(bp.id)))
+    assert(!v.contains(dfg.g.getV(cp.id)))
   }
 }

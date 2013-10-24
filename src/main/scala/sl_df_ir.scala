@@ -34,17 +34,20 @@ case class Input(override val id: Int) extends DataflowNode
 
 
 object DataflowUtil {
+  // Determine if a variable is of bus type
+  // Currently the heuristic is to check if the block that
+  // writes to the signal is bus-capable. 
   def isVarBus(graph:Graph, 
 	       v:Vertex, 
 	       busProcs: Map[Int, BusAction]):Boolean = {
-    val inEdges = graph.outE(v)
+    val inEdges = graph.inE(v)
     if (inEdges.size == 1) {
-      val writerP = inEdges(0).to
+      val writerP = inEdges(0).from
       if (busProcs.contains(writerP.id)) true
       else false
     } else { 
       // shared data cannot be bus (XXX)
-      val writerP = inEdges(0).to
+      val writerP = inEdges(0).from
       if (busProcs.contains(writerP.id)) true
       else false
     }
@@ -74,6 +77,14 @@ class DataflowGraph() {
     }
   }
 
+  private def isVar(n:DataflowNode) = {
+    n match {
+      case Var(_) => true
+      case Proc(_) => false 
+      case Input(_) => false
+    }
+  }
+
   def newVarNode(name:String) = {
     val v = g.newVertex(name)
     val n = Var(v.id)
@@ -98,6 +109,24 @@ class DataflowGraph() {
     nodes(v.id) = n
     n
   }
+
+  def createNodes(name:String, nIn: Int, nOut:Int) = {
+    val p = newProcNode(name)
+    val inputs = ArrayBuffer[DataflowNode]()
+    for (i <- 1 to nIn) {
+      val vI = newInputNode(name + "_i_" + i)
+      addEdge(vI, p)
+      inputs += vI
+    }
+    val outputs = ArrayBuffer[DataflowNode]()
+    for (i <- 1 to nOut) {
+      val vO = newVarNode(name + "_o_" + i)
+      addEdge(p, vO)
+      outputs += vO
+    }
+    (inputs, p, outputs)
+  }
+
 
   def addEdge(src:Int, dst:Int) = { 
     if (src == dst) {
@@ -176,7 +205,9 @@ class DataflowGraph() {
             val current = busReached(v.id)
 	    updateResult(p, current)
           } else {
-            throw new RuntimeException("Error here" + p.sid + "=>" + v.sid)
+            throw new RuntimeException("Error visiting var bus: " +
+                                       "reachset of " + v.sid + " is not computed" +
+                                       p.sid + "=>" + v.sid)
             true
           }
         }
@@ -195,7 +226,7 @@ class DataflowGraph() {
     //  (var) --- bus selection --> <input>
     private def visitBusInput(in: Vertex,
 			      varNode:Vertex): Boolean = {
-
+      // print(" Visit bus input " + varNode.sid + " -> " + in.sid)
       // For virtual bus selector, get the sub-bus at the source
       def getSrcBusSel(srcEId:Int, dstSet:Set[Int]) = {
         val busSelection = busElementEdge(srcEId)
@@ -340,6 +371,8 @@ class DataflowGraph() {
 	      // Variable is bus signal
 	      if (visitBusInput(v, p)) next+=p 
 	    } else {
+              // print(" Visit nonbus input ")
+
 	      // Variable is atomic signal
 	      if (!bfs.visited.contains(p)) next += p
 	    }
@@ -645,7 +678,7 @@ class DataflowGraph() {
   }
 
   def backwardReachableVars(src:Array[Int]) : Array[Int] = {
-    backwardReachable(src).filter( i => !isProc(nodes(i))).toArray
+    backwardReachable(src).filter( i => isVar(nodes(i))).toArray
   }
 
   def backwardReachableProcs(src: Array[Int], 
@@ -659,7 +692,7 @@ class DataflowGraph() {
                              inactive:Inactive) = {
     val reach = new Reachable(g)
     val allReached = reach.backward(src,inactive)
-    allReached.filter( i => !isProc(nodes(i))).toArray
+    allReached.filter( i => isVar(nodes(i))).toArray
   }
 
   // Combine forward reach and backward reach 
@@ -679,7 +712,7 @@ class DataflowGraph() {
     val reach = new Reachable(g)
     val fwd = reach.forward(src, inactive).toSet
     val bwd = reach.backward(sink, inactive).toSet
-    (fwd & bwd).filter ( i => !isProc(nodes(i))).toArray
+    (fwd & bwd).filter ( i => isVar(nodes(i))).toArray
   }
 
 
@@ -723,8 +756,8 @@ class DataflowGraph() {
   def outEId(which:Int) = g.outE(getV(which)).toArray
 
 
-  // Reduce variable nodes
-  def reduceVarNodes {
+  // Reduce non-proc nodes
+  def reduceNonProcNodes {
     val varNodes = g.V.filter(v => !isProc(nodes(v.id)))
     varNodes.foreach ( v => g.reduceVertex(v))
   }
