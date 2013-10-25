@@ -214,9 +214,10 @@ class DataflowGraph() {
 
 	case BusSelect(b) => {
 	  // Bus selector is selecting a sub-bus from a bus signal
-          val vReached = busReached.getOrElse(v.id, SubBus(b,Set[Int](0)))
+          val vReached = if (busReached.contains(v.id)) busReached(v.id).elements
+                         else Set[Int](0)
 	  val i = busElementVar(v.id)
-          val pReached = SubBus(b, b.fromDescendant(i, vReached.elements))
+          val pReached = SubBus(b, b.fromDescendant(i, vReached))
 	  updateResult(p, pReached) 
 	}
       }
