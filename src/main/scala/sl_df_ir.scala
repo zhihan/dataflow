@@ -757,12 +757,23 @@ class DataflowGraph() {
                  ).toArray
   }
 
+  def intermediateNodeFilteredByTarget(src:Int, proc:Array[Int]) = {
+    val procSet = proc.toSet
+
+    val inputs = g.outE(getV(src)).map(e => e.to.id)
+    inputs.filter(v => procSet.exists( d => 
+      g.hasE(v, d))).toArray
+
+  }
+
+
   def outEIdsFiltered(src:Array[Int], ids:Array[Int]) = {
     val idSet = ids.toSet
     src.flatMap( v => 
       g.outE(getV(v)).filter( e => idSet.contains (e.to.id)) 
     ).map( e => e.id).toArray
   } 
+
 
   // Delegate methods to 
   def getE(from:Int, to:Int) = g.getEId(from, to)
