@@ -43,12 +43,23 @@ object DataflowUtil {
     val inEdges = graph.inE(v)
     if (inEdges.size == 1) {
       val writerP = inEdges(0).from
-      if (busProcs.contains(writerP.id)) true
-      else false
+      if (busProcs.contains(writerP.id)) {
+        busProcs(writerP.id) match {
+          case BusCreate(_,_) => true
+          case BusSelect(_) => false // unknown
+          case BusPass(_) => true
+        }
+      } else false
     } else { 
       // shared data cannot be bus (XXX)
       val writerP = inEdges(0).from
-      if (busProcs.contains(writerP.id)) true
+      if (busProcs.contains(writerP.id)) {
+       busProcs(writerP.id) match {
+          case BusCreate(_,_) => true
+          case BusSelect(_) => false // unknown
+          case BusPass(_) => true
+        }
+      }
       else false
     }
   }
@@ -181,6 +192,11 @@ class DataflowGraph() {
     // only writer.
     private def isVarBus(v:Vertex) = {
       DataflowUtil.isVarBus(graph, v, busProcs)
+    }
+
+    private def isEdgeSelection(v:Vertex, reader:Vertex) = {
+      val e = graph.getEdge(v.id, reader.id)
+      busElementEdge.contains(e.id)
     }
 
     // Update the reach set and return the comparison result 
@@ -368,15 +384,16 @@ class DataflowGraph() {
 	case Input(_) => {
 	  val next = ArrayBuffer[Vertex]()
           for (p <- pred) {
-	    if (isVarBus(p)) {
-	      // Variable is bus signal
+	    if (busReached.contains(v.id)) {
+	      // The input node contains bus signal
 	      if (visitBusInput(v, p)) next+=p 
-	    } else {
+	    } else if (isEdgeSelection(p, v)) {
+              if (visitBusInput(v, p)) next+=p 
+            } else {
               // print(" Visit nonbus input ")
-
 	      // Variable is atomic signal
 	      if (!bfs.visited.contains(p)) next += p
-	    }
+            }
           }
 	  next
 	}

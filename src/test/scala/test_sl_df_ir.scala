@@ -175,6 +175,36 @@ class DfGraphTest extends FunSuite {
     assert(!v.contains(dfg.g.getV(ucp.id)))
   }
   
+  test("SL DF with nv selector") {
+    val dfg = new DataflowGraph()
+    val (_,ap,a) = dfg.createNodes("A", 0, 1)
+    val (_,bp,b) = dfg.createNodes("B", 0, 1)
+    val (bci,bcp,bc) = dfg.createNodes("BC", 2, 1)
+    dfg.addEdge(a(0), bci(0))
+    dfg.addEdge(b(0), bci(1))
+    val (bsi, bsp, bs) = dfg.createNodes("BS", 1, 1)
+    dfg.addEdge(bc(0), bsi(0))
+    val (ubi, ubp, _) = dfg.createNodes("Ub", 1, 0)
+    val ube = dfg.addEdge(bs(0), ubi(0))
+    
+    val inact = new Inactive(Array[Int](), Array[Int]())
+    val at = AtomicElement("a",1)
+    val bt = AtomicElement("b",1)
+    val bus = Bus("Bus", List(at,bt))
+    val busVars = bci.map( x => x.id).toList
+    val busProc = Map[Int,BusAction](bcp.id -> BusCreate(bus,busVars),
+				     bsp.id -> BusSelect(bus))
+    val busElemEdge  = Map[Int, VBusSelect]()
+    val busV = Map(bs(0).id -> 2)
+    //println(dfg.toDotString)
+    
+    val (v,busReached) = dfg.backreachBus(Array(ubp.id),
+                                          inact,
+                                          busProc, busElemEdge, busV)
+    assert(!v.contains(dfg.g.getV(ap.id)))
+    assert(v.contains(dfg.g.getV(bp.id)))
+   
+  }
    
   test("SL DF with nonvirtual buses") {
     //
@@ -185,7 +215,7 @@ class DfGraphTest extends FunSuite {
     // |C| -> |       |                  |       | 
     //
     val dfg = new DataflowGraph()
-     val (_,ap,a) = dfg.createNodes("A", 0, 1)
+    val (_,ap,a) = dfg.createNodes("A", 0, 1)
     val (_,bp,b) = dfg.createNodes("B", 0, 1)
     val (_,cp,c) = dfg.createNodes("C", 0, 1)
 
