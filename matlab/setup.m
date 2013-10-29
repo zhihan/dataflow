@@ -22,7 +22,12 @@ switch deblank(name)
             'lib','scala-library.jar'));
         
     otherwise
-        error('Don''t know what to do yet')
+        if strcmpi(computer, 'maci64')
+            javaaddpath(fullfile('/Users/zhihan/scala-2.10.2', ...
+                'lib','scala-library.jar'));
+        else
+            error('Don''t know what to do yet')
+        end
 end
 
 javaaddpath(fullfile(pwd, 'se_2.10-1.0.jar'));

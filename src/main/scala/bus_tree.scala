@@ -7,6 +7,7 @@ import my.se._
 import scala.collection.immutable.Set // Set of indices
 import scala.collection.immutable.Range 
 import scala.annotation.tailrec
+import scala.collection.mutable.Map
 
 abstract sealed class BusElement 
 {
@@ -356,11 +357,22 @@ object SubBusOp extends SetOp[SubBus] {
 }
 
 /* SL Bus behavior */
+// Note the following data structure should not use index to refer to 
+// the graphical objects.
 sealed abstract class BusAction
 // Regular object should also support pattern matching
 case class BusCreate(bus:Bus, children:List[Int]) extends BusAction
+
 case class BusPass(bus:Bus) extends BusAction
-case class BusSelect(val bus:Bus) extends BusAction
+
+// Each BusSelect object has a mapping associated with it
+// where selection: (v.id -> sub-bus id) is the selection map 
+case class BusSelect(val bus:Bus, val selection:Map[Int,Int]) extends BusAction
+
+// Each BusAssidn object has a mapping associated with it
+// where assignment: (v.id -> sub-bus id) is the overriding map 
+case class BusAssign(val bus:Bus, val srcInput:Int, 
+		     val assignment:Map[Int, Int]) extends BusAction
 
 // Bus selector block becomes virtual, the bus selection action is
 // then associated with an edge.

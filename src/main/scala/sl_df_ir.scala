@@ -46,8 +46,9 @@ object DataflowUtil {
       if (busProcs.contains(writerP.id)) {
         busProcs(writerP.id) match {
           case BusCreate(_,_) => true
-          case BusSelect(_) => false // unknown
+          case BusSelect(_, _) => false // unknown
           case BusPass(_) => true
+	  case BusAssign(_,_,_) => true
         }
       } else false
     } else { 
@@ -55,10 +56,11 @@ object DataflowUtil {
       val writerP = inEdges(0).from
       if (busProcs.contains(writerP.id)) {
        busProcs(writerP.id) match {
-          case BusCreate(_,_) => true
-          case BusSelect(_) => false // unknown
-          case BusPass(_) => true
-        }
+         case BusCreate(_,_) => true
+         case BusSelect(_, _) => false // unknown
+         case BusPass(_) => true
+	 case BusAssign(_,_,_) => true
+       }
       }
       else false
     }
@@ -183,7 +185,6 @@ class DataflowGraph() {
   class BusReachBack(graph:Graph, 
 		     busProcs: Map[Int,BusAction],  
 		     busElementEdge: Map[Int, VBusSelect],
-		     busElementVar: Map[Int, Int],
 		     inactive: Inactive) {
 
     val busReached = Map[Int, SubBus]()
@@ -216,7 +217,7 @@ class DataflowGraph() {
     private def visitVarBus(v:Vertex,
                             p:Vertex):Boolean = {
       busProcs(p.id) match {
-        case BusCreate(_,_) | BusPass(_) => {
+        case BusCreate(_,_) | BusPass(_) | BusAssign(_,_,_) => {
           if (busReached.contains(v.id)) {
             val current = busReached(v.id)
 	    updateResult(p, current)
@@ -228,11 +229,11 @@ class DataflowGraph() {
           }
         }
 
-	case BusSelect(b) => {
+	case BusSelect(b, varMap) => {
 	  // Bus selector is selecting a sub-bus from a bus signal
           val vReached = if (busReached.contains(v.id)) busReached(v.id).elements
                          else Set[Int](0)
-	  val i = busElementVar(v.id)
+	  val i = varMap(v.id)
           val pReached = SubBus(b, b.fromDescendant(i, vReached))
 	  updateResult(p, pReached) 
 	}
@@ -312,7 +313,7 @@ class DataflowGraph() {
       
       busProcs(v.id) match {
         case BusPass(b) => predBusPass(b)
-	case BusSelect(b) => predBusPass(b)
+	case BusSelect(b, _) => predBusPass(b)
         case BusCreate(b,srcInputs) => {
           val next = ArrayBuffer[Vertex]()
           val reached = busReached(v.id).distribute
@@ -412,10 +413,9 @@ class DataflowGraph() {
 
   def backreachBus(src:Array[Int], inactive:Inactive, 
                    busProcs:Map[Int,BusAction],
-		   busElemEdge: Map[Int, VBusSelect],
-		   busElemVars: Map[Int, Int]) = {
+		   busElemEdge: Map[Int, VBusSelect]) = {
     val reach = new BusReachBack(g, busProcs, busElemEdge, 
-				 busElemVars, inactive)
+				 inactive)
     reach.run(src)
   }
 
@@ -423,7 +423,6 @@ class DataflowGraph() {
   class BusReachFor(graph:Graph, 
 		    busProcs:Map[Int,BusAction], 
 		    busElemEdge: Map[Int, VBusSelect],
-		    busElemVar: Map[Int, Int],
 		    inactive:Inactive) {
 
     private def isVarBus(v:Vertex) = DataflowUtil.isVarBus(graph, v, busProcs)
@@ -452,7 +451,7 @@ class DataflowGraph() {
                                         p:Vertex):Boolean = {
         
       busProcs(p.id) match {
-        case BusPass(_) | BusSelect(_) => {
+        case BusPass(_) | BusSelect(_, _) => {
           if (!busReached.contains(v.id)) {
             throw new RuntimeException("Error: reach set not found for " + v.sid)
           }
@@ -508,9 +507,8 @@ class DataflowGraph() {
     // Utility function, examins a variable that is the output of a selector
     // and returns whether need to visit v and 
     // the new reach set if it needs update.
-    private def varSelection(b:Bus, proc: Vertex, v: Vertex) : 
+    private def varSelection(b:Bus, i:Int, proc: Vertex, v: Vertex) : 
     (Boolean, Option[SubBus]) = {
-      val i = busElemVar(v.id)
       val select = b.fromDescendant(i, Set(0))
       val reached = busReached(proc.id)
       val inter = b.intersect(select, reached.elements)
@@ -541,11 +539,11 @@ class DataflowGraph() {
                              vars:ArrayBuffer[Vertex]): ArrayBuffer[Vertex] = {
       
       busProcs(v.id) match {
-	case BusSelect(b) => {
+	case BusSelect(b, varMap) => {
 	  val next = ArrayBuffer[Vertex]()
 	  for ( p <- vars ) {
             // Depends on whether the i-th element is bus
-	    val (isNew, optV) = varSelection(b, v, p) 
+	    val (isNew, optV) = varSelection(b, varMap(v.id), v, p) 
 	    if (isNew) {
 	      optV match {
 		case Some(reached) => busReached(p.id) = reached
@@ -655,10 +653,9 @@ class DataflowGraph() {
 
   def reachBus(src:Array[Int], inactive:Inactive, 
                busProcs:Map[Int,BusAction], 
-	       busElemEdge:Map[Int, VBusSelect],
-	       busElemVar:Map[Int, Int]) = {
+	       busElemEdge:Map[Int, VBusSelect]) = {
     val reach = new BusReachFor(g, busProcs,  
-				busElemEdge, busElemVar, 
+				busElemEdge, 
 				inactive)
     reach.run(src)
   }
