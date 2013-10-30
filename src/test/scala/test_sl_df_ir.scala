@@ -363,4 +363,199 @@ class DfGraphTest extends FunSuite {
     assert(v.contains(dfg.g.getV(bp.id)))
     assert(!v.contains(dfg.g.getV(cp.id)))
   }
+
+  test("SL DF with assignment") {
+    //  |A| --> | BC | 
+    //  |B| --> |    |==>| BA |----> |UC|
+    //  |C| ------------>|    |
+    val dfg = new DataflowGraph()
+    val (_, ap, a) = dfg.createNodes("A", 0, 1)
+    val (_,bp,b) = dfg.createNodes("B", 0, 1)
+    val (bci, bcp, bc) = dfg.createNodes("BC", 2, 1)
+    dfg.addEdge(a(0), bci(0))
+    dfg.addEdge(b(0), bci(1))
+
+    val (_,cp,c) = dfg.createNodes("C", 0, 1)
+    val (bai, bap, ba) = dfg.createNodes("BA", 2, 1)
+    dfg.addEdge(bc(0), bai(0))
+    dfg.addEdge(c(0), bai(1))
+
+    val (uci, ucp, _) = dfg.createNodes("Uc", 1, 0)
+    val e1 = dfg.addEdge(ba(0), uci(0))
+    
+    val inact = new Inactive(Array[Int](), Array[Int]())
+    val at = AtomicElement("a",1)
+    val bt = AtomicElement("b",1)
+    val bus1 = Bus("Bus1", List(at,bt))
+ 
+    val busVars = bci.map( x => x.id).toList
+    val busProc = Map[Int,BusAction](bcp.id -> BusCreate(bus1, busVars),
+				     bap.id -> BusAssign(bus1, bai(0).id, 
+							 Map(bai(1).id -> 2))) // first input assign 2
+    val busE = Map(e1.id -> VBusSelect(bus1, 2))
+    val (v,busReached) = dfg.backreachBus(Array(ucp.id),
+                                          inact,
+                                          busProc,
+					  busE)
+    assert(!v.contains(dfg.g.getV(ap.id)))
+    assert(!v.contains(dfg.g.getV(bp.id)))
+    assert(v.contains(dfg.g.getV(cp.id)))
+       
+  }
+
+
+  test("SL DF with assignment 2" ) {
+    //  |A| --> | BC | 
+    //  |B| --> |    |==>| BA |----> |UA|
+    //  |C| ------------>|    |
+    val dfg = new DataflowGraph()
+    val (_, ap, a) = dfg.createNodes("A", 0, 1)
+    val (_,bp,b) = dfg.createNodes("B", 0, 1)
+    val (bci, bcp, bc) = dfg.createNodes("BC", 2, 1)
+    dfg.addEdge(a(0), bci(0))
+    dfg.addEdge(b(0), bci(1))
+
+    val (_,cp,c) = dfg.createNodes("C", 0, 1)
+    val (bai, bap, ba) = dfg.createNodes("BA", 2, 1)
+    dfg.addEdge(bc(0), bai(0))
+    dfg.addEdge(c(0), bai(1))
+
+    val (uci, ucp, _) = dfg.createNodes("Uc", 1, 0)
+    val e1 = dfg.addEdge(ba(0), uci(0))
+    
+    val inact = new Inactive(Array[Int](), Array[Int]())
+    val at = AtomicElement("a",1)
+    val bt = AtomicElement("b",1)
+    val bus1 = Bus("Bus1", List(at,bt))
+ 
+    val busVars = bci.map( x => x.id).toList
+    val busProc = Map[Int,BusAction](bcp.id -> BusCreate(bus1, busVars),
+				     bap.id -> BusAssign(bus1, bai(0).id, 
+							 Map(bai(1).id -> 2))) // first input assign 2
+    val busE = Map(e1.id -> VBusSelect(bus1, 1))
+    val (v,busReached) = dfg.backreachBus(Array(ucp.id),
+                                          inact,
+                                          busProc,
+					  busE)
+    assert(v.contains(dfg.g.getV(ap.id)))
+    assert(!v.contains(dfg.g.getV(bp.id)))
+    assert(!v.contains(dfg.g.getV(cp.id)))
+       
+  }
+
+
+  test("SL DF with assignment 3" ) {
+    //  |A| --> | BC | 
+    //  |B| --> |    |==>| BC |
+    //  |C| ------------>|    | ==> | BA | --[select]-->|Ud|
+    //       |D| -> | BC|=========> |    |
+    //       |E| -> |   |
+
+    val dfg = new DataflowGraph()
+    val (_, ap, a) = dfg.createNodes("A", 0, 1)
+    val (_,bp,b) = dfg.createNodes("B", 0, 1)
+    val (bci, bcp, bc) = dfg.createNodes("BC", 2, 1)
+    dfg.addEdge(a(0), bci(0))
+    dfg.addEdge(b(0), bci(1))
+
+    val (_,cp,c) = dfg.createNodes("C", 0, 1)
+    val (bc2i, bc2p, bc2) = dfg.createNodes("BC2", 2, 1)
+    dfg.addEdge(bc(0), bc2i(0))
+    dfg.addEdge(c(0), bc2i(1))
+
+    val (_, dp, d) = dfg.createNodes("D", 0, 1)
+    val (_, ep, e) = dfg.createNodes("E", 0, 1)
+    val (bc3i, bc3p, bc3) = dfg.createNodes("BC3", 2, 1)
+    dfg.addEdge(d(0), bc3i(0))
+    dfg.addEdge(e(0), bc3i(1))
+
+    val (bai, bap, ba) = dfg.createNodes("BA", 2, 1)
+    dfg.addEdge(bc2(0), bai(0))
+    dfg.addEdge(bc3(0), bai(1))
+
+    val (udi, udp, _) = dfg.createNodes("Ud", 1, 0)
+    val e1 = dfg.addEdge(ba(0), udi(0))
+    
+    val inact = new Inactive(Array[Int](), Array[Int]())
+    val at = AtomicElement("a",1)
+    val bt = AtomicElement("b",1)
+    val bus1 = Bus("Bus1", List(at,bt))
+
+
+    val ct = AtomicElement("c",1)
+    val bus2 = Bus("Bus2", List[BusElement](bus1,ct))
+ 
+    val bus1Vars = bci.map( x => x.id).toList
+    val bus2Vars = bc2i.map(x => x.id).toList
+    val bus3Vars = bc3i.map(x => x.id).toList
+    val busProc = Map[Int,BusAction](bcp.id -> BusCreate(bus1, bus1Vars),
+				     bc2p.id -> BusCreate(bus2, bus2Vars),
+				     bc3p.id -> BusCreate(bus1, bus3Vars),
+				     bap.id -> BusAssign(bus2, bai(0).id, 
+							 Map(bai(1).id -> 1))) // first input assign 1
+    val busE = Map(e1.id -> VBusSelect(bus1, 2))
+    val (v,busReached) = dfg.backreachBus(Array(udp.id),
+                                          inact,
+                                          busProc,
+					  busE)
+    assert(!v.contains(dfg.g.getV(ap.id)))
+    assert(!v.contains(dfg.g.getV(bp.id)))
+    assert(!v.contains(dfg.g.getV(cp.id)))
+    assert(v.contains(dfg.g.getV(dp.id)))
+    assert(!v.contains(dfg.g.getV(ep.id)))
+       
+  }
+
+  test("SL DF with assignment forward 1") {
+    //  |A| --> | BC | 
+    //  |B| --> |    |==>| BA |----> |UA|
+    //  |C| ------------>|    |----> |UC|
+    val dfg = new DataflowGraph()
+    val (_, ap, a) = dfg.createNodes("A", 0, 1)
+    val (_,bp,b) = dfg.createNodes("B", 0, 1)
+    val (bci, bcp, bc) = dfg.createNodes("BC", 2, 1)
+    dfg.addEdge(a(0), bci(0))
+    dfg.addEdge(b(0), bci(1))
+
+    val (_,cp,c) = dfg.createNodes("C", 0, 1)
+    val (bai, bap, ba) = dfg.createNodes("BA", 2, 1)
+    dfg.addEdge(bc(0), bai(0))
+    dfg.addEdge(c(0), bai(1))
+
+    val (uai, uap, _) = dfg.createNodes("Ua", 1, 0)
+    val sa = dfg.addEdge(ba(0), uai(0))
+    val (uci, ucp, _) = dfg.createNodes("Uc", 1, 0)
+    val sc = dfg.addEdge(ba(0), uci(0))
+    
+    val inact = new Inactive(Array[Int](), Array[Int]())
+    val at = AtomicElement("a",1)
+    val bt = AtomicElement("b",1)
+    val bus1 = Bus("Bus1", List(at,bt))
+ 
+    val busVars = bci.map( x => x.id).toList
+    val busProc = Map[Int,BusAction](bcp.id -> BusCreate(bus1, busVars),
+				     bap.id -> BusAssign(bus1, bai(0).id, 
+							 Map(bai(1).id -> 2))) // first input assign 2
+    val busE = Map(sa.id -> VBusSelect(bus1, 1),
+		   sc.id -> VBusSelect(bus1, 2))
+    val (v,busReached) = dfg.reachBus(Array(ap.id),
+                                      inact,
+                                      busProc,
+				      busE)
+    assert(v.contains(dfg.g.getV(uap.id)))
+    assert(!v.contains(dfg.g.getV(ucp.id)))
+       
+    val (v2,_) = dfg.reachBus(Array(bp.id),
+                                      inact,
+                                      busProc,
+				      busE)
+    assert(!v2.contains(dfg.g.getV(uap.id)))
+    assert(!v2.contains(dfg.g.getV(ucp.id)))  
+    val (v3,_) = dfg.reachBus(Array(cp.id),
+                                      inact,
+                                      busProc,
+				      busE)
+    assert(!v3.contains(dfg.g.getV(uap.id)))
+    assert(v3.contains(dfg.g.getV(ucp.id)))  
+  }
 }

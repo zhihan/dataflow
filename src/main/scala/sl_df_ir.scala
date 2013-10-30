@@ -314,6 +314,43 @@ class DataflowGraph() {
       busProcs(v.id) match {
         case BusPass(b) => predBusPass(b)
 	case BusSelect(b, _) => predBusPass(b)
+	case BusAssign(b, busInput, assignMap) => {
+	  // Given R as reached, (R \ As)  is passed to input
+	  assert(busReached.contains(v.id))
+	  val next = ArrayBuffer[Vertex]()
+	  val reached = busReached(v.id)
+	  val assignSet = assignMap.map{ case(k,v) => v}.toSet
+	  val passed = b.diff(reached.elements, assignSet)
+	  if (!passed.isEmpty) {
+	    // Nonempty set pass to input
+	    val current = SubBus(b, passed)
+	    val inputV = graph.getV(busInput)
+	    if (updateResult(inputV, current)) next += inputV
+	  }
+
+	  for ((vid,idx) <- assignMap) {
+	    // For each assigned element, compute (as \cap R)
+	    // pass the result to the element. 
+	    val inter = b.intersect(Set(idx), reached.elements) 
+	    // lower the bus to the descendant type
+	    if (!inter.isEmpty) {
+	      val elem = b.get(idx)
+	      val p = graph.getV(vid)
+	      elem match {
+		case sb:Bus => {
+		  val inputSet = b.toDescendant(idx, inter)
+		  val current = SubBus(sb, inputSet)
+		  if (updateResult(p, current)) next += p
+		}		  
+		case _:AtomicElement => 
+		  if (!bfs.visited.contains(p)) next += p
+		
+	      }
+	    }
+	    
+	  }
+	  next
+	}
         case BusCreate(b,srcInputs) => {
           val next = ArrayBuffer[Vertex]()
           val reached = busReached(v.id).distribute
@@ -465,6 +502,27 @@ class DataflowGraph() {
           val current = SubBus(b, b.collect(cs))
           updateResult(p, current)
          }
+	case BusAssign(b, inputId, assignMap) => {
+	  if (v.id == inputId) {
+	    val assignSet = assignMap.map{ case(k,v) => v}.toSet
+	    val reached = busReached(v.id)
+	    val passed = b.diff(reached.elements, assignSet)
+	    if (!passed.isEmpty) {
+	      updateResult(p, SubBus(b, passed))
+	    } else 
+	      false
+	  } else {
+	    assert(assignMap.contains(v.id))
+	    val idx = assignMap(v.id)
+	    val inputSet = 
+	      if (busReached.contains(v.id))
+		busReached(v.id).elements
+	      else Set(0)
+	    val bSet = b.fromDescendant(idx, inputSet)
+	    updateResult(p, SubBus(b,bSet))
+	  }
+	    
+	}
       }
     }
     
@@ -537,7 +595,16 @@ class DataflowGraph() {
     // [v] => (vars)
     private def visitBusProc(v:Vertex,
                              vars:ArrayBuffer[Vertex]): ArrayBuffer[Vertex] = {
-      
+      def simplePass = {
+          val next = ArrayBuffer[Vertex]()
+          for (p <- vars) {
+            if (updateResult(p, busReached(v.id))) {
+              next += p
+            }
+          }
+          next
+      }
+
       busProcs(v.id) match {
 	case BusSelect(b, varMap) => {
 	  val next = ArrayBuffer[Vertex]()
@@ -554,25 +621,8 @@ class DataflowGraph() {
 	  }
 	  next
 	}
-        case BusPass(b) => {
-          val next = ArrayBuffer[Vertex]()
-          for (p <- vars) {
-            if (updateResult(p, busReached(v.id))) {
-              next += p
-            }
-          }
-          next
-        }
-        case BusCreate(b, _) => {
-          val next = ArrayBuffer[Vertex]()
-          for (p <- vars) {
-            if (updateResult(p, busReached(v.id))) {
-              next += p
-            }
-          }
-          next
-        }
-      }  
+        case BusPass(_) | BusCreate(_,_) | BusAssign(_,_,_) => simplePass
+      }
     }
 
 
