@@ -253,25 +253,22 @@ class DataflowGraph() {
         (srcBus, SubBus(srcBus, srcBus.fromDescendant(i, dstSet)))
       }
       
-      val processedE = Set[Int]() 
       val edges  = graph.getEdges(varNode.id, in.id)
       var updated = false
       for (e <- edges) {
-	if (!processedE.contains(e.id)) {
-	  // Prevent repeating
-	  if (busElementEdge.contains(e.id)) {
-            // There is a selection between busVar and in
-            // Reached elements at <in>
-            val vReached = 
-	      if (busReached.contains(in.id)) busReached(in.id).elements else Set(0)
-            // Compute the corresponding reached at (BusVar)
-            val (_,current) = getSrcBusSel(e.id, vReached)
-            
-            if (updateResult(varNode, current)) updated = true
-	  } else {
+	// Prevent repeating
+	if (busElementEdge.contains(e.id)) {
+          // There is a selection between busVar and in
+          // Reached elements at <in>
+          val vReached = 
+	    if (busReached.contains(in.id)) busReached(in.id).elements else Set(0)
+          // Compute the corresponding reached at (BusVar)
+          val (_,current) = getSrcBusSel(e.id, vReached)
+          
+          if (updateResult(varNode, current)) updated = true
+	} else {
 	    // No selection, pass the reached to input
-	    if (updateResult(varNode, busReached(in.id))) updated = true
-	  }
+	  if (updateResult(varNode, busReached(in.id))) updated = true
 	}
       }
       updated
