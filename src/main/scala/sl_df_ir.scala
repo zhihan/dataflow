@@ -750,15 +750,25 @@ class DataflowGraph() {
 
   def backwardReachableProcs(src: Array[Int], 
                              inactive:Inactive) = {
-    val reach = new Reachable(g)
-    val allReached = reach.backward(src,inactive)
+//    val reach = new Reachable(g)
+//    val allReached = reach.backward(src,inactive)
+    val busProcs = Map[Int,BusAction]()
+    val busElemEdge = Map[Int, VBusSelect]()
+    val (all, _) = backreachBus(src, inactive, 
+				busProcs, busElemEdge)
+    val allReached = all.map(n => n.id)
     allReached.filter( i => isProc(nodes(i))).toArray
   }
 
   def backwardReachableVars(src: Array[Int], 
                              inactive:Inactive) = {
-    val reach = new Reachable(g)
-    val allReached = reach.backward(src,inactive)
+//    val reach = new Reachable(g)
+//    val allReached = reach.backward(src,inactive)
+    val busProcs = Map[Int,BusAction]()
+    val busElemEdge = Map[Int, VBusSelect]()
+    val (all, _) = backreachBus(src, inactive, 
+				busProcs, busElemEdge)
+    val allReached = all.map(n => n.id)
     allReached.filter( i => isVar(nodes(i))).toArray
   }
 
