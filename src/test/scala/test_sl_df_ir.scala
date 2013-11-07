@@ -157,9 +157,10 @@ class DfGraphTest extends FunSuite {
 			 uce.id -> VBusSelect(bus,3))
     // println(dfg.toDotString)
     // println(busElemEdge)
-    val (v,busReached) = dfg.reachBus(Array(ap.id,bp.id),
+    val reachSet = dfg.reachBus(Array(ap.id,bp.id),
                                       inact,
                                       busProc, busElemEdge)
+    val v = reachSet.reachedVertices
     /*
     for (x <- v) {
       print(" " + x.sid)
@@ -169,9 +170,9 @@ class DfGraphTest extends FunSuite {
 	print(elems + "}")
       }
     } */
-    assert(v.contains(dfg.g.getV(uap.id)))
-    assert(v.contains(dfg.g.getV(ubp.id)))
-    assert(!v.contains(dfg.g.getV(ucp.id)))
+    assert(v.contains(uap.id))
+    assert(v.contains(ubp.id))
+    assert(!v.contains(ucp.id))
   }
   
   test("SL DF with nv selector") {
@@ -197,11 +198,12 @@ class DfGraphTest extends FunSuite {
     val busElemEdge  = Map[Int, VBusSelect]()
     //println(dfg.toDotString)
     
-    val (v,busReached) = dfg.backreachBus(Array(ubp.id),
-                                          inact,
-                                          busProc, busElemEdge)
-    assert(!v.contains(dfg.g.getV(ap.id)))
-    assert(v.contains(dfg.g.getV(bp.id)))
+    val reachSet = dfg.backreachBus(Array(ubp.id),
+                                    inact,
+                                    busProc, busElemEdge)
+    val v = reachSet.reachedVertices
+    assert(!v.contains(ap.id))
+    assert(v.contains(bp.id))
    
   }
    
@@ -249,13 +251,14 @@ class DfGraphTest extends FunSuite {
     val busElemEdge = Map(uae.id -> VBusSelect(bus,1), 
 			 ube.id -> VBusSelect(bus,2), 
 			 uce.id -> VBusSelect(bus,3))
-    val (v,busReached) = dfg.backreachBus(Array(uap.id,ubp.id),
+    val reachSet = dfg.backreachBus(Array(uap.id,ubp.id),
                                           inact,
                                           busProc,
 					  busElemEdge)
-    assert(v.contains(dfg.g.getV(ap.id)))
-    assert(v.contains(dfg.g.getV(bp.id)))
-    assert(!v.contains(dfg.g.getV(cp.id)))
+    val v = reachSet.reachedVertices
+    assert(v.contains(ap.id))
+    assert(v.contains(bp.id))
+    assert(!v.contains(cp.id))
   }
 
 
@@ -307,13 +310,14 @@ class DfGraphTest extends FunSuite {
     val busE = Map(e1.id -> VBusSelect(bus2, 3))
     // println(dfg.toDotString)
     // println(busE)
-    val (v,busReached) = dfg.backreachBus(Array(ubp.id),
+    val reachSet = dfg.backreachBus(Array(ubp.id),
                                           inact,
                                           busProc,
 					  busE)
-    assert(!v.contains(dfg.g.getV(ap.id)))
-    assert(v.contains(dfg.g.getV(bp.id)))
-    assert(!v.contains(dfg.g.getV(cp.id)))
+    val v = reachSet.reachedVertices
+    assert(!v.contains(ap.id))
+    assert(v.contains(bp.id))
+    assert(!v.contains(cp.id))
   }
 
   test("SL DF with exchange nv bus") {
@@ -355,13 +359,14 @@ class DfGraphTest extends FunSuite {
                                    e1.id -> VBusSelect(bus2, 1))
     //println(dfg.toDotString)
     //println(busE)
-    val (v,busReached) = dfg.backreachBus(Array(ubp.id),
+    val reachSet = dfg.backreachBus(Array(ubp.id),
                                           inact,
                                           busProc,
 					  busE)
-    assert(!v.contains(dfg.g.getV(ap.id)))
-    assert(v.contains(dfg.g.getV(bp.id)))
-    assert(!v.contains(dfg.g.getV(cp.id)))
+    val v = reachSet.reachedVertices
+    assert(!v.contains(ap.id))
+    assert(v.contains(bp.id))
+    assert(!v.contains(cp.id))
   }
 
   test("SL DF with assignment") {
@@ -393,13 +398,14 @@ class DfGraphTest extends FunSuite {
 				     bap.id -> BusAssign(bus1, bai(0).id, 
 							 Map(bai(1).id -> 2))) // first input assign 2
     val busE = Map(e1.id -> VBusSelect(bus1, 2))
-    val (v,busReached) = dfg.backreachBus(Array(ucp.id),
+    val visited = dfg.backreachBus(Array(ucp.id),
                                           inact,
                                           busProc,
 					  busE)
-    assert(!v.contains(dfg.g.getV(ap.id)))
-    assert(!v.contains(dfg.g.getV(bp.id)))
-    assert(v.contains(dfg.g.getV(cp.id)))
+    val v = visited.reachedVertices
+    assert(!v.contains(ap.id))
+    assert(!v.contains(bp.id))
+    assert(v.contains(cp.id))
        
   }
 
@@ -433,13 +439,14 @@ class DfGraphTest extends FunSuite {
 				     bap.id -> BusAssign(bus1, bai(0).id, 
 							 Map(bai(1).id -> 2))) // first input assign 2
     val busE = Map(e1.id -> VBusSelect(bus1, 1))
-    val (v,busReached) = dfg.backreachBus(Array(ucp.id),
+    val reachSet = dfg.backreachBus(Array(ucp.id),
                                           inact,
                                           busProc,
 					  busE)
-    assert(v.contains(dfg.g.getV(ap.id)))
-    assert(!v.contains(dfg.g.getV(bp.id)))
-    assert(!v.contains(dfg.g.getV(cp.id)))
+    val v = reachSet.reachedVertices
+    assert(v.contains(ap.id))
+    assert(!v.contains(bp.id))
+    assert(!v.contains(cp.id))
        
   }
 
@@ -494,15 +501,16 @@ class DfGraphTest extends FunSuite {
 				     bap.id -> BusAssign(bus2, bai(0).id, 
 							 Map(bai(1).id -> 1))) // first input assign 1
     val busE = Map(e1.id -> VBusSelect(bus1, 2))
-    val (v,busReached) = dfg.backreachBus(Array(udp.id),
+    val reachSet = dfg.backreachBus(Array(udp.id),
                                           inact,
                                           busProc,
 					  busE)
-    assert(!v.contains(dfg.g.getV(ap.id)))
-    assert(!v.contains(dfg.g.getV(bp.id)))
-    assert(!v.contains(dfg.g.getV(cp.id)))
-    assert(v.contains(dfg.g.getV(dp.id)))
-    assert(!v.contains(dfg.g.getV(ep.id)))
+    val v = reachSet.reachedVertices
+    assert(!v.contains(ap.id))
+    assert(!v.contains(bp.id))
+    assert(!v.contains(cp.id))
+    assert(v.contains(dp.id))
+    assert(!v.contains(ep.id))
        
   }
 
@@ -538,24 +546,27 @@ class DfGraphTest extends FunSuite {
 							 Map(bai(1).id -> 2))) // first input assign 2
     val busE = Map(sa.id -> VBusSelect(bus1, 1),
 		   sc.id -> VBusSelect(bus1, 2))
-    val (v,busReached) = dfg.reachBus(Array(ap.id),
+    val reachSet = dfg.reachBus(Array(ap.id),
                                       inact,
                                       busProc,
 				      busE)
-    assert(v.contains(dfg.g.getV(uap.id)))
-    assert(!v.contains(dfg.g.getV(ucp.id)))
+    val v = reachSet.reachedVertices
+    assert(v.contains(uap.id))
+    assert(!v.contains(ucp.id))
        
-    val (v2,_) = dfg.reachBus(Array(bp.id),
+    val reachSet2 = dfg.reachBus(Array(bp.id),
                                       inact,
                                       busProc,
 				      busE)
-    assert(!v2.contains(dfg.g.getV(uap.id)))
-    assert(!v2.contains(dfg.g.getV(ucp.id)))  
-    val (v3,_) = dfg.reachBus(Array(cp.id),
+    val v2 = reachSet2.reachedVertices
+    assert(!v2.contains(uap.id))
+    assert(!v2.contains(ucp.id))  
+    val reachSet3 = dfg.reachBus(Array(cp.id),
                                       inact,
                                       busProc,
 				      busE)
-    assert(!v3.contains(dfg.g.getV(uap.id)))
-    assert(v3.contains(dfg.g.getV(ucp.id)))  
+    val v3 = reachSet3.reachedVertices
+    assert(!v3.contains(uap.id))
+    assert(v3.contains(ucp.id))  
   }
 }

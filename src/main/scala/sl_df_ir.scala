@@ -1,6 +1,7 @@
 package sl.ir
 
 import my.se._
+import scala.collection.immutable.Set
 import scala.collection.mutable.Map
 import scala.collection.mutable.ArrayBuffer
 
@@ -31,6 +32,21 @@ case class Input(override val id: Int) extends DataflowNode
 {
 }
 
+// Object to store the result of reachability analysis. 
+class ReachSet(
+  graph: DataflowGraph,
+  val reachedVertices:Set[Int],
+  val reachedSubBus:Map[Int, SubBus]) {
+
+  def getProcs = 
+    reachedVertices.filter{ i => graph.isProc(graph.nodes(i))} 
+
+  def getVars = 
+    reachedVertices.filter{ i => graph.isVar(graph.nodes(i)) }
+
+  def getInputs =
+    reachedVertices.filter{ i => graph.isInput(graph.nodes(i))} 
+}
 
 
 object DataflowUtil {
@@ -82,7 +98,7 @@ class DataflowGraph() {
   def nNodes = g.V.size
   def nEdges = g.E.size
 
-  private def isProc(n:DataflowNode) = {
+  def isProc(n:DataflowNode) = {
     n match {
       case Var(_) => false
       case Proc(_) => true 
@@ -90,11 +106,19 @@ class DataflowGraph() {
     }
   }
 
-  private def isVar(n:DataflowNode) = {
+  def isVar(n:DataflowNode) = {
     n match {
       case Var(_) => true
       case Proc(_) => false 
       case Input(_) => false
+    }
+  }
+
+  def isInput(n:DataflowNode) = {
+    n match {
+      case Var(_) => false
+      case Proc(_) => false 
+      case Input(_) => true
     }
   }
 
@@ -441,6 +465,7 @@ class DataflowGraph() {
     def run(start:Array[Int]) = {
       bfs.initialize(graph.getV(start))
       bfs.runAlways()
+      // Return result in an object
       (bfs.visited, busReached)
     }
   }
@@ -450,7 +475,10 @@ class DataflowGraph() {
 		   busElemEdge: Map[Int, VBusSelect]) = {
     val reach = new BusReachBack(g, busProcs, busElemEdge, 
 				 inactive)
-    reach.run(src)
+    val (visited, subBusMap) = reach.run(src)
+    // Repeated parameter
+    val immutableV = Set(visited.toSeq:_*).map(_.id)
+    new ReachSet(this, immutableV, subBusMap)
   }
 
   // Forward reach with support for nonvirtual buses
@@ -704,7 +732,9 @@ class DataflowGraph() {
     val reach = new BusReachFor(g, busProcs,  
 				busElemEdge, 
 				inactive)
-    reach.run(src)
+    val (visited, busReach) = reach.run(src)
+    val immutableV = Set(visited.toSeq:_*).map(_.id)
+    new ReachSet(this, immutableV, busReach)
   }
 
 
@@ -722,16 +752,18 @@ class DataflowGraph() {
 
   def forwardReachableProcs(src:Array[Int],
     inactive:Inactive) = {
-    val reach  = new Reachable(g)
-    val allReached = reach.forward(src, inactive)
-    allReached.filter( i=> isProc(nodes(i))).toArray
+    val busProcs = Map[Int, BusAction]()
+    val busElemEdge = Map[Int, VBusSelect]()
+    val reachSet = reachBus(src, inactive, busProcs, busElemEdge)
+    reachSet.getProcs.toArray
   }
 
   def forwardReachableVars(src:Array[Int],
     inactive:Inactive) = {
-    val reach  = new Reachable(g)
-    val allReached = reach.forward(src, inactive)
-    allReached.filter( i=> !isProc(nodes(i))).toArray
+    val busProcs = Map[Int, BusAction]()
+    val busElemEdge = Map[Int, VBusSelect]()
+    val reachSet = reachBus(src, inactive, busProcs, busElemEdge)
+    reachSet.getVars.toArray
   }
 
 
@@ -754,10 +786,9 @@ class DataflowGraph() {
 //    val allReached = reach.backward(src,inactive)
     val busProcs = Map[Int,BusAction]()
     val busElemEdge = Map[Int, VBusSelect]()
-    val (all, _) = backreachBus(src, inactive, 
+    val reachSet = backreachBus(src, inactive, 
 				busProcs, busElemEdge)
-    val allReached = all.map(n => n.id)
-    allReached.filter( i => isProc(nodes(i))).toArray
+    reachSet.getProcs.toArray
   }
 
   def backwardReachableVars(src: Array[Int], 
@@ -766,10 +797,9 @@ class DataflowGraph() {
 //    val allReached = reach.backward(src,inactive)
     val busProcs = Map[Int,BusAction]()
     val busElemEdge = Map[Int, VBusSelect]()
-    val (all, _) = backreachBus(src, inactive, 
+    val reachSet = backreachBus(src, inactive, 
 				busProcs, busElemEdge)
-    val allReached = all.map(n => n.id)
-    allReached.filter( i => isVar(nodes(i))).toArray
+    reachSet.getVars.toArray
   }
 
   // Combine forward reach and backward reach 
