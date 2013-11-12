@@ -41,11 +41,34 @@ class ReachSet(
   def getProcs = 
     reachedVertices.filter{ i => graph.isProc(graph.nodes(i))} 
 
+  def getProcsArray = getProcs.toArray
+
   def getVars = 
     reachedVertices.filter{ i => graph.isVar(graph.nodes(i)) }
+  def getVarsArray = getVars.toArray
 
   def getInputs =
     reachedVertices.filter{ i => graph.isInput(graph.nodes(i))} 
+  def getInputsArray = getInputs.toArray
+
+  def getVarInputPairArray = { 
+    val pairs = for ( vid <- reachedVertices
+		     if (graph.isVar(graph.nodes(vid)));
+		     v = graph.g.getV(vid);
+		     iV <- graph.g.succ(v) 
+		     if reachedVertices.contains(iV.id))
+		yield {
+		  assert(graph.isInput(graph.nodes(iV.id)))
+		  (vid, iV.id)
+		}
+    // Workaround for MATLAB return argument
+    val result = ArrayBuffer[Int]()
+    for ((x,y) <- pairs) {
+      result += x
+      result += y
+    }
+    result
+  }
 }
 
 
