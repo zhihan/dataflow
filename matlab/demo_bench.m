@@ -1,5 +1,5 @@
 a = {'a'};
-n = 200000
+n = 10000
 b = repmat(a, 1,n);
 
 fprintf('Scalar\n');
@@ -13,6 +13,5 @@ toc,
 fprintf('Vectorized\n')
 g2 = sl.ir.DataflowGraph;
 tic,
-names = strjoin(b, '.');
-v2 = g2.newVarNodes(names);
+v2 = g2.newVarNodes(b);
 toc
