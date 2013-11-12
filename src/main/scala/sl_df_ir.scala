@@ -481,6 +481,13 @@ class DataflowGraph() {
     new ReachSet(this, immutableV, subBusMap)
   }
 
+
+  def backreachNoBus(src:Array[Int], inactive:Inactive) = {
+    val busProcs = Map[Int, BusAction]()
+    val busElemEdge = Map[Int, VBusSelect]()
+    backreachBus(src, inactive, busProcs, busElemEdge)
+  }
+
   // Forward reach with support for nonvirtual buses
   class BusReachFor(graph:Graph, 
 		    busProcs:Map[Int,BusAction], 
