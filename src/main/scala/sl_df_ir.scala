@@ -218,8 +218,10 @@ class DataflowGraph() {
   }
 
   def addEdges(src:Array[Int], dst:Array[Int]):Array[Int] = {
+    // Create a map to speed up lookup.
+    val m = g.V.map{ v => (v.id, v) }.toMap
     (src,dst).zipped.map {
-      (s, d) => g.addEdge(s,d)
+      (s, d) => g.addEdge(m(s),m(d))
     }.map{ e => e.id }.toArray
   }
 
