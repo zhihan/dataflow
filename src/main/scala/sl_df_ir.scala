@@ -51,7 +51,7 @@ class ReachSet(
     reachedVertices.filter{ i => graph.isInput(graph.nodes(i))} 
   def getInputsArray = getInputs.toArray
 
-  def getVarInputPairArray = { 
+  def getVarInputPairArray: Array[Int] = { 
     val pairs = for ( vid <- reachedVertices
 		     if (graph.isVar(graph.nodes(vid)));
 		     v = graph.g.getV(vid);
@@ -67,7 +67,7 @@ class ReachSet(
       result += x
       result += y
     }
-    result
+    result.toArray
   }
 }
 
