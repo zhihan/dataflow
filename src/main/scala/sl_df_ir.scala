@@ -152,6 +152,13 @@ class DataflowGraph() {
     n
   }
 
+  def newVarNodes(names:Array[String]): Array[Int] = {
+    names.map( n => {
+      val v = newVarNode(n) 
+      v.id
+    })
+  }
+
   def getVarNodes(name:String) = {
     g.V.filter(_.sid == name)
   }
@@ -163,11 +170,25 @@ class DataflowGraph() {
     n
   }
 
+  def newProcNodes(names:Array[String]) = {
+    names.map( n => {
+      val v = newProcNode(n) 
+      v.id
+    })
+  }
+
   def newInputNode(name:String) = {
     val v = g.newVertex(name)
     val n = Input(v.id)
     nodes(v.id) = n
     n
+  }
+
+  def newInputNodes(names:Array[String]) = {
+    names.map( n => {
+      val v = newInputNode(n) 
+      v.id
+    })
   }
 
   def createNodes(name:String, nIn: Int, nOut:Int) = {
@@ -194,6 +215,12 @@ class DataflowGraph() {
     } else {
       g.addEdge(src, dst)
     }
+  }
+
+  def addEdges(src:Array[Int], dst:Array[Int]):Array[Int] = {
+    (src,dst).zipped.map {
+      (s, d) => g.addEdge(s,d)
+    }.map{ e => e.id }.toArray
   }
 
   def addEdge(src:DataflowNode, dst:DataflowNode) = 
