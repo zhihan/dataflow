@@ -46,7 +46,7 @@ class Graph() {
   val E = ArrayBuffer[Edge]()
 
   var id = 0
-
+  var eid = 0
 
   def newVertex(name:String) = {
     id += 1
@@ -56,8 +56,8 @@ class Graph() {
   }
 
   def addEdge(src:Vertex, dst:Vertex):Edge = {
-    val id = E.size()
-    val e = new Edge(id, src, dst)
+    eid += 1
+    val e = new Edge(eid, src, dst)
     E.add(e)
     e 
   }

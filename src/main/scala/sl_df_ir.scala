@@ -32,6 +32,12 @@ case class Input(override val id: Int) extends DataflowNode
 {
 }
 
+// Identify each dataflow edge by the index at input port
+sealed abstract class DataflowEdge 
+case class Signal(val inportIdx:Int) extends DataflowEdge
+case object Read extends DataflowEdge
+case object Write extends DataflowEdge
+
 // Object to store the result of reachability analysis. 
 class ReachSet(
   graph: DataflowGraph,
@@ -117,6 +123,7 @@ class DataflowGraph() {
 
   // Get the node for a given Id
   val nodes = Map[Int, DataflowNode]()
+  val edges = Map[Int, DataflowEdge]()
 
   def nNodes = g.V.size
   def nEdges = g.E.size
@@ -214,6 +221,21 @@ class DataflowGraph() {
       throw new RuntimeException("No self-loop is allowed")
     } else {
       g.addEdge(src, dst)
+    }
+  }
+
+  def setEdgeType(eid:Int, typeOrIdx:Int) {
+    typeOrIdx match {
+      case -1 => {
+	edges(eid) = Read
+      }
+      case 0 => {
+	edges(eid) = Write
+      }
+      case _ => {
+	assert(typeOrIdx>0)
+	edges(eid) = Signal(typeOrIdx)
+      }
     }
   }
 
