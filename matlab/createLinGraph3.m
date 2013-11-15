@@ -1,4 +1,4 @@
-function g = createLinGraph(n)
+function g = createLinGraph3(n)
 % Create a simple linear graph with node type and edges.
 totalV = 0;  %
 vTypes = [];
@@ -10,12 +10,15 @@ outputs = [];
 m = containers.Map('KeyType', 'double', 'ValueType', 'double');
 
 for i=1:n
-    [totalV, vTypes] = createInput(totalV, vTypes, m);
+    [totalV, vTypes] = createInput(totalV, vTypes);
+    m(totalV) = totalV;
     vIn = totalV;
-    [totalV, vTypes] = createProc(totalV, vTypes, m);
+    [totalV, vTypes] = createProc(totalV, vTypes);
     proc = totalV;
+    m(totalV) = totalV;
     [totalE, edges] = addEdge(totalE, edges, vIn, proc);
-    [totalV, vTypes] = createVar(totalV, vTypes, m);
+    [totalV, vTypes] = createVar(totalV, vTypes);
+    m(totalV) = totalV;
     [totalE, edges] = addEdge(totalE, edges, proc, totalV);
     
    inputs(end+1) = vIn; %#ok<AGROW> 
@@ -33,32 +36,30 @@ g.addEdgesFromArray(edges(1:totalE,1), edges(1:totalE,2), ones(totalE,1));
 end
 
 
-function [totalV, vTypes] = createInput(totalV, vTypes, m)
+function [totalV, vTypes] = createInput(totalV, vTypes)
 totalV = totalV + 1;
 if totalV > size(vTypes,1)
     vTypes = [vTypes; zeros(size(vTypes))];
 end
 
 vTypes(totalV) = 3;
-m(totalV) = totalV; % benchmark
+
 end
 
-function [totalV, vTypes] = createProc(totalV, vTypes, m)
+function [totalV, vTypes] = createProc(totalV, vTypes)
 totalV = totalV + 1;
 if totalV > size(vTypes,1)
     vTypes = [vTypes; zeros(size(vTypes))];
 end
 vTypes(totalV) = 2;
-m(totalV) = totalV; % benchmark
 end
 
-function [totalV, vTypes] = createVar(totalV, vTypes, m)
+function [totalV, vTypes] = createVar(totalV, vTypes)
 totalV = totalV + 1;
 if totalV > size(vTypes,1)
     vTypes = [vTypes; zeros(size(vTypes))];
 end
 vTypes(totalV) = 1;
-m(totalV) = totalV; % benchmark
 end
 
 function [totalE, edges] = addEdge(totalE, edges, s, d)

@@ -209,8 +209,9 @@ class DataflowGraph() {
     }
   }
 
-  def addEdgesFromArray(src:Array[Int], dst:Array[Int]) {
-    val _ = addEdges(src, dst)
+  def addEdgesFromArray(src:Array[Int], dst:Array[Int], typeOrIdx:Array[Int]) {
+    val edgeIds = addEdges(src, dst)
+    (edgeIds, typeOrIdx).zipped.foreach( (eId, ty) => setEdgeType(eId, ty))
   }
 
 
@@ -279,8 +280,10 @@ class DataflowGraph() {
           case Proc(_) => "[shape=\"box\"]"
 	  case Input(_) => "[shape=\"diamond\"]"
       }
-      val label = "[label=\"" + v.sid + "\"]"
-      shape + label
+      if (!v.sid.isEmpty) {
+        val label = "[label=\"" + v.sid + "\"]"
+        shape + label
+      } else shape
     }
   
     def eLabel(e:Edge):String = {
