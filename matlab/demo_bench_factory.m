@@ -35,3 +35,9 @@ for i=1:n
 end
 v2 = f.finalize;
 toc
+
+%%
+fprintf('Using functions\n')
+tic,
+g = createFcn(n);
+toc

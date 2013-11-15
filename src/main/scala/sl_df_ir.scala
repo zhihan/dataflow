@@ -198,6 +198,23 @@ class DataflowGraph() {
     })
   }
 
+  // Note: special function to speed things up
+  // due to MATLAB's current JIT limitation and 
+  // MCOS performance.
+  def createNodesFromArray( nTypes: Array[Int]) {
+    nTypes.foreach{ 
+      case 1 => { val _ = newVarNode("") }
+      case 2 => { val _ = newProcNode("") }
+      case 3 => { val _ = newInputNode("") }
+    }
+  }
+
+  def addEdgesFromArray(src:Array[Int], dst:Array[Int]) {
+    val _ = addEdges(src, dst)
+  }
+
+
+
   def createNodes(name:String, nIn: Int, nOut:Int) = {
     val p = newProcNode(name)
     val inputs = ArrayBuffer[DataflowNode]()

@@ -1,5 +1,5 @@
 a = {'a'};
-n = 10000
+n = 100000
 b = repmat(a, 1,n);
 
 fprintf('Scalar\n');
