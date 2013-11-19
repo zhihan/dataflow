@@ -195,5 +195,20 @@ class TreeNodeFactory () {
   def make  = {
     new TreeNode(gensym(), List[TreeNode]())
   }
+  
+  def makeTree(total:Int, c:Array[Int], p:Array[Int]) = {
+    // Assume 1 is the root node
+    val nodes = (for ( i <- 1 to total) 
+		yield make).toArray
+    assert(c.length == p.length)
+
+    for ( (child,parent) <- c.zip(p)) {
+      val pNode = nodes(parent - 1)
+      val cNode = nodes(child -1)
+      pNode.addChild(cNode)
+    }
+    nodes(0)
+  }
+
 }
 

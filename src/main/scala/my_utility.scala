@@ -1,6 +1,8 @@
 package my.utility
 
 // A simple symbol generation system.
+//
+// Generates 1, 2, 3, ...
 class Gensym () {
   var id = 0
   def apply() = {

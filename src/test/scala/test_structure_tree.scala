@@ -38,5 +38,14 @@ class TreeTest extends FunSuite {
     assert(a.length == 2)
   }
 
+  test("Batch make") {
+    val f = new TreeNodeFactory
+    val t = f.makeTree(4, Array(2,3,4), Array(1,1,2))
+    val s = t.toDotString
+    assert(s.length > 20)
+    //println(n.toDotString)
+    
+ }
+
 }
 
