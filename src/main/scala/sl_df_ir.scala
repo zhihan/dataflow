@@ -25,6 +25,7 @@ sealed abstract class DataflowNode extends AnyRef with HasId
 case class Var(override val id:Int) extends DataflowNode 
 {
 }
+
 case class Proc(override val id:Int) extends DataflowNode
 {
 }
@@ -1004,8 +1005,9 @@ class DataflowGraph() {
   /** Successor */
   def succ(which:Int) = g.succ(getV(which)).map(_.id).toArray
 
-  def outEId(which:Int) = g.outE(getV(which)).toArray
+  def outEId(which:Int) = g.outE(getV(which)).map(_.id).toArray
 
+  def allIds = g.V.map(_.id).toArray
 
   // Reduce non-proc nodes
   def reduceNonProcNodes {
