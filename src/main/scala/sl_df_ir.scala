@@ -92,7 +92,7 @@ object DataflowUtil {
         busProcs(writerP.id) match {
           case BusCreate(_,_) => true
           case BusSelect(_, _) => false // unknown
-          case BusPass(_) => true
+          case BusPass(_,_,_) => true
 	  case BusAssign(_,_,_) => true
         }
       } else false
@@ -103,7 +103,7 @@ object DataflowUtil {
        busProcs(writerP.id) match {
          case BusCreate(_,_) => true
          case BusSelect(_, _) => false // unknown
-         case BusPass(_) => true
+         case BusPass(_,_,_) => true
 	 case BusAssign(_,_,_) => true
        }
       }
@@ -335,7 +335,13 @@ class DataflowGraph() {
     private def visitVarBus(v:Vertex,
                             p:Vertex):Boolean = {
       busProcs(p.id) match {
-        case BusCreate(_,_) | BusPass(_) | BusAssign(_,_,_) => {
+	case BusPass(_,_,outV) => {
+	  if (outV.contains(v.id)) {
+	    val current = busReached(v.id)
+	    updateResult(p, current)
+	  } else !bfs.visited.contains(p)
+	}
+        case BusCreate(_,_) | BusAssign(_,_,_) => {
           if (busReached.contains(v.id)) {
             val current = busReached(v.id)
 	    updateResult(p, current)
@@ -413,22 +419,28 @@ class DataflowGraph() {
     private def visitBusProc(v:Vertex,
                              pred:ArrayBuffer[Vertex]): ArrayBuffer[Vertex] = {
       
-      // For bus pass or bus select, pass the reached part to
-      // the variable at input. Handle the case where the incoming
-      // edge is virtual bus selector.
-      def predBusPass(b:Bus) = {
-	val next = ArrayBuffer[Vertex]()
-	assert(pred.size == 1)
-        for (p <- pred) {
-          val current = busReached(v.id)
-	  if (updateResult(p, current)) next += p
-	}
-        next
-      }
-      
       busProcs(v.id) match {
-        case BusPass(b) => predBusPass(b)
-	case BusSelect(b, _) => predBusPass(b)
+        case BusPass(b, inV, _) => {
+	  val next = ArrayBuffer[Vertex]()
+	  for (p <- pred) {
+	    if (inV.contains(p.id)) {
+	      val current = busReached(v.id)
+	      if (updateResult(p, current)) next +=p 
+	    } else {
+	      if (!bfs.visited.contains(p)) next +=p
+	    }
+	  }
+	  next
+	}
+	case BusSelect(b, _) => {
+	  val next = ArrayBuffer[Vertex]()
+	  assert(pred.size == 1)
+          for (p <- pred) {
+            val current = busReached(v.id)
+	    if (updateResult(p, current)) next += p
+	  }
+          next
+	}
 	case BusAssign(b, busInput, assignMap) => {
 	  // Given R as reached, (R \ As)  is passed to input
 	  assert(busReached.contains(v.id))
@@ -614,7 +626,16 @@ class DataflowGraph() {
                                         p:Vertex):Boolean = {
         
       busProcs(p.id) match {
-        case BusPass(_) | BusSelect(_, _) => {
+	case BusPass(_, inV, _) => {
+	  if (inV.contains(v.id)) {
+	    val reached = busReached(v.id)
+	    updateResult(p, reached)
+	  } else {
+	    // Non-bus-pass
+	    !bfs.visited.contains(p)
+	  }
+	}
+        case BusSelect(_, _) => {
           if (!busReached.contains(v.id)) {
             throw new RuntimeException("Error: reach set not found for " + v.sid)
           }
@@ -747,7 +768,18 @@ class DataflowGraph() {
 	  }
 	  next
 	}
-        case BusPass(_) | BusCreate(_,_) | BusAssign(_,_,_) => simplePass
+        case BusPass(_,_,outV) => {
+	  val next = ArrayBuffer[Vertex]()
+          for (p <- vars) {
+	    if (outV.contains(p.id)) {
+              if (updateResult(p, busReached(v.id))) next += p
+            } else {
+	      if (!bfs.visited.contains(p)) next += p
+	    }
+          }
+          next
+	} 
+	case  BusCreate(_,_) | BusAssign(_,_,_) => simplePass
       }
     }
 

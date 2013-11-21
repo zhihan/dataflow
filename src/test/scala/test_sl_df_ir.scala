@@ -132,7 +132,6 @@ class DfGraphTest extends FunSuite {
 
     val (pi, pp, p) = dfg.createNodes("P", 1, 1)
     dfg.addEdge(bc(0), pi(0))
-
     val (p2i, p2p, p2) = dfg.createNodes("P2", 1, 1)
     dfg.addEdge(p(0), p2i(0))
 
@@ -150,8 +149,12 @@ class DfGraphTest extends FunSuite {
     val bus = Bus("Bus", List(at,bt,ct))
     val busVars = bci.map( x => x.id).toList
     val busProc = Map[Int,BusAction](bcp.id -> BusCreate(bus,busVars),
-				     pp.id -> BusPass(bus),
-				     p2p.id -> BusPass(bus))
+				     pp.id -> BusPass(bus, 
+						      pi.map(_.id).toList, 
+						      p.map(_.id).toList), 
+				     p2p.id -> BusPass(bus, 
+						       p2i.map{_.id}.toList, 
+						       p2.map{_.id}.toList))
     val busElemEdge  = Map(uae.id -> VBusSelect(bus,1), 
 			 ube.id -> VBusSelect(bus,2), 
 			 uce.id -> VBusSelect(bus,3))
@@ -246,8 +249,12 @@ class DfGraphTest extends FunSuite {
     val bus = Bus("Bus", List(at,bt,ct))
     val busVars = bci.map( x => x.id).toList
     val busProc = Map[Int,BusAction](bcp.id -> BusCreate(bus,busVars),
-				     pp.id -> BusPass(bus),
-				     p2p.id -> BusPass(bus))
+				     pp.id -> BusPass(bus, 
+						    pi.map(_.id).toList,
+						    p.map(_.id).toList),
+				     p2p.id -> BusPass(bus,
+						     p2i.map(_.id).toList,
+						     p2.map(_.id).toList))
     val busElemEdge = Map(uae.id -> VBusSelect(bus,1), 
 			 ube.id -> VBusSelect(bus,2), 
 			 uce.id -> VBusSelect(bus,3))
@@ -305,8 +312,12 @@ class DfGraphTest extends FunSuite {
 
     val busProc = Map[Int,BusAction](bcp.id -> BusCreate(bus1,bus1Vars),
                                      bc2p.id -> BusCreate(bus2,bus2Vars),
-                                     pp.id -> BusPass(bus2),
-                                     bsp.id -> BusPass(bus2))
+                                     pp.id -> BusPass(bus2,
+						    pi.map(_.id).toList,
+						    p.map(_.id).toList),
+                                     bsp.id -> BusPass(bus2,
+						     bsi.map(_.id).toList,
+						     bs.map(_.id).toList))
     val busE = Map(e1.id -> VBusSelect(bus2, 3))
     // println(dfg.toDotString)
     // println(busE)

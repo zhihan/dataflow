@@ -363,7 +363,7 @@ sealed abstract class BusAction
 // Regular object should also support pattern matching
 case class BusCreate(bus:Bus, children:List[Int]) extends BusAction
 
-case class BusPass(bus:Bus) extends BusAction
+case class BusPass(bus:Bus, in:List[Int], out:List[Int]) extends BusAction
 
 // Each BusSelect object has a mapping associated with it
 // where selection: (v.id -> sub-bus id) is the selection map 
