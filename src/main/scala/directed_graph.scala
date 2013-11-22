@@ -213,6 +213,17 @@ class Inactive(vArray: Array[Int], eArray:Array[Int])
   val e = if (eArray != null ) BitSet() ++ eArray else BitSet()
 }
 
+/** Dependence class implements a mechanism to add additional
+ * edges in the seach.
+ */
+class Dependence(fromV: Array[Int], toV:Array[Int]) 
+{
+  val pairs:List[(Int,Int)] = if (fromV != null) {
+    assert(fromV.length == toV.length)
+    fromV.zip(toV).toList
+  } else List[(Int,Int)]()
+}
+
 object Graph {
   def filteredPredecessor(g:Graph, v:Vertex, inactive:Inactive) = {
     val out = g.inE(v)
@@ -221,9 +232,14 @@ object Graph {
     filteredSucc.filter(v => !inactive.v.contains(v.id))
   }
 
-  def filteredInEdges(g:Graph, v: Vertex, inactive:Inactive) = {
-    g.inE(v).filter(e => !inactive.e.contains(e.id))
-  }
+  def customizedPredecessor(g:Graph, v:Vertex, 
+			    inactive:Inactive, dep:Dependence) = {
+    val pred = filteredPredecessor(g, v, inactive)
+
+    val depId = for ((from, to) <- dep.pairs; if (to==v.id)) yield from
+    val depV = depId.map( g.getV(_))
+    pred ++ depV
+  } 
 
   def filteredSuccessor(g:Graph, v:Vertex, inactive:Inactive) = {
     val out = g.outE(v)
@@ -231,6 +247,15 @@ object Graph {
     val filteredSucc = filteredOut.map(e => e.to)
     filteredSucc.filter(v => !inactive.v.contains(v.id))
   }
+
+  def customizedSuccessor(g:Graph, v:Vertex, 
+			    inactive:Inactive, dep:Dependence) = {
+    val pred = filteredSuccessor(g, v, inactive)
+
+    val depId = for ((from, to) <- dep.pairs; if (from==v.id)) yield to
+    val depV = depId.map( g.getV(_))
+    pred ++ depV
+  } 
 
 }
 
@@ -353,6 +378,10 @@ class Reachable(graph: Graph) {
     ArrayBuffer[Vertex]() ++ Graph.filteredSuccessor(graph, v, inactive)
   }
 
+  private def customizedSuccessor(v:Vertex, inactive:Inactive, dep:Dependence) = {
+    Graph.customizedSuccessor(graph, v, inactive, dep)
+  }
+
   private def errorOutIfInSet(v: Int, s: scala.collection.Set[Int]):Unit = {
     if (s contains v) {
       throw new RuntimeException("Error: " + v + " is in the set.")
@@ -389,6 +418,19 @@ class Reachable(graph: Graph) {
     vertices.map(v => v.id)
   }
 
+  def forward(start: Array[Int], inactive:Inactive, dep:Dependence) = {
+    val bfs = new BFS((v:Vertex) => 
+                        customizedSuccessor(v, inactive, dep))
+    
+    start.foreach( errorOutIfInSet(_, inactive.v))
+    
+    bfs.initialize(graph.getV(start))
+    bfs.run()
+    val vertices = bfs.visited.toArray
+    vertices.map(v => v.id)
+  }
+
+
   
   // Backward reachability
 
@@ -418,6 +460,12 @@ class Reachable(graph: Graph) {
     ArrayBuffer[Vertex]() ++ r
   }
 
+  private def customizedPredecessor(v:Vertex, 
+				    inactive: Inactive,
+				    dep:Dependence) = {
+    Graph.customizedPredecessor(graph, v, inactive, dep)
+  }
+
   def backward(start: Int, inactive: Inactive) = {
     val bfs = new BFS((v:Vertex) => 
 			filteredPredecessor(v, inactive)
@@ -444,6 +492,19 @@ class Reachable(graph: Graph) {
     val vertices = bfs.visited.toArray
     vertices.map(v => v.id)
   }
+
+  def backward(start: Array[Int], inactive:Inactive, dep:Dependence) = {
+    val bfs = new BFS((v:Vertex) => 
+                        customizedPredecessor(v, inactive, dep))
+    
+    start.foreach( errorOutIfInSet(_, inactive.v))
+    
+    bfs.initialize(graph.getV(start))
+    bfs.run()
+    val vertices = bfs.visited.toArray
+    vertices.map(v => v.id)
+  }
+
   
   private def guardedSuccessor(v:Vertex, stop:Set[Vertex]) = 
     if (stop contains v) ArrayBuffer[Vertex]() else graph.succ(v)

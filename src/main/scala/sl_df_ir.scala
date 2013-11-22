@@ -304,7 +304,9 @@ class DataflowGraph() {
   class BusReachBack(graph:Graph, 
 		     busProcs: Map[Int,BusAction],  
 		     busElementEdge: Map[Int, VBusSelect],
-		     inactive: Inactive) {
+		     inactive:Inactive = new Inactive(null,null),
+		     dependence: Dependence = new Dependence(null, null)
+		   ) {
 
     val busReached = Map[Int, SubBus]()
 
@@ -515,7 +517,7 @@ class DataflowGraph() {
     private def visitBackward(v:Vertex):ArrayBuffer[Vertex] = {
       // In the BFS, need to distinguish between Var and Proc and
       // handle bus logics
-      val pred = Graph.filteredPredecessor(graph,v,inactive)
+      val pred = Graph.customizedPredecessor(graph,v,inactive, dependence)
       nodes(v.id) match {
         case Var(_) => {
 	  // visit variable
@@ -577,11 +579,13 @@ class DataflowGraph() {
     }
   }
 
-  def backreachBus(src:Array[Int], inactive:Inactive, 
-                   busProcs:Map[Int,BusAction],
-		   busElemEdge: Map[Int, VBusSelect]) = {
+  def backreachBus(src:Array[Int], 
+		   inactive:Inactive,
+		   busProcs:Map[Int,BusAction],
+		   busElemEdge: Map[Int, VBusSelect],
+		   dependence: Dependence = new Dependence(null, null)) = {
     val reach = new BusReachBack(g, busProcs, busElemEdge, 
-				 inactive)
+				 inactive, dependence)
     val (visited, subBusMap) = reach.run(src)
     // Repeated parameter
     val immutableV = Set(visited.toSeq:_*).map(_.id)
@@ -589,17 +593,19 @@ class DataflowGraph() {
   }
 
 
-  def backreachNoBus(src:Array[Int], inactive:Inactive) = {
+  def backreachNoBus(src:Array[Int], inactive:Inactive,
+		   dependence: Dependence = new Dependence(null, null)) = {
     val busProcs = Map[Int, BusAction]()
     val busElemEdge = Map[Int, VBusSelect]()
-    backreachBus(src, inactive, busProcs, busElemEdge)
+    backreachBus(src, inactive, busProcs, busElemEdge, dependence)
   }
 
   // Forward reach with support for nonvirtual buses
   class BusReachFor(graph:Graph, 
 		    busProcs:Map[Int,BusAction], 
 		    busElemEdge: Map[Int, VBusSelect],
-		    inactive:Inactive) {
+		    inactive:Inactive = new Inactive(null, null),
+		    dependence: Dependence = new Dependence(null, null)) {
 
     private def isVarBus(v:Vertex) = DataflowUtil.isVarBus(graph, v, busProcs)
 
@@ -789,7 +795,7 @@ class DataflowGraph() {
     private def visitForward(v:Vertex):ArrayBuffer[Vertex] = {
       // In the BFS, need to distinguish between Var and Proc and
       // handle bus logics
-      val pred = Graph.filteredSuccessor(graph,v,inactive)
+      val pred = Graph.customizedSuccessor(graph,v,inactive, dependence)
       nodes(v.id) match {
         case Var(_) => {
           val next = ArrayBuffer[Vertex]()

@@ -120,6 +120,31 @@ package my.se.test.GraphTest {
       assert(df(b).contains(m) && df(b).contains(b))
       assert(df(d).contains(g) && df(d).contains(i) && df(d).contains(l))
     }
-  }
+  
 
+    test("Customized predecessor") {
+      val graph = new Graph
+      val v1 = graph.newVertex("x")
+      val v2 = graph.newVertex("y")
+      val dep = new Dependence(Array(v1.id), Array(v2.id)) 
+      val inactive =new Inactive(Array[Int](), Array[Int]())
+      val p = Graph.customizedPredecessor(graph, v2, inactive, dep)
+      assert (p.length == 1)
+    }
+
+    test("Reach with dependence") {
+      val graph = new Graph
+      val v1 = graph.newVertex("x")
+      val v2 = graph.newVertex("y")
+      val dep = new Dependence(Array(v1.id), Array(v2.id)) 
+      val inactive =new Inactive(Array[Int](), Array[Int]())
+      val reach = new Reachable(graph)
+      val r = reach.backward(Array(v2.id), inactive, dep)
+      assert (r.length == 2)
+
+      val r2 = reach.forward(Array(v1.id), inactive, dep)
+      assert (r2.length == 2)
+    }
+
+  }
 }

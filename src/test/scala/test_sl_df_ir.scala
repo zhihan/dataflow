@@ -110,6 +110,40 @@ class DfGraphTest extends FunSuite {
     assert(result4.length == 0)    
   }
 
+
+  test("Dataflow with dependence") {
+    // y = copy(x)
+    // copy <-- enable
+    val dfg = new DataflowGraph()
+    val y = dfg.newVarNode("y")
+    val x = dfg.newVarNode("x")
+    val p = dfg.newProcNode("copy")
+    val i = dfg.newInputNode("ci")
+    dfg.addEdge(x, i)
+    dfg.addEdge(i, p)
+    dfg.addEdge(p, y)
+    
+    val enable = dfg.newProcNode("Sys")
+    val ei = dfg.newInputNode("Enable")
+    val e = dfg.newVarNode("e")
+    dfg.addEdge(ei, enable)
+    dfg.addEdge(e, ei)
+
+    val dep = new Dependence(Array(enable.id), Array(p.id))
+    val reachSet = dfg.backreachNoBus(Array(y.id), 
+				      new Inactive(null,null),
+				      dep)
+    val v = reachSet.getVars
+    assert(v.contains(e.id))
+    assert(v.contains(x.id))
+
+    val reachSet2 = dfg.backreachNoBus(Array(y.id), 
+				      new Inactive(null,null))
+    val v2 = reachSet2.getVars
+    assert(!v2.contains(e.id))
+    assert(v2.contains(x.id))
+  }
+
   
   test("SL DF with nonvirtual buses for") {
     //
