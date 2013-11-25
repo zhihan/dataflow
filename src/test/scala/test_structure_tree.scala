@@ -5,6 +5,11 @@ import org.scalatest.FunSuite
 
 class TreeTest extends FunSuite {
   def createSimpleTree = {
+    // t-+----x--+----x1 
+    //   |       |
+    //   |       +----x2
+    //   |
+    //   |--- y--------z
     val fac = new TreeNodeFactory()
     
     val t = fac.make
@@ -18,20 +23,22 @@ class TreeTest extends FunSuite {
 
     val y = fac.make
     t.addChild(y)
-    y.addChild(fac.make)
+    val z = fac.make
+    
+    y.addChild(z)
 
-    t
+    (t, (x, x1, x2, y, z))
   }
 
   test("Print simple tree") {
-    val t = createSimpleTree
+    val (t,_) = createSimpleTree
     val s = t.toDotString
     // println(s)
     assert(s.length > 20)
   } 
 
   test("Get ancestors") {
-    val t = createSimpleTree
+    val (t,_) = createSimpleTree
     val c1 = t.children.head
     val c2 = c1.children.head
     val a = t.computeAncestors(Array(c2.id))
@@ -45,7 +52,18 @@ class TreeTest extends FunSuite {
     assert(s.length > 20)
     //println(n.toDotString)
     
- }
+  }
+
+  test("Remove partial ancestors") {
+    val (t,(x,x1,x2, y,z)) = createSimpleTree
+    val tests = Array(x.id, x1.id, y.id, z.id)
+    val r = t.removePartiallyContainedAncestors(tests)
+    println(r)
+    assert(r.length == 3)
+    assert(r.contains(y.id))
+    assert(r.contains(x1.id))
+    assert(r.contains(z.id))
+  }
 
 }
 

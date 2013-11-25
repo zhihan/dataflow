@@ -147,6 +147,7 @@ class TreeNode( i: Int, c: List[TreeNode]) {
     def allDescendantContainedIn(i:Int, s:Set[Int]):Boolean = {
       val v = getNode(i)
       val c = v.getAllDescendantIDs()
+      assert (!c.isEmpty) 
       val cSet = c.toSet
       cSet.subsetOf(s)
     }
