@@ -758,7 +758,6 @@ class DataflowGraph() {
           }
           next
       }
-
       busProcs(v.id) match {
 	case BusSelect(b, varMap) => {
 	  val next = ArrayBuffer[Vertex]()

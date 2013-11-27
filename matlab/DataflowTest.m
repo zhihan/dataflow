@@ -18,14 +18,14 @@ classdef DataflowTest < matlab.unittest.TestCase
         function testForward2(testcase)
             g = createLinearGraph(5);
             r = my.se.Reachable(g);
-            inactive = my.se.Inactive([], 2);
+            inactive = my.se.Inactive([], 3);
             b = r.forward(1, inactive);
             testcase.verifyEqual(length(b), 3);
         end
         function testBackward(testcase)
             g = createLinearGraph(5);
             r = my.se.Reachable(g);
-            inactive = my.se.Inactive([], 2);
+            inactive = my.se.Inactive([], 3);
             b = r.backward(5, inactive);
             testcase.verifyEqual(length(b), 2);
         end
