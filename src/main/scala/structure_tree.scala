@@ -14,11 +14,16 @@ class TreeNode( i: Int, c: List[TreeNode]) {
   val id = i
   var children = c  // mutable
 
+  private def isLeaf = children.isEmpty 
+
   // Get all descendant 
   private def getAllDescendants():List[TreeNode] = {
     val m = children.map( c => c.getAllDescendants() )
     this :: m.foldLeft(List[TreeNode]()) ((b,a) => b ::: a)
   }
+
+  private def getAllNonleafDescendants: List[TreeNode] = 
+    getAllDescendants().filter(!_.isLeaf)
 
   // Get all descedants of a a set of nodes
   private def getDescendants(s: Set[Int]):List[TreeNode] = {
@@ -62,6 +67,13 @@ class TreeNode( i: Int, c: List[TreeNode]) {
     val ids = result.map(v => v.id)
     ids.toArray
   }
+
+  def getAllNonleafDescendantIDs() = {
+    val result = this.getAllNonleafDescendants
+    val ids = result.map(_.id)
+    ids.toArray
+  }
+
 
   def isChild(which: Int): Boolean = {
     val found = children.find( x => x.id==which) 

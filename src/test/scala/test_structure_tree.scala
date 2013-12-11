@@ -35,7 +35,13 @@ class TreeTest extends FunSuite {
     val s = t.toDotString
     // println(s)
     assert(s.length > 20)
-  } 
+  }
+
+  test("Get nonleaf descendants") {
+    val (t,_) = createSimpleTree
+    val ids = t.getAllNonleafDescendantIDs()
+    assert(ids.length == 3)
+  }
 
   test("Get ancestors") {
     val (t,_) = createSimpleTree
@@ -58,7 +64,7 @@ class TreeTest extends FunSuite {
     val (t,(x,x1,x2, y,z)) = createSimpleTree
     val tests = Array(x.id, x1.id, y.id, z.id)
     val r = t.removePartiallyContainedAncestors(tests)
-    println(r)
+    // println(r)
     assert(r.length == 3)
     assert(r.contains(y.id))
     assert(r.contains(x1.id))
