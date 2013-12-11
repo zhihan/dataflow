@@ -63,9 +63,12 @@ class ReachSet(
 		     if (graph.isVar(graph.nodes(vid)));
 		     v = graph.g.getV(vid);
 		     iV <- graph.g.succ(v) 
-		     if reachedVertices.contains(iV.id))
+		     if (reachedVertices.contains(iV.id) &&
+                         // The following is to filter out direct 
+                         // connection due to DSM
+                         graph.isInput(graph.nodes(iV.id)))
+                   )
 		yield {
-		  assert(graph.isInput(graph.nodes(iV.id)))
 		  (vid, iV.id)
 		}
     // Workaround for MATLAB return argument
