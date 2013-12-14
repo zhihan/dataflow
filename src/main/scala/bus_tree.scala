@@ -9,6 +9,13 @@ import scala.collection.immutable.Range
 import scala.annotation.tailrec
 import scala.collection.mutable.Map
 
+class BusFactory {
+  def newAtomicElement(name:String, width:Int) = AtomicElement(name, width)
+  def newElementList() = List[BusElement]()
+  def prepend(l:List[BusElement], a:BusElement) = a :: l
+  def newBus(name: String, l:List[BusElement]) = Bus(name,l)
+}
+
 abstract sealed class BusElement 
 {
   def size: Int
