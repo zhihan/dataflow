@@ -63,9 +63,9 @@ class ReachSet(
 		     if (graph.isVar(graph.nodes(vid)));
 		     v = graph.g.getV(vid);
 		     iV <- graph.g.succ(v) 
-		     if reachedVertices.contains(iV.id))
+		     if (reachedVertices.contains(iV.id)) &&
+		     graph.isInput(graph.nodes(iV.id))) // Skip direct access such as DSM
 		yield {
-		  assert(graph.isInput(graph.nodes(iV.id)))
 		  (vid, iV.id)
 		}
     // Workaround for MATLAB return argument
@@ -76,8 +76,25 @@ class ReachSet(
     }
     result.toArray
   }
-}
 
+  def getInputInpupPairs: Array[Int] = {
+    val pairs = for (vid <- reachedVertices
+		     if (graph.isInput(graph.nodes(vid)));
+		     v = graph.g.getV(vid);
+		     preV <- graph.g.pre(v)
+		     if reachedVertices.contains(preV.id))
+		yield {
+		  (preV.id, vid)
+		}
+    // Workaround for MATLAB return argument
+    val result = ArrayBuffer[Int]()
+    for ((x,y) <- pairs) {
+      result += x
+      result += y
+    }
+    result.toArray
+  }
+}
 
 object DataflowUtil {
   // Determine if a variable is of bus type
