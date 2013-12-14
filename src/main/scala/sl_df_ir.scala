@@ -63,8 +63,11 @@ class ReachSet(
 		     if (graph.isVar(graph.nodes(vid)));
 		     v = graph.g.getV(vid);
 		     iV <- graph.g.succ(v) 
-		     if (reachedVertices.contains(iV.id)) &&
-		     graph.isInput(graph.nodes(iV.id))) // Skip direct access such as DSM
+		     if (reachedVertices.contains(iV.id) &&
+                         // The following is to filter out direct 
+                         // connection due to DSM
+                         graph.isInput(graph.nodes(iV.id)))
+                   )
 		yield {
 		  (vid, iV.id)
 		}
