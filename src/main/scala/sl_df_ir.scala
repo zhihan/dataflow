@@ -80,12 +80,14 @@ class ReachSet(
     result.toArray
   }
 
-  def getInputInpupPairs: Array[Int] = {
+  def getInputInputPairArray: Array[Int] = {
     val pairs = for (vid <- reachedVertices
 		     if (graph.isInput(graph.nodes(vid)));
 		     v = graph.g.getV(vid);
 		     preV <- graph.g.pre(v)
-		     if reachedVertices.contains(preV.id))
+		     if (reachedVertices.contains(preV.id) &&
+		       graph.isInput(graph.nodes(preV.id)))
+		   )
 		yield {
 		  (preV.id, vid)
 		}
