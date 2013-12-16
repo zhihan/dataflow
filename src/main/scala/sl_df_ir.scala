@@ -120,17 +120,19 @@ object DataflowUtil {
         }
       } else false
     } else { 
-      // shared data cannot be bus (XXX)
-      val writerP = inEdges(0).from
-      if (busProcs.contains(writerP.id)) {
-       busProcs(writerP.id) match {
-         case BusCreate(_,_) => true
-         case BusSelect(_, _) => false // unknown
-         case BusPass(_,_,_) => true
-	 case BusAssign(_,_,_) => true
-       }
-      }
-      else false
+      if (inEdges.size > 1) { 
+        // shared data cannot be bus (XXX)
+        val writerP = inEdges(0).from
+          if (busProcs.contains(writerP.id)) {
+            busProcs(writerP.id) match {
+              case BusCreate(_,_) => true
+              case BusSelect(_, _) => false // unknown
+              case BusPass(_,_,_) => true
+	      case BusAssign(_,_,_) => true
+            }
+          }
+          else false
+      } else false
     }
   }
 }
