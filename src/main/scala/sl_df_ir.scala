@@ -22,22 +22,37 @@ import scala.collection.mutable.ArrayBuffer
 import sl.ir._
 
 sealed abstract class DataflowNode extends AnyRef with HasId
+// A Var node corresponds to the output buffer of a nonvirtual block
 case class Var(override val id:Int) extends DataflowNode 
 {
 }
-
+// A Proc node correspond to the execution unit of a block
 case class Proc(override val id:Int) extends DataflowNode
 {
 }
+// An input node correspond to a input argument of the Proc, which 
+// can be a Var or a slice of a Var, e.g., elements of a bus signal.
 case class Input(override val id: Int) extends DataflowNode
 {
 }
 
 // Identify each dataflow edge by the index at input port
 sealed abstract class DataflowEdge 
+
+// A signal edge correspond to edges that connects Var to Input 
 case class Signal(val inportIdx:Int) extends DataflowEdge
+
+// A read edge connects an input
+// 1) a Proc node such that the Proc read through the input
+// 2) another input such that some Proc read through the input
 case object Read extends DataflowEdge
+
+// A write edge connects a Proc to the signal it writes to
 case object Write extends DataflowEdge
+
+// A DSRead edge connects a DSM var with the Proc that reads
+// from it.
+case object DSRead extends DataflowEdge 
 
 // Object to store the result of reachability analysis. 
 class ReachSet(
@@ -239,8 +254,6 @@ class DataflowGraph() {
     (edgeIds, typeOrIdx).zipped.foreach( (eId, ty) => setEdgeType(eId, ty))
   }
 
-
-
   def createNodes(name:String, nIn: Int, nOut:Int) = {
     val p = newProcNode(name)
     val inputs = ArrayBuffer[DataflowNode]()
@@ -269,6 +282,10 @@ class DataflowGraph() {
 
   def setEdgeType(eid:Int, typeOrIdx:Int) {
     typeOrIdx match {
+      // Maps an integer value to its edge type
+      case -2 => {
+	edges(eid) = DSRead 
+      }
       case -1 => {
 	edges(eid) = Read
       }
