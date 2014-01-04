@@ -1047,6 +1047,8 @@ class DataflowGraph() {
   
   /** Predecessor */
   def pre(which:Int) = g.pre(getV(which)).map(_.id).toArray
+  def pre(which:Array[Int]) = which.flatMap(
+    (i:Int) => g.pre(getV(i))).map(_.id).toArray
 
   /** Successor */
   def succ(which:Int) = g.succ(getV(which)).map(_.id).toArray
@@ -1062,7 +1064,3 @@ class DataflowGraph() {
   }
   
 }
-
-
-
- 
