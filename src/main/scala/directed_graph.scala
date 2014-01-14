@@ -218,10 +218,35 @@ class Inactive(vArray: Array[Int], eArray:Array[Int])
  */
 class Dependence(fromV: Array[Int], toV:Array[Int]) 
 {
-  val pairs:List[(Int,Int)] = if (fromV != null) {
+  if (fromV != null) { 
     assert(fromV.length == toV.length)
-    fromV.zip(toV).toList
-  } else List[(Int,Int)]()
+  }
+
+  def computeMappings: (HashMap[Int,Set[Int]], HashMap[Int,Set[Int]]) = {
+    val f = HashMap[Int,Set[Int]]()
+    val bwd = HashMap[Int,Set[Int]]()
+    if (fromV != null) {
+      fromV.zip(toV).foreach( l => 
+        l match {
+          case (x,y) => {
+            if (!f.contains(x)) {
+              f += x -> Set(y)
+              } else {
+                f += x -> (f(x) + y)
+              }
+            if (!bwd.contains(y)) {
+              bwd += y -> Set(x)
+            } else {
+              bwd += y -> (bwd(y) + x)
+            }         
+          }
+        }) 
+    }
+    (f,bwd)
+  }
+
+  val (fwd, bwd) = computeMappings
+
 }
 
 object Graph {
@@ -235,8 +260,9 @@ object Graph {
   def customizedPredecessor(g:Graph, v:Vertex, 
 			    inactive:Inactive, dep:Dependence) = {
     val pred = filteredPredecessor(g, v, inactive)
+    
 
-    val depId = for ((from, to) <- dep.pairs; if (to==v.id)) yield from
+    val depId = dep.bwd.getOrElse(v.id, Set[Int]())
     val depV = depId.map( g.getV(_))
     pred ++ depV
   } 
@@ -252,7 +278,7 @@ object Graph {
 			    inactive:Inactive, dep:Dependence) = {
     val pred = filteredSuccessor(g, v, inactive)
 
-    val depId = for ((from, to) <- dep.pairs; if (from==v.id)) yield to
+    val depId = dep.fwd.getOrElse(v.id, Set[Int]())
     val depV = depId.map( g.getV(_))
     pred ++ depV
   } 
