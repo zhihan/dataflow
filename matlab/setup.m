@@ -23,7 +23,7 @@ switch deblank(name)
         
     otherwise
         if strcmpi(computer, 'maci64')
-            javaaddpath(fullfile('/Users/zhihan/scala-2.10.2', ...
+            javaaddpath(fullfile('/Users/zhihan/scala-2.10.3', ...
                 'lib','scala-library.jar'));
         else
             error('Don''t know what to do yet')

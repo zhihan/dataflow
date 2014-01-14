@@ -103,9 +103,9 @@ class ReachSet(
 		     if (reachedVertices.contains(preV.id) &&
 		       graph.isInput(graph.nodes(preV.id)))
 		   )
-		yield {
+		  yield {
 		  (preV.id, vid)
-		}
+		  }
     // Workaround for MATLAB return argument
     val result = ArrayBuffer[Int]()
     for ((x,y) <- pairs) {
@@ -113,6 +113,20 @@ class ReachSet(
       result += y
     }
     result.toArray
+  }
+  
+  // Datastore nodes are Var nodes that feeds directly to
+  // Proc nodes
+  def getVarWithDirectRead: Array[Int] = {
+    val vIDs = for (vid <- reachedVertices 
+		    if (graph.isVar(graph.nodes(vid)));
+		    v = graph.g.getV(vid);
+		    succV <- graph.g.succ(v)
+		    if (reachedVertices.contains(succV.id) &&
+			graph.isProc(graph.nodes(succV.id)))
+		  )
+	       yield vid
+    vIDs.toArray
   }
 }
 
