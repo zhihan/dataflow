@@ -137,6 +137,7 @@ object DataflowUtil {
   def isVarBus(graph:Graph, 
 	       v:Vertex, 
 	       busProcs: Map[Int, BusAction]):Boolean = {
+    false /*
     val inEdges = graph.inE(v)
     if (inEdges.size == 1) {
       val writerP = inEdges(0).from
@@ -162,7 +163,7 @@ object DataflowUtil {
           }
           else false
       } else false
-    }
+    } */
   }
 }
 
@@ -360,22 +361,23 @@ class DataflowGraph() {
 		     busProcs: Map[Int,BusAction],  
 		     busElementEdge: Map[Int, VBusSelect],
 		     inactive:Inactive = new Inactive(null,null),
-		     dependence: Dependence = new Dependence(null, null)
+		     dependence: Dependence = new Dependence(null, null, null)
 		   ) {
     val inE = graph.E.groupBy(_.to.id)
+    val outE = graph.E.groupBy(_.from.id)
 
     val busReached = Map[Int, SubBus]()
 
     // Test if a variable vertex is bus by testing its one and 
     // only writer.
-    private def isVarBus(v:Vertex) = {
+    private def isVarBus(v:Vertex) = false /*{
       DataflowUtil.isVarBus(graph, v, busProcs)
-    }
+    } */
 
-    private def isEdgeSelection(v:Vertex, reader:Vertex) = {
+    private def isEdgeSelection(v:Vertex, reader:Vertex) = false /* {
       val e = graph.getEdge(v.id, reader.id)
       busElementEdge.contains(e.id)
-    }
+    } */
 
     // Update the reach set and return the comparison result 
     def updateResult(v:Vertex, current:SubBus) = {
@@ -639,7 +641,7 @@ class DataflowGraph() {
 		   inactive:Inactive,
 		   busProcs:Map[Int,BusAction],
 		   busElemEdge: Map[Int, VBusSelect],
-		   dependence: Dependence = new Dependence(null, null)) = {
+		   dependence: Dependence = new Dependence(null, null, g)) = {
     val reach = new BusReachBack(g, busProcs, busElemEdge, 
 				 inactive, dependence)
     val (visited, subBusMap) = reach.run(src)
@@ -650,7 +652,7 @@ class DataflowGraph() {
 
 
   def backreachNoBus(src:Array[Int], inactive:Inactive,
-		   dependence: Dependence = new Dependence(null, null)) = {
+		   dependence: Dependence = new Dependence(null, null, g)) = {
     val busProcs = Map[Int, BusAction]()
     val busElemEdge = Map[Int, VBusSelect]()
     backreachBus(src, inactive, busProcs, busElemEdge, dependence)
@@ -661,7 +663,7 @@ class DataflowGraph() {
 		    busProcs:Map[Int,BusAction], 
 		    busElemEdge: Map[Int, VBusSelect],
 		    inactive:Inactive = new Inactive(null, null),
-		    dependence: Dependence = new Dependence(null, null)) {
+		    dependence: Dependence = new Dependence(null, null, null)) {
 
     private def isVarBus(v:Vertex) = DataflowUtil.isVarBus(graph, v, busProcs)
 

@@ -216,28 +216,30 @@ class Inactive(vArray: Array[Int], eArray:Array[Int])
 /** Dependence class implements a mechanism to add additional
  * edges in the seach.
  */
-class Dependence(fromV: Array[Int], toV:Array[Int]) 
+class Dependence(fromV: Array[Int], toV:Array[Int], g:Graph)
 {
+  
   if (fromV != null) { 
     assert(fromV.length == toV.length)
   }
 
-  def computeMappings: (HashMap[Int,Set[Int]], HashMap[Int,Set[Int]]) = {
-    val f = HashMap[Int,Set[Int]]()
-    val bwd = HashMap[Int,Set[Int]]()
+  def computeMappings: (HashMap[Int,Set[Vertex]], HashMap[Int,Set[Vertex]]) = {
+    val f = HashMap[Int,Set[Vertex]]()
+    val bwd = HashMap[Int,Set[Vertex]]()
     if (fromV != null) {
+      val vMap = g.V.map( v => (v.id, v)).toMap
       fromV.zip(toV).foreach( l => 
         l match {
           case (x,y) => {
             if (!f.contains(x)) {
-              f += x -> Set(y)
+              f += x -> Set(vMap(y))
               } else {
-                f += x -> (f(x) + y)
+                f += x -> (f(x) + vMap(y))
               }
             if (!bwd.contains(y)) {
-              bwd += y -> Set(x)
+              bwd += y -> Set(vMap(x))
             } else {
-              bwd += y -> (bwd(y) + x)
+              bwd += y -> (bwd(y) + vMap(x))
             }         
           }
         }) 
@@ -266,8 +268,7 @@ object Graph {
     v:Vertex, 
     inactive:Inactive, dep:Dependence) = {
     val pred = filteredPredecessor(inE, g, v, inactive)
-    val depId = dep.bwd.getOrElse(v.id, Set[Int]())
-    val depV = depId.map( g.getV(_))
+    val depV = dep.bwd.getOrElse(v.id, Set[Vertex]())
     pred ++ depV
   } 
 
@@ -282,8 +283,7 @@ object Graph {
 			    inactive:Inactive, dep:Dependence) = {
     val pred = filteredSuccessor(g, v, inactive)
 
-    val depId = dep.fwd.getOrElse(v.id, Set[Int]())
-    val depV = depId.map( g.getV(_))
+    val depV = dep.fwd.getOrElse(v.id, Set[Vertex]())
     pred ++ depV
   } 
 

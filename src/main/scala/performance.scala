@@ -22,4 +22,8 @@ object GraphGenerator {
     }
     g
   }
+
+  def hashInE(g:Graph) = {
+    
+  }
 }
