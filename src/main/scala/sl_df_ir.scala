@@ -134,11 +134,12 @@ object DataflowUtil {
   // Determine if a variable is of bus type
   // Currently the heuristic is to check if the block that
   // writes to the signal is bus-capable. 
-  def isVarBus(graph:Graph, 
-	       v:Vertex, 
-	       busProcs: Map[Int, BusAction]):Boolean = {
-    false /*
-    val inEdges = graph.inE(v)
+  def isVarBus(
+    inE: scala.collection.immutable.Map[Int, ArrayBuffer[Edge]], 
+    graph:Graph, 
+    v:Vertex, 
+    busProcs: Map[Int, BusAction]):Boolean = {
+    val inEdges = inE.getOrElse(v.id, ArrayBuffer[Edge]())
     if (inEdges.size == 1) {
       val writerP = inEdges(0).from
       if (busProcs.contains(writerP.id)) {
@@ -163,7 +164,7 @@ object DataflowUtil {
           }
           else false
       } else false
-    } */
+    } 
   }
 }
 
@@ -370,14 +371,18 @@ class DataflowGraph() {
 
     // Test if a variable vertex is bus by testing its one and 
     // only writer.
-    private def isVarBus(v:Vertex) = false /*{
-      DataflowUtil.isVarBus(graph, v, busProcs)
-    } */
+    private def isVarBus(v:Vertex) = {
+      DataflowUtil.isVarBus(inE, graph, v, busProcs)
+    } 
 
-    private def isEdgeSelection(v:Vertex, reader:Vertex) = false /* {
-      val e = graph.getEdge(v.id, reader.id)
-      busElementEdge.contains(e.id)
-    } */
+    private def isEdgeSelection(v:Vertex, reader:Vertex) = {
+      val edges = inE.getOrElse(reader.id, ArrayBuffer[Edge]())
+      val e = edges.find( e => e.from.id == v.id)
+      e match {
+	case Some(edge) => busElementEdge.contains(edge.id)
+	case None => false
+      }
+    } 
 
     // Update the reach set and return the comparison result 
     def updateResult(v:Vertex, current:SubBus) = {
@@ -665,7 +670,9 @@ class DataflowGraph() {
 		    inactive:Inactive = new Inactive(null, null),
 		    dependence: Dependence = new Dependence(null, null, null)) {
 
-    private def isVarBus(v:Vertex) = DataflowUtil.isVarBus(graph, v, busProcs)
+    val inE = graph.E.groupBy(_.to.id)
+
+    private def isVarBus(v:Vertex) = DataflowUtil.isVarBus(inE, graph, v, busProcs)
 
     private def isEdgeSelection(v:Vertex, reader:Vertex) = {
       val e = graph.getEdge(v.id, reader.id)
