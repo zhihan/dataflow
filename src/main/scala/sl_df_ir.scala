@@ -362,6 +362,7 @@ class DataflowGraph() {
 		     inactive:Inactive = new Inactive(null,null),
 		     dependence: Dependence = new Dependence(null, null)
 		   ) {
+    val inE = graph.E.groupBy(_.to.id)
 
     val busReached = Map[Int, SubBus]()
 
@@ -572,7 +573,6 @@ class DataflowGraph() {
     private def visitBackward(v:Vertex):ArrayBuffer[Vertex] = {
       // In the BFS, need to distinguish between Var and Proc and
       // handle bus logics
-      val inE = graph.E.groupBy(_.to.id)
       val pred = Graph.customizedPredecessor(inE, graph,v,inactive, dependence)
       nodes(v.id) match {
         case Var(_) => {
