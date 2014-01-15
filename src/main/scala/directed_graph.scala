@@ -250,18 +250,22 @@ class Dependence(fromV: Array[Int], toV:Array[Int])
 }
 
 object Graph {
-  def filteredPredecessor(g:Graph, v:Vertex, inactive:Inactive) = {
-    val out = g.inE(v)
+  def filteredPredecessor(
+    inE:scala.collection.immutable.Map[Int, ArrayBuffer[Edge]], 
+    g:Graph,
+    v:Vertex, inactive:Inactive) = {
+    val out = inE.getOrElse(v.id, ArrayBuffer[Edge]())
     val filteredOut = out.filter(e => !inactive.e.contains(e.id))
     val filteredSucc = filteredOut.map(e => e.from)
     filteredSucc.filter(v => !inactive.v.contains(v.id))
   }
 
-  def customizedPredecessor(g:Graph, v:Vertex, 
-			    inactive:Inactive, dep:Dependence) = {
-    val pred = filteredPredecessor(g, v, inactive)
-    
-
+  def customizedPredecessor(
+    inE:scala.collection.immutable.Map[Int, ArrayBuffer[Edge]],
+    g:Graph, 
+    v:Vertex, 
+    inactive:Inactive, dep:Dependence) = {
+    val pred = filteredPredecessor(inE, g, v, inactive)
     val depId = dep.bwd.getOrElse(v.id, Set[Int]())
     val depV = depId.map( g.getV(_))
     pred ++ depV
@@ -376,6 +380,9 @@ class Reachable(graph: Graph) {
   val successor = (v:Vertex)=> graph.succ(v)
   val predecessor = (v:Vertex)=> graph.pre(v)
 
+  // Hash incoming edges for fast lookup
+  val inE = graph.E.groupBy(_.to.id) 
+
   def forward(start:Vertex):Array[Vertex] = {
     val bfs = new BFS(successor)
     
@@ -482,14 +489,14 @@ class Reachable(graph: Graph) {
   }
 
   private def filteredPredecessor(v:Vertex, inactive:Inactive) = {
-    val r = Graph.filteredPredecessor(graph, v, inactive)
+    val r = Graph.filteredPredecessor(inE, graph, v, inactive)
     ArrayBuffer[Vertex]() ++ r
   }
 
   private def customizedPredecessor(v:Vertex, 
 				    inactive: Inactive,
 				    dep:Dependence) = {
-    Graph.customizedPredecessor(graph, v, inactive, dep)
+    Graph.customizedPredecessor(inE, graph, v, inactive, dep)
   }
 
   def backward(start: Int, inactive: Inactive) = {
@@ -600,9 +607,11 @@ class PropagateSet[SetT](graph: Graph,
 			 inactive: Inactive)
 {
   val m = HashMap[Int,SetT]()
+  // Hash incoming edges for fast lookup
+  val inE = graph.E.groupBy(_.to.id) 
 
   private def visitBackward(v:Vertex):ArrayBuffer[Vertex] = {
-    val pred = Graph.filteredPredecessor(graph, v, inactive)
+    val pred = Graph.filteredPredecessor(inE, graph, v, inactive)
     val next = ArrayBuffer[Vertex]()
     for ( i <- pred ) {
       // Before visiting the node, the set at i

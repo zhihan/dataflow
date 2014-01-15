@@ -572,7 +572,8 @@ class DataflowGraph() {
     private def visitBackward(v:Vertex):ArrayBuffer[Vertex] = {
       // In the BFS, need to distinguish between Var and Proc and
       // handle bus logics
-      val pred = Graph.customizedPredecessor(graph,v,inactive, dependence)
+      val inE = graph.E.groupBy(_.to.id)
+      val pred = Graph.customizedPredecessor(inE, graph,v,inactive, dependence)
       nodes(v.id) match {
         case Var(_) => {
 	  // visit variable
