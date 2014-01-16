@@ -7,7 +7,6 @@ import scala.collection.mutable.BitSet
 import scala.collection.mutable.Set
 import scala.collection.mutable.ArrayBuffer
 
-import scala.collection.JavaConversions._ 
 import scala.collection.mutable.HashMap
 
 import scala.collection.mutable.Stack
@@ -58,7 +57,7 @@ class Graph() {
   def addEdge(src:Vertex, dst:Vertex):Edge = {
     eid += 1
     val e = new Edge(eid, src, dst)
-    E.add(e)
+    E.append(e)
     e 
   }
 
@@ -223,23 +222,23 @@ class Dependence(fromV: Array[Int], toV:Array[Int], g:Graph)
     assert(fromV.length == toV.length)
   }
 
-  def computeMappings: (HashMap[Int,Set[Vertex]], HashMap[Int,Set[Vertex]]) = {
-    val f = HashMap[Int,Set[Vertex]]()
-    val bwd = HashMap[Int,Set[Vertex]]()
+  def computeMappings = {
+    val f = HashMap[Int,ArrayBuffer[Vertex]]()
+    val bwd = HashMap[Int,ArrayBuffer[Vertex]]()
     if (fromV != null) {
       val vMap = g.V.map( v => (v.id, v)).toMap
       fromV.zip(toV).foreach( l => 
         l match {
           case (x,y) => {
             if (!f.contains(x)) {
-              f += x -> Set(vMap(y))
-              } else {
-                f += x -> (f(x) + vMap(y))
-              }
-            if (!bwd.contains(y)) {
-              bwd += y -> Set(vMap(x))
+              f(x)= ArrayBuffer(vMap(y))
             } else {
-              bwd += y -> (bwd(y) + vMap(x))
+              f(x).append(vMap(y))
+            }
+            if (!bwd.contains(y)) {
+              bwd(y) = ArrayBuffer(vMap(x))
+            } else {
+              bwd(y).append(vMap(x))
             }         
           }
         }) 
@@ -345,7 +344,7 @@ class BFS(callback: Vertex => ArrayBuffer[Vertex]){
 
 
   def run() {
-    while (! q.isEmpty() ) {
+    while (! q.isEmpty ) {
       val e = q.dequeue()
       if (!visited.contains(e)) {
         // Not visited before
@@ -359,7 +358,7 @@ class BFS(callback: Vertex => ArrayBuffer[Vertex]){
 
   // Run the DFS disregarding the visited flag
   def runAlways() {
-    while ( !q.isEmpty() ) {
+    while ( !q.isEmpty ) {
       val e = q.dequeue()
       val next = cb(e)
       visited.add(e)
@@ -576,7 +575,7 @@ class PropagateLabel[LabelT] (graph: Graph,
       n.foreach( x =>
         if (!op.lessThan(l(v.id), l(x.id))) {
           l(x.id) = op.max(l(v.id), l(x.id))
-          result.add(x)
+          result.append(x)
         }
 	      )
       result
@@ -585,7 +584,7 @@ class PropagateLabel[LabelT] (graph: Graph,
     val q = Queue[Vertex]()
     start.foreach(x => q.enqueue(x))
 
-    while (!q.isEmpty()) {
+    while (!q.isEmpty) {
       val e = q.dequeue()
       val next = update(e)
       for (c <- next) q.enqueue(c)

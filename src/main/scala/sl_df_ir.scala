@@ -60,6 +60,13 @@ class ReachSet(
   val reachedVertices:Set[Int],
   val reachedSubBus:Map[Int, SubBus]) {
 
+  val vMap = (for (v <-graph.g.V) yield (v.id -> v)).toMap
+  val predMap = graph.g.E.groupBy(_.to.id)
+  def locPre(vId:Int) = predMap.getOrElse(vId, ArrayBuffer[Edge]()).map(_.from)
+  val succMap = graph.g.E.groupBy(_.from.id)
+  def locSucc(vId:Int) = succMap.getOrElse(vId, ArrayBuffer[Edge]()).map(_.to)
+
+
   def getProcs = 
     reachedVertices.filter{ i => graph.isProc(graph.nodes(i))} 
 
@@ -76,8 +83,8 @@ class ReachSet(
   def getVarInputPairArray: Array[Int] = { 
     val pairs = for ( vid <- reachedVertices
 		     if (graph.isVar(graph.nodes(vid)));
-		     v = graph.g.getV(vid);
-		     iV <- graph.g.succ(v) 
+		     v = vMap(vid);
+		     iV <- locSucc(vid) 
 		     if (reachedVertices.contains(iV.id) &&
                          // The following is to filter out direct 
                          // connection due to DSM
@@ -98,8 +105,8 @@ class ReachSet(
   def getInputInputPairArray: Array[Int] = {
     val pairs = for (vid <- reachedVertices
 		     if (graph.isInput(graph.nodes(vid)));
-		     v = graph.g.getV(vid);
-		     preV <- graph.g.pre(v)
+		     v = vMap(vid);
+		     preV <- locPre(vid)
 		     if (reachedVertices.contains(preV.id) &&
 		       graph.isInput(graph.nodes(preV.id)))
 		   )
@@ -120,8 +127,8 @@ class ReachSet(
   def getVarWithDirectRead: Array[Int] = {
     val vIDs = for (vid <- reachedVertices 
 		    if (graph.isVar(graph.nodes(vid)));
-		    v = graph.g.getV(vid);
-		    succV <- graph.g.succ(v)
+		    v = vMap(vid);
+		    succV <- locSucc(vid)
 		    if (reachedVertices.contains(succV.id) &&
 			graph.isProc(graph.nodes(succV.id)))
 		  )
