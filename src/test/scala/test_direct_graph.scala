@@ -126,9 +126,10 @@ package my.se.test.GraphTest {
       val graph = new Graph
       val v1 = graph.newVertex("x")
       val v2 = graph.newVertex("y")
-      val dep = new Dependence(Array(v1.id), Array(v2.id)) 
+      val dep = new Dependence(Array(v1.id), Array(v2.id), graph) 
       val inactive =new Inactive(Array[Int](), Array[Int]())
-      val p = Graph.customizedPredecessor(graph, v2, inactive, dep)
+      val inE = graph.E.groupBy( e => e.to.id)
+      val p = Graph.customizedPredecessor(inE, graph, v2, inactive, dep)
       assert (p.length == 1)
     }
 
@@ -136,7 +137,7 @@ package my.se.test.GraphTest {
       val graph = new Graph
       val v1 = graph.newVertex("x")
       val v2 = graph.newVertex("y")
-      val dep = new Dependence(Array(v1.id), Array(v2.id)) 
+      val dep = new Dependence(Array(v1.id), Array(v2.id), graph) 
       val inactive =new Inactive(Array[Int](), Array[Int]())
       val reach = new Reachable(graph)
       val r = reach.backward(Array(v2.id), inactive, dep)

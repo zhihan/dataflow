@@ -129,7 +129,7 @@ class DfGraphTest extends FunSuite {
     dfg.addEdge(ei, enable)
     dfg.addEdge(e, ei)
 
-    val dep = new Dependence(Array(enable.id), Array(p.id))
+    val dep = new Dependence(Array(enable.id), Array(p.id), dfg.g)
     val reachSet = dfg.backreachNoBus(Array(y.id), 
 				      new Inactive(null,null),
 				      dep)
