@@ -178,6 +178,13 @@ class VirtualBlockGraph() {
     }
   }
 
+  def addEdges(src:Array[Int], dst:Array[Int]) {
+    if (src != null) {
+      src.zip(dst).foreach { case (s,d) =>
+        addEdge(s,d) }
+    }
+  }
+
   def toDotString(): String = {
     def vLabel(v:Vertex) = "[label=\"" + v.sid + "\"]"
     writeGraphviz(g, vLabel)
