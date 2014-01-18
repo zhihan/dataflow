@@ -123,7 +123,8 @@ class ReachSet(
   }
   
   // Datastore nodes are Var nodes that feeds directly to
-  // Proc nodes
+  // Proc nodes, this is used for forward analysis as it
+  // includes the source DSM node
   def getVarWithDirectRead: Array[Int] = {
     val vIDs = for (vid <- reachedVertices 
 		    if (graph.isVar(graph.nodes(vid)));
@@ -135,7 +136,24 @@ class ReachSet(
 	       yield vid
     vIDs.toArray
   }
+  
+  // Given a set of Ids, find the reached set
+  // This method require a given set of nodes, used to find
+  // DSM.
+  def getSubset(s:Array[Int]) = {
+    if (s != null) {
+      val c = s.toSet
+      val vIDs = for (vid <- reachedVertices 
+		      if (graph.isVar(graph.nodes(vid))&&
+			  c.contains(vid))
+		    ) yield vid
+      vIDs.toArray
+    } else {
+      Array[Int]()
+    }
+  }
 }
+
 
 object DataflowUtil {
   // Determine if a variable is of bus type
