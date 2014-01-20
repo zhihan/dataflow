@@ -210,4 +210,25 @@ class VirtualBlockGraph() {
     result.map(_.id).toArray
     
   }
+
+  def fwdUnreachable(fSrc:Array[Int]) :Array[Int] = {
+    val reach = new Reachable(g)
+    val fwd = if (fSrc!= null) { 
+      reach.forward(fSrc).toSet
+    } else {
+      Set[Int]()
+    }
+    val result = g.V.filter ( v => !fwd.contains(v.id))
+    result.map(_.id).toArray
+  }
+  def bwdUnreachable(bSrc:Array[Int]):Array[Int] = {
+    val reach = new Reachable(g)
+    val bwd = if (bSrc!= null) { 
+      reach.forward(bSrc).toSet
+    } else {
+      Set[Int]()
+    }
+    val result = g.V.filter ( v => !bwd.contains(v.id))
+    result.map(_.id).toArray
+  }
 }

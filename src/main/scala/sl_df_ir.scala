@@ -1053,12 +1053,17 @@ class DataflowGraph() {
 
 
   def allProcsButID(ids:Array[Int]) = {
-    val idSet = ids.toSet
-    
-    val result = g.V.filter(v => isProc(nodes(v.id))
-                          ).filter( v=> !idSet.contains(v.id) 
-                                 ).toArray
-    result.map(v => v.id)
+    if (ids == null) {
+      val result = g.V.filter(v => isProc(nodes(v.id)))
+      result.map(_.id).toArray
+    } else {
+      val idSet = ids.toSet
+      
+      val result = g.V.filter(v => isProc(nodes(v.id))
+                            ).filter( v=> !idSet.contains(v.id) 
+                                   ).toArray
+      result.map(v => v.id)
+    }
   }
 
   /** Compute ids of the out edges for a given node filtered by the target nodes */
