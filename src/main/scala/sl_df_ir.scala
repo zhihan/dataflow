@@ -144,8 +144,7 @@ class ReachSet(
     if (s != null) {
       val c = s.toSet
       val vIDs = for (vid <- reachedVertices 
-		      if (graph.isVar(graph.nodes(vid))&&
-			  c.contains(vid))
+		      if (c.contains(vid))
 		    ) yield vid
       vIDs.toArray
     } else {
