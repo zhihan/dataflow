@@ -385,3 +385,21 @@ case class BusAssign(val bus:Bus, val srcInput:Int,
 // then associated with an edge.
 case class VBusSelect(val bus:Bus, val i:Int)
 
+class BusActionFactory {
+  def busCreate(bus: Bus, children: Array[Int]) = 
+    if (children != null) 
+      BusCreate(bus, children.toList) 
+    else
+      BusCreate(bus, List[Int]())
+
+  
+  def busActionMap(procIds: Array[Int], 
+		   actions: Array[BusAction] ) = Map[Int,BusAction]() ++ procIds.zip(actions)
+    
+  def vBusSelect(bus: Bus, element: Int) = VBusSelect(bus, element)
+
+  def vBusSelectMap(edgeIds: Array[Int],
+		    busActions: Array[VBusSelect]) = 
+		      Map[Int,VBusSelect]() ++ edgeIds.zip(busActions)
+
+}

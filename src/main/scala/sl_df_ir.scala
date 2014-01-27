@@ -438,8 +438,8 @@ class DataflowGraph() {
 	    updateResult(p, current)
           } else {
             throw new RuntimeException("Error visiting var bus: " +
-                                       "reachset of " + v.sid + " is not computed" +
-                                       p.sid + "=>" + v.sid)
+                                       "reachset of " + v.id + " is not computed" +
+                                       p.sid + "=>" + v.id)
             true
           }
         }
@@ -459,7 +459,7 @@ class DataflowGraph() {
     //  (var) --- bus selection --> <input>
     private def visitBusInput(in: Vertex,
 			      varNode:Vertex): Boolean = {
-      // print(" Visit bus input " + varNode.sid + " -> " + in.sid)
+      //print(" Visit bus input " + varNode.id + " -> " + in.id)
       // For virtual bus selector, get the sub-bus at the source
       def getSrcBusSel(srcEId:Int, dstSet:Set[Int]) = {
         val busSelection = busElementEdge(srcEId)
@@ -1093,8 +1093,18 @@ class DataflowGraph() {
   } 
 
 
-  // Delegate methods to 
-  def getE(from:Int, to:Int) = g.getEId(from, to)
+  def getSignalEdge(from:Int, to:Int, signalId:Int) = {
+    // Get an edge from->to signal with Id
+    val eList = g.getEdges(from, to)
+    val x = eList.find( e => edges(e.id) match {
+      case Signal(signalId) => true
+      case _ => false })
+    x match {
+      case Some(e) => e
+      case None => throw new RuntimeException(
+	"Cannot find the edge")
+    }
+  }
 
   def getV(which:Int) = g.getV(which)
   def getV(which:Array[Int]) = g.getV(which)
