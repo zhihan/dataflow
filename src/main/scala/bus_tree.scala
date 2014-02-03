@@ -392,7 +392,20 @@ class BusActionFactory {
     else
       BusCreate(bus, List[Int]())
 
-  
+  def busPass(bus:Bus, in: Array[Int], out:Array[Int]) = 
+    if (in != null) 
+      BusPass(bus, in.toList, out.toList)
+    else
+      BusPass(bus, List[Int](), List[Int]())
+
+  def busAssign(bus:Bus, src:Int, in:Array[Int], to:Array[Int]) = 
+    if (in == null)
+      BusAssign(bus, src, Map[Int,Int]())
+    else {
+      val m = Map[Int,Int]() ++ in.zip(to)
+      BusAssign(bus, src, m)
+    }
+
   def busActionMap(procIds: Array[Int], 
 		   actions: Array[BusAction] ) = Map[Int,BusAction]() ++ procIds.zip(actions)
     
