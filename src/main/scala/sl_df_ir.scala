@@ -55,14 +55,19 @@ case object Write extends DataflowEdge
 case object DSRead extends DataflowEdge 
 
 // Object to store the result of reachability analysis. 
+// The reach set is a subset of the vertices of the graph and a reached
+// elements subsets of buses. 
 class ReachSet(
   graph: DataflowGraph,
-  val reachedVertices:Set[Int],
+  val reachedVertices:Set[Int], 
   val reachedSubBus:Map[Int, SubBus]) {
 
+  // Cache mappings for faster access
   val vMap = (for (v <-graph.g.V) yield (v.id -> v)).toMap
+
   val predMap = graph.g.E.groupBy(_.to.id)
   def locPre(vId:Int) = predMap.getOrElse(vId, ArrayBuffer[Edge]()).map(_.from)
+
   val succMap = graph.g.E.groupBy(_.from.id)
   def locSucc(vId:Int) = succMap.getOrElse(vId, ArrayBuffer[Edge]()).map(_.to)
 
@@ -666,6 +671,7 @@ class DataflowGraph() {
     }
   }
 
+  // Backward reachability analysis with bus support
   def backreachBus(src:Array[Int], 
 		   inactive:Inactive,
 		   busProcs:Map[Int,BusAction],
@@ -954,15 +960,27 @@ class DataflowGraph() {
     }
   }
 
+  /** Forward reachable set with bus support */
   def reachBus(src:Array[Int], inactive:Inactive, 
                busProcs:Map[Int,BusAction], 
-	       busElemEdge:Map[Int, VBusSelect]) = {
+	       busElemEdge:Map[Int, VBusSelect],
+	       dependence: Dependence = new Dependence(null, null, g)) = {
     val reach = new BusReachFor(g, busProcs,  
 				busElemEdge, 
-				inactive)
+				inactive, 
+				dependence)
     val (visited, busReach) = reach.run(src)
     val immutableV = Set(visited.toSeq:_*).map(_.id)
     new ReachSet(this, immutableV, busReach)
+  }
+
+  /** Forward reachable set with no bus support */
+  def reachNoBus(src: Array[Int], 
+    inactive: Inactive,
+    dependence: Dependence = new Dependence(null, null, g)): ReachSet = {
+    val busProcs = Map[Int, BusAction]() 
+    val busElemEdge = Map[Int, VBusSelect]()
+    reachBus(src, inactive, busProcs, busElemEdge, dependence)
   }
 
 
@@ -1010,8 +1028,6 @@ class DataflowGraph() {
 
   def backwardReachableProcs(src: Array[Int], 
                              inactive:Inactive) = {
-//    val reach = new Reachable(g)
-//    val allReached = reach.backward(src,inactive)
     val busProcs = Map[Int,BusAction]()
     val busElemEdge = Map[Int, VBusSelect]()
     val reachSet = backreachBus(src, inactive, 
@@ -1021,8 +1037,6 @@ class DataflowGraph() {
 
   def backwardReachableVars(src: Array[Int], 
                              inactive:Inactive) = {
-//    val reach = new Reachable(g)
-//    val allReached = reach.backward(src,inactive)
     val busProcs = Map[Int,BusAction]()
     val busElemEdge = Map[Int, VBusSelect]()
     val reachSet = backreachBus(src, inactive, 
@@ -1050,7 +1064,7 @@ class DataflowGraph() {
     (fwd & bwd).filter ( i => isVar(nodes(i))).toArray
   }
 
-
+  /** Return all proc nodes excluding the ones given */
   def allProcsButID(ids:Array[Int]) = {
     if (ids == null) {
       val result = g.V.filter(v => isProc(nodes(v.id)))

@@ -110,8 +110,8 @@ class DfGraphTest extends FunSuite {
     assert(result4.length == 0)    
   }
 
-
-  test("Dataflow with dependence") {
+  // 
+  test("Backward reachability with dependence") {
     // y = copy(x)
     // copy <-- enable
     val dfg = new DataflowGraph()
@@ -142,6 +142,52 @@ class DfGraphTest extends FunSuite {
     val v2 = reachSet2.getVars
     assert(!v2.contains(e.id))
     assert(v2.contains(x.id))
+  }
+
+  // Simple forward rechability analysis with control dependence
+  test("Foward reachability with dependence") {
+    // y = copy(x)
+    // copy <-- enable
+    val dfg = new DataflowGraph()
+    val y = dfg.newVarNode("y")
+    val x = dfg.newVarNode("x")
+    val p = dfg.newProcNode("copy")
+    val i = dfg.newInputNode("ci")
+    dfg.addEdge(x, i)
+    dfg.addEdge(i, p)
+    dfg.addEdge(p, y)
+    
+    val enable = dfg.newProcNode("Sys")
+    val ei = dfg.newInputNode("Enable")
+    val enableSrc = dfg.newVarNode("Src")  
+    dfg.addEdge(ei, enable)
+    dfg.addEdge(enableSrc, ei)
+    // Proc p is structually dependent on enable sys
+    val dep = new Dependence(Array(enable.id), Array(p.id), dfg.g)
+    val reachSet = dfg.reachNoBus(Array(x.id), 
+      new Inactive(null,null), dep)
+    val v = reachSet.getVars
+    assert(v.contains(y.id))
+    assert(!v.contains(enableSrc.id))
+
+    val reachSet2 = dfg.reachNoBus(Array(enableSrc.id),
+      new Inactive(null,null), dep)
+    val v2 = reachSet2.getVars
+    assert(!v2.contains(x.id))
+    assert(v2.contains(y.id))
+
+    // No dependence enableSrc cannot reach y
+    val reachSet3 = dfg.reachNoBus(Array(enableSrc.id),
+      new Inactive(null,null))
+    val v3 = reachSet3.getVars
+    assert(!v3.contains(y.id))
+
+    // No dependence x can reach y
+    val reachSet4 = dfg.reachNoBus(Array(x.id),
+      new Inactive(null,null))
+    val v4 = reachSet4.getVars
+    assert(v4.contains(y.id))
+
   }
 
   
