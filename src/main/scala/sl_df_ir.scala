@@ -937,15 +937,23 @@ class DataflowGraph() {
           }
         case Input(_) => 
           {
-            assert(pred.size == 1) 
-            val p = pred(0)
-            if (busProcs.contains(p.id)) {
-              if (visitInputWithBusReader(v,p)) ArrayBuffer(p)
-              else ArrayBuffer[Vertex]()
+            if (pred.size > 1) {
+              throw new RuntimeException("More than one successor at " + v.id)
+            }
+
+            if (pred.size == 1) {
+              val p = pred(0)
+              if (busProcs.contains(p.id)) {
+                if (visitInputWithBusReader(v,p)) ArrayBuffer(p)
+                else ArrayBuffer[Vertex]()
+              } else {
+                // Non-bus proc
+                if (!bfs.visited.contains(p)) ArrayBuffer(p)
+                else ArrayBuffer[Vertex]()
+              }
             } else {
-              // Non-bus proc
-              if (!bfs.visited.contains(p)) ArrayBuffer(p) 
-              else ArrayBuffer[Vertex]()
+              // Successor is filtered due to inactive sets
+              ArrayBuffer[Vertex]()
             }
           }
       }
