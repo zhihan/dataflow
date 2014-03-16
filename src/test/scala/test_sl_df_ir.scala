@@ -25,6 +25,30 @@ class DfGraphTest extends FunSuite {
     dfg
   }
 
+
+  def createSISOBlk(g: DataflowGraph, name:String) = {
+    val p = g.newProcNode(name.toUpperCase() )
+    val pi = g.newInputNode(name + "_i")
+    val v = g.newVarNode(name.toLowerCase())
+    g.addEdge(pi, p)
+    g.addEdge(p, v)
+    (pi, p, v)
+  }
+
+  def createSrcBlk(g: DataflowGraph, name:String) = {
+    val p = g.newProcNode(name.toUpperCase())
+    val v = g.newVarNode(name.toLowerCase())
+    g.addEdge(p, v)
+    (p, v)
+  }
+
+  def createSinkBlk(g: DataflowGraph, name:String) = {
+    val p = g.newProcNode(name.toUpperCase())
+    val pi = g.newInputNode(name + "_i")
+    g.addEdge(pi, p)
+    (pi, p)
+  }
+
    test("print simple DFG") {
     val cfg = createSimpleGraph
     val s = cfg.toDotString
@@ -190,6 +214,21 @@ class DfGraphTest extends FunSuite {
 
   }
 
+
+  test("Either reachability") {
+    val dfg = new DataflowGraph()
+    val (c, cv) = createSrcBlk(dfg, "c")
+    val (xi, x, xv) = createSISOBlk(dfg, "x")
+    val (si, s) = createSinkBlk(dfg, "s")
+    dfg.addEdge(cv, xi)
+    dfg.addEdge(xv, si)
+
+    val reachSet = dfg.eitherReach(Array(x.id))
+    val v = reachSet.reachedVertices
+
+    assert(v.contains(c.id))
+    assert(v.contains(s.id))
+  }
   
   test("SL DF with nonvirtual buses for") {
     //

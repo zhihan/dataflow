@@ -58,7 +58,7 @@ case object DSRead extends DataflowEdge
 // The reach set is a subset of the vertices of the graph and a reached
 // elements subsets of buses. 
 class ReachSet(
-  graph: DataflowGraph,
+  private val graph: DataflowGraph,
   val reachedVertices:Set[Int], 
   val reachedSubBus:Map[Int, SubBus]) {
 
@@ -156,6 +156,26 @@ class ReachSet(
       Array[Int]()
     }
   }
+}
+
+object ReachSet {
+  def union(a: ReachSet, b:ReachSet) = {
+    assert(a.graph == b.graph)
+    val vUnion = a.reachedVertices ++ b.reachedVertices 
+
+    // sum of two map entries
+    def sumSubBusValues(k:Int) = {
+      if (!a.reachedSubBus.contains(k)) b.reachedSubBus(k)
+      else if (!b.reachedSubBus.contains(k)) a.reachedSubBus(k)
+      else SubBusOp.union( a.reachedSubBus(k), b.reachedSubBus(k))
+    }
+
+    val keys = a.reachedSubBus.keys ++ b.reachedSubBus.keys
+    val subBusUnion = Map[Int,SubBus]() ++= (
+      for (k <- keys) yield (k, sumSubBusValues(k)))
+    new ReachSet(a.graph, vUnion, subBusUnion)
+  }
+
 }
 
 
@@ -671,6 +691,7 @@ class DataflowGraph() {
     }
   }
 
+  /** Backward reachability analysis */
   // Backward reachability analysis with bus support
   def backreachBus(src:Array[Int], 
 		   inactive:Inactive,
@@ -691,6 +712,35 @@ class DataflowGraph() {
     val busProcs = Map[Int, BusAction]()
     val busElemEdge = Map[Int, VBusSelect]()
     backreachBus(src, inactive, busProcs, busElemEdge, dependence)
+  }
+
+  def backwardReachableProcs(src: Array[Int], 
+                             inactive:Inactive = new Inactive(
+                               Array[Int](), Array[Int]())) = {
+    val busProcs = Map[Int,BusAction]()
+    val busElemEdge = Map[Int, VBusSelect]()
+    val reachSet = backreachBus(src, inactive, 
+				busProcs, busElemEdge)
+    reachSet.getProcs.toArray
+  }
+
+  def backwardReachableVars(src: Array[Int], 
+                             inactive:Inactive = new Inactive(
+                               Array[Int](), Array[Int]())) = {
+    val busProcs = Map[Int,BusAction]()
+    val busElemEdge = Map[Int, VBusSelect]()
+    val reachSet = backreachBus(src, inactive, 
+				busProcs, busElemEdge)
+    reachSet.getVars.toArray
+  }
+
+  def backwardReachable(src:Array[Int]) = {
+    val inactive = new Inactive(Array[Int](), Array[Int]())
+    val busProcs = Map[Int,BusAction]()
+    val busElemEdge = Map[Int, VBusSelect]()
+    val reachSet = backreachBus(src, inactive, 
+				busProcs, busElemEdge)
+    reachSet.reachedVertices.toArray
   }
 
   // Forward reach with support for nonvirtual buses
@@ -982,6 +1032,8 @@ class DataflowGraph() {
     new ReachSet(this, immutableV, busReach)
   }
 
+
+
   /** Forward reachable set with no bus support */
   def reachNoBus(src: Array[Int], 
     inactive: Inactive,
@@ -991,21 +1043,8 @@ class DataflowGraph() {
     reachBus(src, inactive, busProcs, busElemEdge, dependence)
   }
 
-
-  private def forwardReachable(src:Array[Int]) : Array[Int] = {
-    val reach = new Reachable(g)
-    reach.forward(src)
-  }
-  
-  def forwardReachableProcs(src:Array[Int]): Array[Int] = {
-    forwardReachable(src).filter( i=> isProc(nodes(i))).toArray
-  }
-  def forwardReachableVars(src:Array[Int]): Array[Int] = {
-    forwardReachable(src).filter( i=> !isProc(nodes(i))).toArray
-  }
-
   def forwardReachableProcs(src:Array[Int],
-    inactive:Inactive) = {
+    inactive:Inactive = new Inactive(Array[Int](), Array[Int]())) = {
     val busProcs = Map[Int, BusAction]()
     val busElemEdge = Map[Int, VBusSelect]()
     val reachSet = reachBus(src, inactive, busProcs, busElemEdge)
@@ -1013,43 +1052,50 @@ class DataflowGraph() {
   }
 
   def forwardReachableVars(src:Array[Int],
-    inactive:Inactive) = {
+    inactive:Inactive = new Inactive(Array[Int](), Array[Int]())) = {
     val busProcs = Map[Int, BusAction]()
     val busElemEdge = Map[Int, VBusSelect]()
     val reachSet = reachBus(src, inactive, busProcs, busElemEdge)
     reachSet.getVars.toArray
   }
 
-
-  def backwardReachable(src:Array[Int]): Array[Int] = {
-    val reach = new Reachable(g)
-    reach.backward(src)
-  }
-
-  def backwardReachableProcs(src:Array[Int]) : Array[Int] = {
-    backwardReachable(src).filter( i => isProc(nodes(i))).toArray
-  }
-
-  def backwardReachableVars(src:Array[Int]) : Array[Int] = {
-    backwardReachable(src).filter( i => isVar(nodes(i))).toArray
-  }
-
-  def backwardReachableProcs(src: Array[Int], 
-                             inactive:Inactive) = {
-    val busProcs = Map[Int,BusAction]()
+  private def forwardReachable(src:Array[Int]) : Array[Int] = {
+    val inactive = new Inactive(Array[Int](), Array[Int]())
+    val busProcs = Map[Int, BusAction]()
     val busElemEdge = Map[Int, VBusSelect]()
-    val reachSet = backreachBus(src, inactive, 
-				busProcs, busElemEdge)
-    reachSet.getProcs.toArray
+    val reachSet = reachBus(src, inactive, busProcs, busElemEdge)
+    reachSet.reachedVertices.toArray
+  }
+  
+  /** 
+    Combination of forward and backward reachability
+
+    - Either: returns the reach set that can be reached in either
+    forward visit or backward visit.
+    
+    */
+
+  def eitherReachBus(src:Array[Int],
+    inactive:Inactive, busProcs: Map[Int, BusAction],
+    busElem: Map[Int, VBusSelect], 
+    dependence:Dependence = new Dependence(null, null, g)): ReachSet = {
+
+    val backReachSet = backreachBus(src, inactive, busProcs,
+      busElem, dependence)
+    val forReachSet = reachBus(src, inactive, busProcs,
+      busElem, dependence)
+
+    // Return the union of back and forward reach set
+    ReachSet.union(backReachSet, forReachSet)
   }
 
-  def backwardReachableVars(src: Array[Int], 
-                             inactive:Inactive) = {
-    val busProcs = Map[Int,BusAction]()
+  def eitherReach(src:Array[Int]): ReachSet = {
+    val inactive = new Inactive(Array[Int](), Array[Int]())
+    val busProcs = Map[Int, BusAction]()
     val busElemEdge = Map[Int, VBusSelect]()
-    val reachSet = backreachBus(src, inactive, 
-				busProcs, busElemEdge)
-    reachSet.getVars.toArray
+    val dependence = new Dependence(null, null, g)
+    eitherReachBus(src, inactive, busProcs, busElemEdge,
+      dependence)
   }
 
   // Combine forward reach and backward reach 
