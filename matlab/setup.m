@@ -12,7 +12,7 @@ switch deblank(name)
     case 'ah-zhan' % My Windows PC at work
         javaaddpath('C:\scala\lib\scala-library.jar');
         javaaddpath(fullfile('C:\jars',  'antlr-3.5-complete-no-st3.jar'));
-    case 'zhan-deb6-64' % My linux PC at work
+    case 'zhan-deb7-64' % My linux PC at work
         javaaddpath(fullfile('/local-ssd/zhan/scala-2.10.2', ...
             'lib','scala-library.jar'));
         javaaddpath(fullfile('/local-ssd/zhan/jars', ...

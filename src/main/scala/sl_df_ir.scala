@@ -1098,6 +1098,14 @@ class DataflowGraph() {
       dependence)
   }
 
+  def eitherReachNoBus(src:Array[Int],
+    inactive:Inactive,  
+    dependence:Dependence = new Dependence(null, null, g)): ReachSet = {
+    val busProcs = Map[Int, BusAction]()
+    val busElem = Map[Int, VBusSelect]()
+    eitherReachBus(src, inactive, busProcs, busElem, dependence)  
+  }
+
   // Combine forward reach and backward reach 
   def reachableProcs(src: Array[Int],
                     sink: Array[Int],
