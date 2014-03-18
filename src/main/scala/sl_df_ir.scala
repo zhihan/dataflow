@@ -1099,7 +1099,7 @@ class DataflowGraph() {
   }
 
   def eitherReachNoBus(src:Array[Int],
-    inactive:Inactive,  
+    inactive:Inactive,
     dependence:Dependence = new Dependence(null, null, g)): ReachSet = {
     val busProcs = Map[Int, BusAction]()
     val busElem = Map[Int, VBusSelect]()

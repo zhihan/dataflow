@@ -229,6 +229,43 @@ class DfGraphTest extends FunSuite {
     assert(v.contains(c.id))
     assert(v.contains(s.id))
   }
+
+  test("Either reachability with bus") {
+    val dfg = new DataflowGraph()
+    //     +-----|C|------------+
+    //     |                    |
+    //     +---> | BC |---> |B| |
+    //  |A| ---> |    |---------+
+    val (_, ap, a) = dfg.createNodes("A", 0, 1)
+    val (bci, bcp, bc) = dfg.createNodes("BC", 2, 1)
+    val (bi, bp, _) = dfg.createNodes("B", 1, 0)
+    val (ci, cp, c) = dfg.createNodes("C", 1, 1)
+    dfg.addEdge(c(0), bci(0))
+    dfg.addEdge(a(0), bci(1))
+    val bs1 = dfg.addEdge(bc(0), bi(0))
+    val bs2 = dfg.addEdge(bc(0), ci(0))
+
+    val inactive = new Inactive(Array[Int](), Array[Int]())
+    val at = AtomicElement("a", 1)
+    val bt = AtomicElement("b", 1)
+    val bus = Bus("bus", List(at, bt))
+
+    val busVars = bci.map(_.id).toList
+    val busProc = Map[Int, BusAction](bcp.id -> BusCreate(bus, busVars))
+    val busElem = Map(bs1.id -> VBusSelect(bus, 1),
+      bs2.id-> VBusSelect(bus,2))
+
+    val reachSet = dfg.eitherReachBus(Array(cp.id), inactive,
+      busProc, busElem)
+
+    val v = reachSet.reachedVertices
+    assert(v.contains(bp.id))
+    assert(v.contains(ap.id))
+
+    val reachedElem = reachSet.reachedSubBus(bcp.id)
+    val compacted = bus.compact(reachedElem.elements)
+    assert(compacted == Set(0))
+  }
   
   test("SL DF with nonvirtual buses for") {
     //
