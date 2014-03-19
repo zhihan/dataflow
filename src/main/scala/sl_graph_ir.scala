@@ -4,6 +4,8 @@ package sl.ir
 import my.se._
 import scala.collection.mutable.Map
 import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.ArrayBuffer
+import my.utility._
 
 trait HasId 
 {
@@ -231,4 +233,40 @@ class VirtualBlockGraph() {
     val result = g.V.filter ( v => !bwd.contains(v.id))
     result.map(_.id).toArray
   }
+}
+
+
+class NameTreeNode(val id: Int, val children:ArrayBuffer[NameTreeNode], val name:String) {
+  var relPath = name
+  private def dotString():String = {
+    var result = id.toString() + "[label=\"" + name + ":" + relPath + "\"]\n"
+
+    children.foreach(n => result = result + 
+                     id.toString() + " -- " + n.id.toString() + "\n")
+    children.foreach(n => result = result + n.dotString() )
+    result
+  }
+  
+  def toDotString() = " graph G {\n" + dotString() + " } "
+
+  def addChild(t: NameTreeNode) {
+    children.append(t)
+  }
+
+  def reduceChild(i:Int) {
+    val name = children(i).name
+    val cc = children(i).children
+    children.remove(i)
+    cc.foreach{ v => 
+      v.relPath = name + "/" + v.relPath
+      addChild(v) 
+    }
+  }
+  
+}
+
+class NameTreeNodeFactory {
+  val gensym = new Gensym()
+
+  def make(n:String) = new NameTreeNode(gensym(), ArrayBuffer[NameTreeNode](), n)
 }
