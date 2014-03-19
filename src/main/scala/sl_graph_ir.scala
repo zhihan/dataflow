@@ -233,6 +233,30 @@ class VirtualBlockGraph() {
     val result = g.V.filter ( v => !bwd.contains(v.id))
     result.map(_.id).toArray
   }
+
+  private def allContainedIn(x:ArrayBuffer[Int], filt:Set[Int]) = 
+    x.forall(filt.contains(_))
+
+  def allSrcContainedIn(candidates:Array[Int], filt:Array[Int]) = {
+    if (candidates != null) {
+      if (filt != null) { 
+        val filtSet = filt.toSet
+        candidates.filter( v => allContainedIn(g.pre(g.getV(v)).map(_.id), filtSet))
+      } else {
+        Array[Int]()
+      }
+    } else Array[Int]()
+  }
+
+  def allDstContainedIn(candidates:Array[Int], filt:Array[Int]) = {
+    if (candidates != null) {
+      if (filt != null) { 
+        val filtSet = filt.toSet
+        candidates.filter( v => allContainedIn(g.succ(g.getV(v)).map(_.id), filtSet))
+      } else Array[Int]()
+    } else Array[Int]()
+  }
+  
 }
 
 
