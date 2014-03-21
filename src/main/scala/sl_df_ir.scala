@@ -85,19 +85,21 @@ class ReachSet(
     reachedVertices.filter{ i => graph.isInput(graph.nodes(i))} 
   def getInputsArray = getInputs.toArray
 
+  // Get the pairs of var->input connections and return them in
+  // an interleaving id vector.
   def getVarInputPairArray: Array[Int] = { 
     val pairs = for ( vid <- reachedVertices
-		     if (graph.isVar(graph.nodes(vid)));
-		     v = vMap(vid);
-		     iV <- locSucc(vid) 
-		     if (reachedVertices.contains(iV.id) &&
-                         // The following is to filter out direct 
-                         // connection due to DSM
-                         graph.isInput(graph.nodes(iV.id)))
-                   )
-		yield {
-		  (vid, iV.id)
-		}
+      if (graph.isVar(graph.nodes(vid)));
+      v = vMap(vid);
+      iV <- locSucc(vid)
+      if (reachedVertices.contains(iV.id) &&
+        // The following is to filter out direct
+        // connection due to DSM
+        graph.isInput(graph.nodes(iV.id)))
+        )
+    yield {
+      (vid, iV.id)
+    }
     // Workaround for MATLAB return argument
     val result = ArrayBuffer[Int]()
     for ((x,y) <- pairs) {
