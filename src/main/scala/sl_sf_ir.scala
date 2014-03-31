@@ -122,6 +122,11 @@ class StateflowFactory() {
     s
   }
 
+  def states(names: Array[String]) = 
+    (for (n <- names;
+      x = state(n)) yield x).toArray
+  
+
   def normalTransition(source: StateLike, 
     destination: StateLike, condition: Option[Condition],
     event: Option[Event], cAction: Option[Action],
@@ -150,11 +155,62 @@ class StateflowFactory() {
   */
 
 class StateflowDependenceGraph (val objects: Map[Int, StateflowObject]) {
-  val g = new Graph() 
-
   // Get the node for a given id, returns its Stateflow id
   val nodes = Map[Int, Int]()
+  val objToId = Map[Int, Int]()
+
+  // Create a dependence graph from the Stateflow objects
+  def createGraph = {
+    val g = new Graph()
+
+    for ((id, obj) <- objects) {
+      val v = g.newVertex("") 
+      nodes += (v.id -> id) // Graph id to SF id
+      objToId += (id -> v.id) // SF id to graph id
+    }
+
+    for ((id, obj) <- objects) {
+      obj match {
+        case NormalTransition(id, source, dst, _,_,_,_) => {
+          val srcId = objToId(source.id)
+          val dstId = objToId(dst.id)
+          val tId = objToId(id)
+
+          g.addEdge(srcId, tId)
+          g.addEdge(tId, dstId)
+        }
+        case _ => {}
+      }
+    }
+    g
+  }
+
+  val g = createGraph 
+
+  def toDotString  = {
+    var result = " digraph G {\n"
+    result += "graph [rankdir=\"LR\"]\n"
+    g.V.foreach( v =>
+      {
+        result = result + v.id +
+        "[label=\"" +
+        nodes(v.id) +"\"]\n"
+      })
+    g.E.foreach( e =>
+      result = result +
+	e.from.id + " -> " +
+	e.to.id +
+	"[label=\"" + "\"]\n")
+    result + " }\n"
+  }
+    
+ 
   
   def nNodes = g.V.size
+  def nEdges = g.E.size
 
+  def backreach(i:Int) = {
+    val reach = new Reachable(g)
+    reach.backward(objToId(i)).map(nodes(_))
+  }
 }

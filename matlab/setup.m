@@ -31,5 +31,6 @@ switch deblank(name)
 end
 
 javaaddpath(fullfile(pwd, 'se_2.10-1.0.jar'));
+end
 
 
