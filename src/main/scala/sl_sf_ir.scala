@@ -1,7 +1,13 @@
 package sl.ir.sf
 
-import sl.ir.HasId
 import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.Map
+
+// My utility imports
+import my.se._ // Graph, Vertex, Edge
+import sl.ir.HasId
+import my.utility.Gensym  
+
 
 /** 
   An intermediate representation of Stateflow objects. 
@@ -88,4 +94,67 @@ class Chart(val states: List[StateLike],
        transitions.foldLeft ("") { (s, t) => s+ "\n" + t.toDotString} +
       "\n}\n"
   }
+}
+
+/** Utility object for StateflowObject */
+object StateflowObject {
+  def isStateLike(n: StateflowObject) = {
+    n match {
+      case x:StateLike => true
+      case t:Transition => false
+      case d:Data => false
+      case e:Event => false
+    }
+  }
+}
+
+/**
+  A utility class to create StateflowObject objects and keep
+  track of the ids.
+  */
+class StateflowFactory() {
+  val objects = Map[Int, StateflowObject]()
+  val gensym = new Gensym()
+
+  def state(name: String) = {
+    val s = State(gensym(), name)
+    objects += (s.id -> s)
+    s
+  }
+
+  def normalTransition(source: StateLike, 
+    destination: StateLike, condition: Option[Condition],
+    event: Option[Event], cAction: Option[Action],
+    tAction: Option[Action]) = {
+    val t = NormalTransition(gensym(), source, destination,
+      condition, event, cAction, tAction)
+    objects += (t.id -> t)
+    t
+  }
+  def defaultTransition(destination: StateLike) = {
+    val t = DefaultTransition(gensym(), destination)
+    objects += (t.id -> t)
+    t
+  }
+
+  def junction() = {
+    val j = Junction(gensym())
+    objects += (j.id -> j)
+    j
+  }
+}
+
+/**
+  A Stateflow dependence graph consists a set of Stateflow objects
+  (using their ids) and stores the depenedence among the objects.
+  */
+
+class StateflowDependenceGraph (val objects: Map[Int, StateflowObject]) {
+  val g = new Graph() 
+
+  // Get the node for a given id, returns its Stateflow id
+  val nodes = Map[Int, Int]()
+  
+  def nNodes = g.V.size
+
 }
