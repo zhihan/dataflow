@@ -157,6 +157,7 @@ case class RefVar(v: Var) extends LRef
   def isRefVar() = true
   def getVar() = v
 }
+
 case class RefArray(v: Var, i: Int) extends LRef
 {
   def isRefArray() = true

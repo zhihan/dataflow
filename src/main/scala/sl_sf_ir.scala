@@ -70,7 +70,7 @@ case class Event(override val id: Int) extends StateflowObject
 {
 }
 
-case class Data(override val id:Int) extends StateflowObject
+case class Data(override val id:Int, val name:String) extends StateflowObject
 {
 }
 
@@ -127,15 +127,43 @@ class StateflowFactory() {
       x = state(n)) yield x).toArray
   
 
+  def data(name:String) = {
+    val d = Data(gensym(), name)
+    objects += (d.id -> d)
+    d
+  }
+
+  def dataArray(names:Array[String]) = 
+    (for (n <- names; x = data(n)) yield x).toArray
+
+
   def normalTransition(source: StateLike, 
-    destination: StateLike, condition: Option[Condition],
-    event: Option[Event], cAction: Option[Action],
-    tAction: Option[Action]) = {
+    destination: StateLike, 
+    condition: Option[Condition],
+    event: Option[Event], 
+    cAction: Option[Action],
+    tAction: Option[Action]): NormalTransition = {
     val t = NormalTransition(gensym(), source, destination,
       condition, event, cAction, tAction)
     objects += (t.id -> t)
     t
   }
+
+  def normalTransition(source: StateLike,
+    destination: StateLike, 
+    c: Condition = null,
+    e: Event = null, 
+    cA: Action = null,
+    tA: Action = null): NormalTransition = {
+    val condition = if (c == null) None else Some(c)
+    val event = if (e == null) None else Some(e)
+    val cAction = if (cA == null) None else Some(cA)
+    val tAction = if (tA == null) None else Some(tA)
+    normalTransition(source, destination, condition,
+      event, cAction, tAction)
+  }
+
+
   def defaultTransition(destination: StateLike) = {
     val t = DefaultTransition(gensym(), destination)
     objects += (t.id -> t)
@@ -179,6 +207,11 @@ class StateflowDependenceGraph (val objects: Map[Int, StateflowObject]) {
           g.addEdge(srcId, tId)
           g.addEdge(tId, dstId)
         }
+        case DefaultTransition(id, dst) => {
+          val dstId = objToId(dst.id)
+          val tId = objToId(id)
+          g.addEdge(tId, dstId)
+        }
         case _ => {}
       }
     }
@@ -212,5 +245,13 @@ class StateflowDependenceGraph (val objects: Map[Int, StateflowObject]) {
   def backreach(i:Int) = {
     val reach = new Reachable(g)
     reach.backward(objToId(i)).map(nodes(_))
+  }
+
+  def backreach(objId:Array[Int], dependence:Dependence) = {
+    val reach = new Reachable(g)
+    val inactive = new Inactive(Array[Int](), Array[Int]())
+    val start = objId.map( objToId(_))
+    val vertices = reach.backward(start, inactive, dependence)
+    vertices.map(nodes(_))
   }
 }

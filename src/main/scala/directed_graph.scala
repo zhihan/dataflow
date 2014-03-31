@@ -279,7 +279,7 @@ object Graph {
   }
 
   def customizedSuccessor(g:Graph, v:Vertex, 
-			    inactive:Inactive, dep:Dependence) = {
+    inactive:Inactive, dep:Dependence) = {
     val pred = filteredSuccessor(g, v, inactive)
     val depV = dep.fwd.getOrElse(v.id, Set[Vertex]())
     pred ++ depV
