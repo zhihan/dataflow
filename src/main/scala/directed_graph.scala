@@ -247,7 +247,11 @@ class Dependence(fromV: Array[Int], toV:Array[Int], g:Graph)
   }
 
   val (fwd, bwd) = computeMappings
-
+  def toDotString = {
+    fromV.zip(toV).map{ case (f,t) =>
+      f.toString + " -> " + t.toString 
+    }.mkString("\n")
+  }
 }
 
 object Graph {
@@ -341,7 +345,7 @@ class BFS(callback: Vertex => ArrayBuffer[Vertex]){
     e.foreach(x => q.enqueue(x))
   }
 
-
+  // Visited flag is maintained locally in this function
   def run() {
     while (! q.isEmpty ) {
       val e = q.dequeue()
@@ -355,7 +359,6 @@ class BFS(callback: Vertex => ArrayBuffer[Vertex]){
     }
   }
 
-  // Run the DFS disregarding the visited flag
   def runAlways() {
     while ( !q.isEmpty ) {
       val e = q.dequeue()
@@ -366,6 +369,34 @@ class BFS(callback: Vertex => ArrayBuffer[Vertex]){
   }
 }
 
+
+/** BFS that need to pass the visited flags to the visitor */
+class BFSAlways(val callback: (Vertex, Set[Vertex])=>ArrayBuffer[Vertex]) {
+  val visited = Set[Vertex]()
+  var q = Queue[Vertex]()
+
+  private def clearVisit() {
+    visited.clear()
+  }
+  def initialize(e: Vertex) {
+    clearVisit()
+    q.enqueue(e)
+  }
+
+  def initialize(e: Array[Vertex]) {
+    clearVisit()
+    e.foreach(x => q.enqueue(x))
+  }
+
+  def run() {
+    while ( !q.isEmpty ) {
+      val e = q.dequeue()
+      val next = callback(e, visited)
+      visited.add(e)
+      for (c <- next) q.enqueue(c)
+    }
+  }
+}
 
 /* Reachable
  * Compute graph reachability using BFS search.
@@ -409,7 +440,8 @@ class Reachable(graph: Graph) {
     ArrayBuffer[Vertex]() ++ Graph.filteredSuccessor(graph, v, inactive)
   }
 
-  private def customizedSuccessor(v:Vertex, inactive:Inactive, dep:Dependence) = {
+  private def customizedSuccessor(v:Vertex, inactive:Inactive, 
+    dep:Dependence) = {
     Graph.customizedSuccessor(graph, v, inactive, dep)
   }
 

@@ -70,7 +70,7 @@ class DfGraphTest extends FunSuite {
     val yId = y.map( v => v.id)
     val result = dfg.backwardReachable(yId.toArray)
     assert(result.length == 6)
-    // result.foreach{ vid => println(dfg.nodes( vid ))}
+    //result.foreach{ vid => println(dfg.nodes( vid ))}
   }
 
   test("Simple DFG proc reachability") {
