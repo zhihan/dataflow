@@ -180,7 +180,7 @@ class SFIRTest extends FunSuite {
     val reach = new SLSFGraphBackReach(dfg, new Dependence(null,null, dfg.g),
       dg, dep, sfMap)
     val reachSet = reach.reach(Array(use.id))
-    val vars = reachSet.getVars
+    val vars = reachSet.dfgReach.getVars
     assert(vars.size == 2)
 
   }
