@@ -454,7 +454,6 @@ class SLSFGraphBackReach(dfg: DataflowGraph, dfgDep: Dependence,
     val start = dfgId.map(dfg.g.getV(_))
     bfs.initialize(start)
     bfs.run()
-
     
     val immutableV = scala.collection.immutable.Set(bfs.visited.toSeq:_*).map(_.id)
 
