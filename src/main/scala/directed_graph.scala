@@ -6,17 +6,24 @@ import scala.collection.mutable.Queue
 import scala.collection.mutable.BitSet
 import scala.collection.mutable.Set
 import scala.collection.mutable.ArrayBuffer
-
 import scala.collection.mutable.HashMap
-
 import scala.collection.mutable.Stack
 
+/*
+   A Directed graph is a simple implementation of directed graph
+  (maybe cyclic). It is used in another class to model the semantic
+  model of Simulink block diagrams.
+*/
+
+/** Label operation is to implement the labeling mechanism to
+  * partition block diagrams as proposeb by Alongkrit and Mohamed */
 abstract class LabelOp[Label] {
   type T = Label
   def lessThan(l:Label, r:Label):Boolean
   def max(l:Label, r:Label):Label
 }
 
+/** Set operation to analyze vectorized signals */
 abstract class SetOp[SetType] {
   type T = SetType
   def isSubset(l:SetType, r:SetType): Boolean
@@ -24,29 +31,44 @@ abstract class SetOp[SetType] {
   def empty(n:SetType): SetType
 }
 
-/** Vertex class consists of an id, a string for sid
- * and in- out- edges. The edges are ArrayBuffer, which are
- * mutable data members.
+/** 
+  Vertex object consists of an id, a string for sid
+  and in- out- edges. The edges are ArrayBuffer, which are
+  mutable data members.
+  
+  To save memory, in the current implementation the sid field
+  is empty.
+
  */
 class Vertex(val id: Int, val sid: String) {
   def deepCopy = new Vertex(id, sid)
 }
 
-/* Edge class consists of id, and the two end vertices
+/** 
+  Edge object consists of id, and the two end vertices
  */
 class Edge(val id: Int,  val from:Vertex, val to:Vertex) 
 
-/*
- * Graph class implements a simple graph using edgelist.
- */
+/**
+  Directed graph implemented using edge list. The vertices
+  and edges of the graph is mutable. One can add or remove
+  vertices or edges. 
+
+  It allows self-loop, loops, and multi-edges. 
+*/
 class Graph() {
-  
+  /** Vertices of the graph */
   var V = ArrayBuffer[Vertex]()
+  /** Edges of the graph */
   val E = ArrayBuffer[Edge]()
 
-  var id = 0
+  /** Next available Vertex Id */
+  var id = 0 
+  
+  /** Next available Edge Id */
   var eid = 0
 
+  /** Create and return a new vertex */
   def newVertex(name:String) = {
     id += 1
     val v = new Vertex(id, name)
@@ -54,6 +76,7 @@ class Graph() {
     v
   }
 
+  /** Create and return a new edge */
   def addEdge(src:Vertex, dst:Vertex):Edge = {
     eid += 1
     val e = new Edge(eid, src, dst)
@@ -61,12 +84,18 @@ class Graph() {
     e 
   }
 
+  def addEdge(src:Int, dst:Int): Edge = {
+    val from = getV(src)
+    val to = getV(dst)
+    addEdge(from, to)
+  }
+
   /** Remove a vertex, its source and destination will be disconnected */
   def removeVertex(v:Vertex) {
     val out = outE(v)
     val in = inE(v)
-    out.foreach( e=> E.remove(E.indexOf(e)))
-    in.foreach( e=> E.remove(E.indexOf(e)))
+    out.foreach( e => E.remove(E.indexOf(e)))
+    in.foreach( e => E.remove(E.indexOf(e)))
     V.remove(V.indexOf(v))
   }
 
@@ -82,15 +111,31 @@ class Graph() {
 	addEdge(src, dst)))
   }
 
-  def outE(v: Vertex) = ArrayBuffer[Edge]() ++ (E.filter (e => v.eq(e.from) ))
-  def inE(v:Vertex) = ArrayBuffer[Edge]() ++ (E.filter  (e => v.eq(e.to) ))
+  /** Get the set of out-going edges of the vertex */
+  def outE(v: Vertex) = ArrayBuffer[Edge]() ++ 
+    (E.filter (e => v.eq(e.from) ))
 
+  /** Get the set of incoming edges of the vertex */
+  def inE(v:Vertex) = ArrayBuffer[Edge]() ++ 
+    (E.filter  (e => v.eq(e.to) ))
+
+  /** Successor, defined as the set of vertices whose incoming edges are
+    out-going edges of the current vertex */
   def succ(v:Vertex) = {
     val out = E.filter (e => v.eq(e.from) )
     val r = out.map( e => e.to)
     ArrayBuffer[Vertex]() ++ r
   }
 
+  /** Predecessor */
+  def pre(v:Vertex) = {
+    val out = E.filter (e => v.eq(e.to) )
+    val r = out.map( e => e.from)
+    ArrayBuffer[Vertex]() ++ r
+  }
+
+
+  /** The index of the edge at the source vertex. */
   def inIndex(src:Vertex, v:Vertex) = {
     // This function makes the assumption that every call of inE returns the edges
     // in a fixed order.
@@ -101,19 +146,8 @@ class Graph() {
 
   def hasSelfLoop(v:Vertex) = succ(v).contains(v)
   
+  /** Get the edges that forms self-loop at the vertex */
   def getSelfLoop(v:Vertex) = outE(v).filter( e => e.to == v)
-
-  def pre(v:Vertex) = {
-    val out = E.filter (e => v.eq(e.to) )
-    val r = out.map( e => e.from)
-    ArrayBuffer[Vertex]() ++ r
-  }
-
-  def addEdge(src:Int, dst:Int): Edge = {
-    val from = getV(src)
-    val to = getV(dst)
-    addEdge(from, to)
-  }
 
 
   def print() {
@@ -127,7 +161,8 @@ class Graph() {
             )
     println(" } ") 
   }
-  
+
+  /** Get the DOT string ot the graph */
   def toDotString  = {
     var result = " digraph G {\n"
     result += "graph [rankdir=\"LR\"]\n"
@@ -146,11 +181,13 @@ class Graph() {
     result + " }\n" 
   }
   
+  /** Get the set of vertices for given ids */
   private def fromID(ids: Array[Int]) = {
     val idSet = ids.toSet
     V.filter( v => idSet.contains(v.id) ).toArray 
   }
 
+  /** Get the set of vertices excluding the ones in with the given ids. */
   def butID(ids: Array[Int]) = {
     val idSet = ids.toSet
     val result = V.filter( v=> !idSet.contains(v.id) ).toArray
@@ -177,6 +214,7 @@ class Graph() {
     }
   }
 
+  /** Whether two vertices are connected by an edge */
   def hasE(from:Int, to:Int):Boolean = {
     val vFrom = getV(from)
     val e = outE(vFrom).find( e => e.to.id ==to)
@@ -186,6 +224,7 @@ class Graph() {
     }
   }
 
+  /** Get the first edge between two vertices */
   def getEdge(from:Int, to:Int) = {
     val vFrom = getV(from)
     val e = outE(vFrom).find( e => e.to.id ==to)
@@ -196,6 +235,7 @@ class Graph() {
     }
   }
 
+  /** Get all edges from between two given vertices */ 
   def getEdges(from:Int, to:Int) = {
     ArrayBuffer[Edge]() ++ E.filter(e => (e.from.id ==from) && (e.to.id ==to)) 
   }
@@ -203,9 +243,10 @@ class Graph() {
   def getEId(from: Int, to: Int) = getEdge(from, to).id
 }
 
-/* Inactive class implements a mechanism to filter nodes
+/** 
+  Inactive class implements a mechanism to filter nodes
  and edges in the BFS search.
- * */
+ */
 class Inactive(vArray: Array[Int], eArray:Array[Int])
 {
   val v = if (vArray != null ) BitSet() ++ vArray else BitSet()
@@ -221,7 +262,8 @@ class Dependence(fromV: Array[Int], toV:Array[Int], g:Graph)
   if (fromV != null) { 
     assert(fromV.length == toV.length)
   }
-
+  // Compute the mapping of incoming and outgoing edges 
+  // for fast search.
   def computeMappings = {
     val f = HashMap[Int,ArrayBuffer[Vertex]]()
     val bwd = HashMap[Int,ArrayBuffer[Vertex]]()
@@ -245,8 +287,9 @@ class Dependence(fromV: Array[Int], toV:Array[Int], g:Graph)
     }
     (f,bwd)
   }
-
   val (fwd, bwd) = computeMappings
+
+  // Get the DOT representation of the dependence
   def toDotString = {
     fromV.zip(toV).map{ case (f,t) =>
       f.toString + " -> " + t.toString 
@@ -298,8 +341,10 @@ class SeseGraph(g: Graph, en:Vertex, ex:Vertex)
   val exit = ex
 }
 
-// Alternative constructor for Graph
-class GraphFactory() {
+/**
+  GraphFactory create graphs from a vector of vertices.
+  */
+class GraphFactory {
   // XXX This needs to be changed
   def make(v: Array[Vertex]) = {
     val g = new Graph()
@@ -317,12 +362,13 @@ class GraphFactory() {
 			  gCopy.getV(e.to.id))
  	      )
     gCopy.id = g.id
+    gCopy.eid = g.eid
     gCopy
   }
 }
-/* Breadth-First search
- *
- * Used by Reachable class to compute reachability.
+/** Breadth-First search
+ 
+ Used by Reachable class to compute reachability.
  */
 class BFS(callback: Vertex => ArrayBuffer[Vertex]){
   // Immutable members
@@ -335,6 +381,7 @@ class BFS(callback: Vertex => ArrayBuffer[Vertex]){
   private def clearVisit() {
     visited.clear()
   }
+
   def initialize(e: Vertex) {
     clearVisit()
     q.enqueue(e)
@@ -345,7 +392,10 @@ class BFS(callback: Vertex => ArrayBuffer[Vertex]){
     e.foreach(x => q.enqueue(x))
   }
 
-  // Visited flag is maintained locally in this function
+  /** 
+    Visited flag is maintained locally and used to determine
+    next to visit.
+   */
   def run() {
     while (! q.isEmpty ) {
       val e = q.dequeue()
@@ -359,6 +409,10 @@ class BFS(callback: Vertex => ArrayBuffer[Vertex]){
     }
   }
 
+  /** 
+    Visited flag is maintained internally. The client must
+    check the visited flag before enqueue the next.
+   */
   def runAlways() {
     while ( !q.isEmpty ) {
       val e = q.dequeue()
@@ -398,12 +452,14 @@ class BFSAlways(val callback: (Vertex, Set[Vertex])=>ArrayBuffer[Vertex]) {
   }
 }
 
-/* Reachable
- * Compute graph reachability using BFS search.
- *
- * The default method performs a simple BFS search. When an
- * Inactive object is given, the inactive object is used to
- * stop searches at specified nodes and edges.
+/** 
+  Reachable
+ 
+  Compute graph reachability using BFS search.
+ 
+  The default method performs a simple BFS search. When an Inactive
+  object is given, the inactive object is used to stop searches at
+  specified nodes and edges.
  */
 class Reachable(graph: Graph) {
   val successor = (v:Vertex)=> graph.succ(v)

@@ -5,7 +5,7 @@ import scala.collection.immutable.Set
 import scala.collection.mutable.Map
 import scala.collection.mutable.ArrayBuffer
 
-/**
+/*
  * A dataflow node can be either a variable node or a proc node, or special
  * input node.
  *
