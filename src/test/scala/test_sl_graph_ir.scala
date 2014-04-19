@@ -63,5 +63,31 @@ class VirtualGraphTest extends FunSuite {
     }
 
   }
+
+
+  test("Named tree") {
+    val f = new NameTreeNodeFactory()
+    val root = f.make("root")
+    val a = f.make("a")
+    val b = f.make("b")
+    val c = f.make("c")
+    val d = f.make("d")
+
+    root.addChild(a)
+    a.addChild(b)
+    b.addChild(c)
+    a.addChild(d)
+
+    val s = root.toDotString()
+    // println(s)
+    assert(s.size > 10)
+    a.reduceChild(0)
+    root.reduceChild(0) // reduce a
+    //println(root.toDotString())
+
+    val u = new NameTreeUtil()
+    assert(u.fullpath(root, c) == "/c")
+    assert(u.fullpath(root, d) == "/d")
+  }
 }
 

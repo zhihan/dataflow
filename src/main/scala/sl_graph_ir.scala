@@ -16,11 +16,11 @@ trait HasId
  * outport generate output signals. */
 abstract sealed class Port extends AnyRef with HasId
 
-// Represent an input port of a block 
+/** Represent an input port of a block  */
 case class Inport(id: Int) extends Port
 { }
 
-// Represent an output port of a block
+/**  Represent an output port of a block */
 case class Outport(id:Int) extends Port
 { }
 
@@ -88,7 +88,7 @@ class VirtualPortGraph() {
     }
   }
 
-  /*
+  /**
     Compute the reachable I/O port from a list of output port Ids. 
 
     Given a list of outport and a set of reachable ports, compute all
@@ -259,20 +259,29 @@ class VirtualBlockGraph() {
   
 }
 
-
-class NameTreeNode(val id: Int, val children:ArrayBuffer[NameTreeNode], val name:String) {
+/** NamedTreeNode is similar to string trie, where each node has 
+  a string label. Each non-root node is idenfitied by the unique
+  string consisting the labels on the path of that node. */
+class NameTreeNode(val id: Int, 
+  val children:ArrayBuffer[NameTreeNode], 
+  val name:String) {
   var relPath = name
-  private def dotString():String = {
-    var result = id.toString() + "[label=\"" + name + ":" + relPath + "\"]\n"
+  // Recursive 
+  private def dotString(): List[String] = {
+    val l = id.toString() + 
+    "[label=\"" + name + ":" + relPath + "\"]"
 
-    children.foreach(n => result = result + 
-                     id.toString() + " -- " + n.id.toString() + "\n")
-    children.foreach(n => result = result + n.dotString() )
-    result
+    val conn = (for (c <- children) yield
+      id.toString() + " -- " + c.id.toString).toList 
+    
+    val rest = (for (c <- children) yield c.dotString()).toList
+    l :: (conn ++ rest.flatten)
   }
   
-  def toDotString() = " graph G {\n" + dotString() + " } "
-
+  def toDotString() = {
+    val l = dotString()
+    " graph G {\n" + l.mkString("\n") + " } "
+  }
   def addChild(t: NameTreeNode) {
     children.append(t)
   }
@@ -292,5 +301,35 @@ class NameTreeNode(val id: Int, val children:ArrayBuffer[NameTreeNode], val name
 class NameTreeNodeFactory {
   val gensym = new Gensym()
 
-  def make(n:String) = new NameTreeNode(gensym(), ArrayBuffer[NameTreeNode](), n)
+  def make(n:String) = new NameTreeNode(gensym(), 
+    ArrayBuffer[NameTreeNode](), n)
+}
+
+class NameTreeUtil {
+  def computeParentMap(root: NameTreeNode) = {
+    def addMap(x: NameTreeNode, 
+      m: Map[Int, NameTreeNode]) {
+      x.children.foreach{ c =>
+        m += (c.id -> x) 
+      }
+      x.children.foreach( addMap(_, m) )
+    }
+    val m = Map[Int, NameTreeNode]()
+    addMap(root, m)
+    m
+  }
+
+  def fullpath(root: NameTreeNode,
+    target:NameTreeNode) = {
+    val parentMap = computeParentMap(root)
+    def getPath(cur: NameTreeNode, rel:String): String = {
+      if (cur == root) 
+        rel
+      else if (parentMap.contains(cur.id)) 
+        getPath(parentMap(cur.id),
+          "/" + cur.name + rel) 
+      else throw new RuntimeException("Cannot find path")
+    }
+    getPath(target, "")
+  }
 }

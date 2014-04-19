@@ -3,12 +3,23 @@ name := "se"
 
 version := "1.0"
 
+scalaVersion := "2.10.4"
+
 resolvers += "Sonatype Releases" at "http://oss.sonatype.org/content/repositories/releases"
 
 libraryDependencies += "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test"
 
 libraryDependencies += "org.antlr" % "antlr" % "3.5" 
 
-scalaVersion := "2.10.4"
+libraryDependencies += "commons-io" % "commons-io" % "2.4" 
 
-seq(sbtantlr.SbtAntlrPlugin.antlrSettings: _*)
+resolvers += Classpaths.sbtPluginReleases
+
+addSbtPlugin("org.scoverage" %% "sbt-scoverage" % "0.98.2")
+
+seq(sbtantlr.SbtAntlrPlugin.antlrSettings: _*) 
+
+ScoverageSbtPlugin.instrumentSettings
+
+
+
