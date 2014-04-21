@@ -108,16 +108,7 @@ class TreeNode( i: Int, c: List[TreeNode]) {
     }
   }
 
-  private def dotString():String = {
-    var result = id.toString() + "[label=\"" + id + "\"]\n"
-
-    children.foreach(n => result = result + 
-                     id.toString() + " -- " + n.id.toString() + "\n")
-    children.foreach(n => result = result + n.dotString() )
-    result
-  }
-
-  def toDotString() = " graph G {\n" + dotString() + " } "
+  def toDotString = writeGraphviz.tree(this, {n:TreeNode => n.id.toString() })
 
   private def ancestorSubset(vec:Set[Int]): (Set[Int], Set[Int]) = {
     def excludeDescendants(v:TreeNode, s:Set[Int]) = {

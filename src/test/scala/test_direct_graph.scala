@@ -27,6 +27,37 @@ package my.se.test.GraphTest {
       assert(g.getSelfLoop(v1).isEmpty)
     }
 
+    test("Print graph") {
+      val g = createLinGraph
+      g.print()
+    }
+
+    test("Graph dot string") {
+      val g = createLinGraph
+      val s = g.toDotString
+      assert(s.size > 10)
+    }
+
+    test("Graph butID") {
+      val g = createLinGraph
+      val v = g.getV(1)
+      val butV = g.butID(Array(1))
+      assert(butV.forall{ _ != 1})
+    }
+
+    test("Graph getE") {
+      val g = createLinGraph
+      val v = g.getE(1)
+      assert(v != null)
+      try {
+        val v = g.getE(100)
+        assert(true) // should error out
+      } catch {
+        case _ :RuntimeException => // nothing
+      }
+
+    }
+
     test("Remove a vertex") {
       val g = createLinGraph  // 1->2->3
       val v2 = g.getV(2)     
@@ -145,6 +176,15 @@ package my.se.test.GraphTest {
 
       val r2 = reach.forward(Array(v1.id), inactive, dep)
       assert (r2.length == 2)
+    }
+
+    test("Dependence to dot") {
+      val graph = new Graph
+      val v1 = graph.newVertex("x")
+      val v2 = graph.newVertex("y")
+      val dep = new Dependence(Array(v1.id), Array(v2.id), graph) 
+      val s = dep.toDotString
+      assert(s.length > 5)
     }
 
   }
