@@ -1,5 +1,11 @@
 package my.utility
 
+
+trait HasId 
+{
+  def id:Int  // A simple trait specifying it has an Id field.
+}
+
 // A simple symbol generation system.
 //
 // Generates 1, 2, 3, ...

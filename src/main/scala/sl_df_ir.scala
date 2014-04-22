@@ -1,6 +1,7 @@
 package sl.ir
 
 import my.se._
+import my.utility.HasId
 import scala.collection.immutable.Set
 import scala.collection.mutable.Map
 import scala.collection.mutable.ArrayBuffer
@@ -21,7 +22,7 @@ import scala.collection.mutable.ArrayBuffer
 
 import sl.ir._
 
-sealed abstract class DataflowNode extends AnyRef with HasId
+sealed abstract class DataflowNode extends HasId
 // A Var node corresponds to the output buffer of a nonvirtual block
 case class Var(override val id:Int) extends DataflowNode 
 {

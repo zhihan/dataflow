@@ -1,5 +1,5 @@
 /** Intermediate representation for Simulink graphic objects*/
-package sl.ir
+package sl.ir.graph
 
 import my.se._
 import scala.collection.mutable.Map
@@ -7,21 +7,16 @@ import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.ArrayBuffer
 import my.utility._
 
-trait HasId 
-{
-  val id:Int  // A simple trait specifying it has an Id field.
-}
-
 /** There are two kinds of ports, inport accepts input signals
  * outport generate output signals. */
-abstract sealed class Port extends AnyRef with HasId
+abstract sealed class Port extends HasId
 
 /** Represent an input port of a block  */
-case class Inport(id: Int) extends Port
+case class Inport(override val id: Int) extends Port
 { }
 
 /**  Represent an output port of a block */
-case class Outport(id:Int) extends Port
+case class Outport(override val id:Int) extends Port
 { }
 
 
@@ -333,3 +328,6 @@ class NameTreeUtil {
     getPath(target, "")
   }
 }
+
+
+

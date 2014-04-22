@@ -8,7 +8,7 @@ import scala.collection.mutable.Queue
 
 // My utility imports
 import my.se._ // Graph, Vertex, Edge
-import sl.ir.HasId
+import my.utility.HasId
 import my.utility.Gensym  
 import sl.ir._
 
@@ -17,7 +17,7 @@ import sl.ir._
 */
 
 /** Syntax part */
-sealed abstract class StateflowObject extends AnyRef with HasId
+sealed abstract class StateflowObject extends HasId
 {
   def name: String
 }

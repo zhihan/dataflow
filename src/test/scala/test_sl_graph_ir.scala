@@ -1,6 +1,6 @@
 package sl.ir.test
 
-import sl.ir._
+import sl.ir.graph._
 import my.se._
 import org.scalatest.FunSuite
 
