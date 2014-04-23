@@ -4,6 +4,29 @@ import my.se._
 
 import org.scalatest.FunSuite
 
+class BusFactoryTest extends FunSuite {
+  def testBus = {
+    val f = new BusFactory()
+    val a = f.newAtomicElement("a",1)
+    val b = f.newAtomicElement("b",2)
+    val l = f.newElementList()
+    val l1 = f.prepend(l, a)
+    val l2 = f.prepend(l1, b)
+    Bus("ab", l2)
+  }
+
+  test("Bus Factory") {
+    val bf = new BusActionFactory()
+    val bus = testBus
+    val bc = bf.busCreate(bus, Array(1,2))
+    val bp = bf.busPass(bus, Array(1), Array(1))
+    val ba = bf.busAssign(bus, 1, Array(1,2), Array(1,2))
+    val bm = bf.busActionMap(Array(1,2), Array(bc,bp))
+    val vbs = bf.vBusSelect(bus, 1)
+    val vbm = bf.vBusSelectMap(Array(1), Array(vbs))
+  }
+}
+
 class BusTest extends FunSuite {
 
   def testBus = {

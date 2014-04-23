@@ -10,7 +10,7 @@ class DimGraphTest extends FunSuite {
     val s = x.json
     val m = JSON.parseFull(s)
     m match {
-      case None => assert(true, "Cannot parse json string")
+      case None => assert(false, "Cannot parse json string")
       case Some(m) => {
         val a = m.asInstanceOf[Map[String, Any]]
         val y = Inport.fromMap(a)
@@ -23,7 +23,7 @@ class DimGraphTest extends FunSuite {
     val s = x.json
     val m = JSON.parseFull(s)
     m match {
-      case None => assert(true, "Cannot parse json string")
+      case None => assert(false, "Cannot parse json string")
       case Some(m) => {
         val a = m.asInstanceOf[Map[String, Any]]
         val y = Outport.fromMap(a)
@@ -39,7 +39,7 @@ class DimGraphTest extends FunSuite {
     val s = b.json
     val m = JSON.parseFull(s)
     m match {
-      case None => assert(true, "Cannot parse json string")
+      case None => assert(false, "Cannot parse json string")
       case Some(mm) => {
         val blockM = mm.asInstanceOf[Map[String, Any]]
         val b2 = Block.fromMap(blockM)

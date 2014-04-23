@@ -25,7 +25,6 @@ class DfGraphTest extends FunSuite {
     dfg
   }
 
-
   def createSISOBlk(g: DataflowGraph, name:String) = {
     val p = g.newProcNode(name.toUpperCase() )
     val pi = g.newInputNode(name + "_i")
@@ -47,6 +46,12 @@ class DfGraphTest extends FunSuite {
     val pi = g.newInputNode(name + "_i")
     g.addEdge(pi, p)
     (pi, p)
+  }
+
+  test("all proc but id") {
+    val g = createSimpleGraph
+    val v = g.allProcsButID(Array(-1))
+    assert(v.size == 1)
   }
 
    test("print simple DFG") {
@@ -115,6 +120,22 @@ class DfGraphTest extends FunSuite {
   }
 
 
+  test("DFG creation") {
+    val g1 = new DataflowGraph()
+    val v1 = g1.newVarNodes(Array("a", "b"))
+    assert(v1.size == 2)
+    val g2 = new DataflowGraph()
+    val v2 = g2.newProcNodes(Array("a", "b"))
+    assert(v1.size == 2)
+    val g3 = new DataflowGraph()
+    val v3 = g3.newInputNodes(Array("a", "b"))
+    assert(v1.size == 2)
+    val g4 = new DataflowGraph()
+    g4.createNodesFromArray(Array(1,2,3))
+    assert(g4.nNodes == 3)
+    assert(g4.nEdges == 0)
+  }
+
 
   test("Simple DFG proc fwd/bwd reachability") {
     val dfg = createSimpleGraph2
@@ -160,6 +181,19 @@ class DfGraphTest extends FunSuite {
     val v = reachSet.getVars
     assert(v.contains(e.id))
     assert(v.contains(x.id))
+
+    val v1 = reachSet.getVarInputPairArray
+    assert(v1.contains(x.id))
+    assert(v1.contains(i.id))
+
+    val v3 = reachSet.getInputInputPairArray
+    assert(v3.isEmpty)
+
+    val v4 = reachSet.getVarWithDirectRead
+    assert(v4.isEmpty)
+
+    val v5 = reachSet.getSubset( (0 to 20).toArray)
+    assert(v5.contains(x.id))
 
     val reachSet2 = dfg.backreachNoBus(Array(y.id), 
 				      new Inactive(null,null))
@@ -228,6 +262,14 @@ class DfGraphTest extends FunSuite {
 
     assert(v.contains(c.id))
     assert(v.contains(s.id))
+
+    val inactive = new Inactive(Array[Int](), Array[Int]())
+    val r2 = dfg.eitherReachNoBus(Array(x.id),
+      inactive)
+    val v2 = reachSet.getProcsArray
+    assert(v2.contains(c.id))
+    val i2 = reachSet.getInputsArray
+    assert(i2.contains(si.id))
   }
 
   test("Either reachability with bus") {
