@@ -89,5 +89,17 @@ class VirtualGraphTest extends FunSuite {
     assert(u.fullpath(root, c) == "/c")
     assert(u.fullpath(root, d) == "/d")
   }
+
+
+  test("Virtual block graph") {
+    val g = new VirtualBlockGraph()
+    val names = Array("a", "b")
+    val v = g.newBlocks(names)
+    g.addEdges(Array(v(0)), Array(v(1)))
+    assert(v.size == names.size)
+
+    val s = g.toDotString() 
+    assert(s.size > 6) 
+  }
 }
 
