@@ -790,6 +790,7 @@ class DfGraphTest extends FunSuite {
 
     val reach = dfg.backreachNoBus(Array(wp.id), inactive)
     val V = reach.getSubset(Array(A.id))
+    assert(!reach.reachedVertices.contains(A.id))
     assert(V.contains(A.id))
   }
 
