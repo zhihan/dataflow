@@ -49,6 +49,8 @@ class Vertex(val id: Int, val sid: String) {
  */
 class Edge(val id: Int,  val from:Vertex, val to:Vertex) 
 
+
+
 /**
   Directed graph implemented using edge list. The vertices
   and edges of the graph is mutable. One can add or remove
@@ -58,9 +60,10 @@ class Edge(val id: Int,  val from:Vertex, val to:Vertex)
 */
 class Graph() {
   /** Vertices of the graph */
-  var V = ArrayBuffer[Vertex]()
+  val V = ArrayBuffer[Vertex]()
   /** Edges of the graph */
   val E = ArrayBuffer[Edge]()
+
 
   /** Next available Vertex Id */
   var id = 0 

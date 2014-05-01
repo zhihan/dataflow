@@ -20,6 +20,8 @@ case class Outport(override val id:Int) extends Port
 { }
 
 
+
+
 /** Virtual port graph captures the relationship between
  * ports of virtual blocks. It is used to compute the
  * virtual blocks in  a signal pathway. */
@@ -148,6 +150,9 @@ class VirtualPortGraph() {
  * and outports. */
 
 case class Block(id:Int) extends AnyRef with HasId
+{
+  def json:String = "{\"block\": $id%d }"
+}
 
 class VirtualBlockGraph() {
   val g = new Graph()
