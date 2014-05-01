@@ -778,4 +778,19 @@ class DfGraphTest extends FunSuite {
     assert(!v3.contains(uap.id))
     assert(v3.contains(ucp.id))  
   }
+
+  test("DSM Subset reach") {
+    val dfg = new DataflowGraph()
+    val (_, wp, _) = dfg.createNodes("~W", 1, 0)
+    val (_, rp, _) = dfg.createNodes("R", 0, 1)
+    val inactive = new Inactive(null, null)
+    val A = dfg.newVarNode("A")
+    dfg.addEdge(wp, A)
+    dfg.addEdge(A, rp)
+
+    val reach = dfg.backreachNoBus(Array(wp.id), inactive)
+    val V = reach.getSubset(Array(A.id))
+    assert(V.contains(A.id))
+  }
+
 }
