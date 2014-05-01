@@ -51,9 +51,15 @@ case object Read extends DataflowEdge
 // A write edge connects a Proc to the signal it writes to
 case object Write extends DataflowEdge
 
-// A DSRead edge connects a DSM var with the Proc that reads
-// from it.
-case object DSRead extends DataflowEdge 
+/** A DSRead edge connects a DSM var with the Proc that reads
+ from it. */
+case object DSRead extends DataflowEdge
+
+/** A DSWrite edge connects a DSM Var with the Proc that writes to
+  it 
+*/
+case object DSWrite extends DataflowEdge
+
 
 // Object to store the result of reachability analysis. 
 // The reach set is a subset of the vertices of the graph and a reached
@@ -135,30 +141,56 @@ class ReachSet(
   // includes the source DSM node
   def getVarWithDirectRead: Array[Int] = {
     val vIDs = for (vid <- reachedVertices 
-		    if (graph.isVar(graph.nodes(vid)));
-		    v = vMap(vid);
-		    succV <- locSucc(vid)
-		    if (reachedVertices.contains(succV.id) &&
-			graph.isProc(graph.nodes(succV.id)))
-		  )
-	       yield vid
+      if (graph.isVar(graph.nodes(vid)));
+      v = vMap(vid);
+      succV <- locSucc(vid)
+      if (reachedVertices.contains(succV.id) &&
+	graph.isProc(graph.nodes(succV.id)))
+	)
+    yield vid
     vIDs.toArray
   }
   
-  // Given a set of Ids, find the reached set
-  // This method require a given set of nodes, used to find
-  // DSM.
+  /** Given a set of Ids, find the reached set
+    This method require a given set of nodes, used to find
+   DSM.
+  */
   def getSubset(s:Array[Int]) = {
     if (s != null) {
       val c = s.toSet
+      // The DSM is reached
       val vIDs = for (vid <- reachedVertices 
-		      if (c.contains(vid))
-		    ) yield vid
-      vIDs.toArray
+	if (c.contains(vid))
+	  ) yield vid
+      
+      // Note the following logic is special 
+      // handling for datastore blocks where
+      // some of the reader or writers are reached
+
+      // The reader of the DSM is reached
+      val writeVIDs = for (vid <- reachedVertices
+        if (graph.isProc(graph.nodes(vid)));
+        v = vMap(vid);
+        succV <- locSucc(vid)
+        if (c.contains(succV.id))
+          ) yield succV.id
+
+      // There exists a reached vertex for which 
+      // the dsm 
+      val readVIDs = for (vid <- reachedVertices
+        if (graph.isProc(graph.nodes(vid)));
+        v = vMap(vid);
+        preV <- locPre(vid)
+        if (c.contains(preV.id))
+          ) yield preV.id
+
+
+      (vIDs ++ writeVIDs ++ readVIDs).toArray
     } else {
       Array[Int]()
     }
   }
+
 }
 
 object ReachSet {
@@ -351,6 +383,9 @@ class DataflowGraph() {
   def setEdgeType(eid:Int, typeOrIdx:Int) {
     typeOrIdx match {
       // Maps an integer value to its edge type
+      case -3 => {
+        edges(eid) = DSWrite
+      }
       case -2 => {
 	edges(eid) = DSRead 
       }

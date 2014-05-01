@@ -41,7 +41,9 @@ object Outport {
   }
 }
 
-
+/**
+  Block consists of a set of input port and a set of output ports
+  */
 abstract sealed class Block extends HasId
 {
   def json: String
@@ -49,6 +51,8 @@ abstract sealed class Block extends HasId
   def outputs: List[Outport]
 }
 
+/** Single-Input/Single-Output block
+  */
 case class SISOBlock(val input:Inport,
   val output:Outport, val id:Int,
   val blockType: String, val name:String ) extends Block
@@ -61,12 +65,34 @@ case class SISOBlock(val input:Inport,
     "}" +
     "\n}"
 
-  override def inputs = List(input)
-  override def outputs = List(output)
+  override lazy val inputs = List(input)
+  override lazy val outputs = List(output)
 }
 
+/** Single-Input/Mutli-Output block
+  */
+case class SIMOBlock( val input:Inport,
+  val output: List[Outport], val id: Int,
+  val blockType: String, val name: String) extends Block
+{
+  override def json = {
+    val inputStr = input.json
+    val outputStr = output.map(_.json).mkString(",\n")
+
+    "{" + "\"" + blockType + "\":" + "{\n" +
+    "\"name\":" + "\"" + name + "\",\n" +
+    "\"inputs\": [" + inputStr + "],\n" +
+    "\"outputs\": [" + outputStr + "]\n" +
+    "}" +
+    "\n}"
+  }
+  override lazy val inputs = List(input)
+  override def outputs = output
+}
+
+/** Companion object of block class */
 object Block {
-  // Create a block from map
+  /** Create a block object from parsed JSON map */
   def fromMap(m:IMap[String, Any]):Block = {
     val blockType = m.keySet.head
     val content = m(blockType).asInstanceOf[
@@ -129,7 +155,9 @@ class Diagram {
     }
     m
   }
-
+  /**
+    Serialize the object to a JSON string
+    */
   def json = {
     val s = blocks.map(_.json)
     val sig = signals.map(_.json)
@@ -141,7 +169,8 @@ class Diagram {
       sig.mkString(",\n") + "]\n" +
       "}\n" + "}"
   }
-
+  /** Create a Diagram object from parsed JSON string
+    */
   def fromMap(bdM: IMap[String, Any])  {
     val content = bdM("diagram").asInstanceOf[IMap[String,Any]]
     val blockMaps = content("blocks").asInstanceOf[List[IMap[String, Any]]]
