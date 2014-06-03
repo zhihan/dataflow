@@ -64,6 +64,120 @@ class VirtualGraphTest extends FunSuite {
 
   }
 
+  test("Virtual block graph") {
+    val g = new VirtualBlockGraph()
+    val names = Array("a", "b")
+    val v = g.newBlocks(names)
+    g.addEdges(Array(v(0)), Array(v(1)))
+    assert(v.size == names.size)
+
+    val s = g.toDotString() 
+    assert(s.size > 6) 
+  }
+
+
+  test("Virtual port graph no self-loop"){
+    val g = new VirtualPortGraph()
+    val v = g.newOutport("a")
+    try {
+      g.addEdge(v, v)
+      assert(true)
+    } catch {
+      case _:RuntimeException => () 
+    }
+  }
+
+  test("Virtual port graph no repeat edges") {
+    val g = new VirtualPortGraph()
+    val s = g.newOutport("a")
+    val t = g.newInport("b")
+    val e = g.addEdge(s,t)
+    val x = g.addEdge(s,t)
+    assert( x == e)
+  }
+
+  test("Virtual block graph no self-loop"){
+    val g = new VirtualBlockGraph()
+    val v = g.newBlock("a")
+    try {
+      g.addEdge(v.id, v.id)
+      assert(true)
+    } catch {
+      case _:RuntimeException => () 
+    }
+  }
+
+  // Virtual block graph reachability test graph
+  def testReachGraph = {
+    val g = new VirtualBlockGraph()
+    val names = Array("a", "b", "c", "d", "e")
+    val v = g.newBlocks(names)
+    g.addEdge(v(0), v(2))
+    g.addEdge(v(1), v(2))
+    g.addEdge(v(2), v(3))
+    g.addEdge(v(2), v(4))
+    (g, v)
+  }
+
+  test("virtual block unreachable"){
+    val (g, v) = testReachGraph
+    val x = g.unreachable(Array(v(0)), Array(v(4)))
+    assert(x.length == 2)
+
+    val y = g.unreachable(null, null)
+    assert(y.length == 5)
+
+  }
+
+  test("virtual block unreachable fwd"){
+    val (g, v) = testReachGraph
+    val x = g.fwdUnreachable(Array(v(0)))
+    assert(x.length == 1)
+
+    val y = g.fwdUnreachable(null)
+    assert(y.length == 5)
+
+  }
+
+  test("virtual block unreachable bwd"){
+    val (g, v) = testReachGraph
+    val x = g.bwdUnreachable(Array(v(4)))
+    assert(x.length == 1)
+
+    val y = g.bwdUnreachable(null)
+    assert(y.length == 5)
+
+  }
+
+  test("virtual block src contained in"){
+    val (g, v) = testReachGraph
+    val x = g.allSrcContainedIn(v, Array(v(2)))
+    // x.foreach( e => println(e + " ") )
+    // result contains v1, v2, v4, v5
+    assert(x.length == 4)
+
+    val y = g.allSrcContainedIn(v, null)
+    assert (y.length == 0)
+
+    val z = g.allSrcContainedIn(null, null)
+    assert (z.length == 0)
+
+  }
+
+  test("virtual block dst contained in"){
+    val (g, v) = testReachGraph
+    val x = g.allDstContainedIn(v, Array(v(2)))
+    // x.foreach( e => println(e + " ") )
+    // result contains v1, v2, v4, v5
+    assert(x.length == 4)
+
+    val y = g.allDstContainedIn(v, null)
+    assert (y.length == 0)
+
+    val z = g.allDstContainedIn(null, null)
+    assert (z.length == 0)
+
+  }
 
   test("Named tree") {
     val f = new NameTreeNodeFactory()
@@ -91,15 +205,5 @@ class VirtualGraphTest extends FunSuite {
   }
 
 
-  test("Virtual block graph") {
-    val g = new VirtualBlockGraph()
-    val names = Array("a", "b")
-    val v = g.newBlocks(names)
-    g.addEdges(Array(v(0)), Array(v(1)))
-    assert(v.size == names.size)
-
-    val s = g.toDotString() 
-    assert(s.size > 6) 
-  }
 }
 

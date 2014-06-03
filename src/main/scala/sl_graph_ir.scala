@@ -226,7 +226,7 @@ class VirtualBlockGraph() {
   def bwdUnreachable(bSrc:Array[Int]):Array[Int] = {
     val reach = new Reachable(g)
     val bwd = if (bSrc!= null) { 
-      reach.forward(bSrc).toSet
+      reach.backward(bSrc).toSet
     } else {
       Set[Int]()
     }
