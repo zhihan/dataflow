@@ -37,6 +37,19 @@ class TreeTest extends FunSuite {
     assert(s.length > 20)
   }
 
+  test("Get descendants") {
+    val (t, _) = createSimpleTree
+    val d = t.getDescendantIDs(Array(t.id))
+    assert(d.length == 6)
+
+    val ids = t.children.toArray.map(_.id)
+    val d2 = t.getDescendantIDs(ids)
+    assert(d2.length == 5)
+
+    val d3 = t.getDescendantIDs(null)
+    assert(d3.length == 0)
+  }
+
   test("Get nonleaf descendants") {
     val (t,_) = createSimpleTree
     val ids = t.getAllNonleafDescendantIDs()
@@ -51,6 +64,25 @@ class TreeTest extends FunSuite {
     assert(a.length == 2)
   }
 
+  test("Children tests") {
+    val (t, _) = createSimpleTree
+    val c1 = t.children.head
+    assert(t.isChild(c1.id))
+    assert(!t.isChild(-1))
+
+
+    val children = t.getChildrenIDs()
+    assert(children.length == 2)
+  }
+
+  test("Is descendant") {
+    val (t, _) = createSimpleTree
+    val c1 = t.children.head
+    assert(t.isDescendant(c1.id))
+    assert(!c1.isDescendant(t.id))
+
+  }
+
   test("Batch make") {
     val f = new TreeNodeFactory
     val t = f.makeTree(4, Array(2,3,4), Array(1,1,2))
@@ -58,6 +90,18 @@ class TreeTest extends FunSuite {
     assert(s.length > 20)
     //println(n.toDotString)
     
+  }
+
+  test("Ancestor subsets") {
+    val (t,(x,x1,x2, y,z)) = createSimpleTree
+    val tests = Array(x.id, x1.id, y.id, z.id)
+    val as = t.computeAncestorSubset(tests)
+    assert(as.length == 2)
+    assert(as.contains(x.id))
+    assert(as.contains(y.id))
+
+    val as2 = t.computeAncestorSubset(null)
+    assert(as2.length == 0)
   }
 
   test("Remove partial ancestors") {
@@ -69,6 +113,9 @@ class TreeTest extends FunSuite {
     assert(r.contains(y.id))
     assert(r.contains(x1.id))
     assert(r.contains(z.id))
+
+    val r2 = t.removePartiallyContainedAncestors(null)
+    assert(r2.length == 0)
   }
 
 }
