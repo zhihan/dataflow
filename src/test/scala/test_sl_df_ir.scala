@@ -131,9 +131,13 @@ class DfGraphTest extends FunSuite {
     val v3 = g3.newInputNodes(Array("a", "b"))
     assert(v1.size == 2)
     val g4 = new DataflowGraph()
-    g4.createNodesFromArray(Array(1,2,3))
-    assert(g4.nNodes == 3)
+    g4.createNodesFromArray(Array(1,2,3,1,2,3))
+    assert(g4.nNodes == 6)
     assert(g4.nEdges == 0)
+
+    g4.addEdgesFromArray(Array(1,2,3,4,5), 
+      Array(2,3,4,5,6), Array(0, 1, -3, -2, -1))
+    assert(g4.nEdges == 5)
   }
 
 
