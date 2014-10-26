@@ -20,8 +20,6 @@ case class Outport(override val id:Int) extends Port
 { }
 
 
-
-
 /** Virtual port graph captures the relationship between
  * ports of virtual blocks. It is used to compute the
  * virtual blocks in  a signal pathway. */

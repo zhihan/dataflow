@@ -1025,7 +1025,7 @@ class TarjanDominators {
       val s = Set[Vertex]()
       val succ = g.succ(n)
       for (y <- succ) {
-	// Immediate successor is DF if 
+	// Immediate successor is DF if
 	// it is not dmoniated by the vertex
 	if (idom(y) != n) {
 	  s += y
@@ -1042,8 +1042,9 @@ class TarjanDominators {
       df(n) = s
     }
   }
+
   def dominanceFrontier(n: Vertex, idom: HashMap[Vertex,Vertex],
-		       g: Graph) = {
+    g: Graph) = {
     val c = new DominanceF(g, idom)
     c.compute(n)
     c.df

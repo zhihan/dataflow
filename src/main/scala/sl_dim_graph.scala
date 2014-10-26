@@ -1,7 +1,5 @@
-/** Intermediate representation for understanding dimension
-  propagation */
 
-package sl.ir.dim // Dimension class
+package sl.ir.src // Src classes 
 
 import my.se._
 import scala.collection.mutable.Map
@@ -113,7 +111,10 @@ object Block {
   }
 }
 
-
+/**
+  Each signal connect a source port to a destination
+  inport. 
+  */
 case class Signal(val source: Outport,
   val destination: Inport, val name:String)
 {
