@@ -3,7 +3,7 @@ name := "se"
 
 version := "1.0"
 
-scalaVersion := "2.11.2"
+scalaVersion := "2.11.4"
 
 resolvers += "Sonatype Releases" at "http://oss.sonatype.org/content/repositories/releases"
 
@@ -13,7 +13,7 @@ libraryDependencies += "org.scala-lang.modules" % "scala-parser-combinators_2.11
 
 libraryDependencies += "org.antlr" % "antlr" % "3.5" 
 
-//libraryDependencies += "commons-io" % "commons-io" % "2.4" 
+libraryDependencies += "commons-io" % "commons-io" % "2.4" 
 
 resolvers += Classpaths.sbtPluginReleases
 

@@ -1,7 +1,9 @@
 package my.se
 
-// A bus is a hierarchical data structure for propagating 
-// dataflow dependence with the dataflow graph. 
+/** 
+  A bus is a hierarchical data structure for propagating 
+  dataflow dependence with the dataflow graph. 
+  */
 
 import my.se._
 import scala.collection.immutable.Set // Set of indices

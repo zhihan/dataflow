@@ -1,6 +1,6 @@
 package sl.ir.dim.test
 
-import sl.ir.dim._
+import sl.ir.src._
 import my.utility._
 import scala.util.parsing.json.JSON
 import org.scalatest.FunSuite

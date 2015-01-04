@@ -1,6 +1,10 @@
-// Program structure tree 
-// Construct a PST from a program IR
 package my.ir.pst
+
+/**
+  Program structure tree
+  
+  Construct a PST from a program AST
+*/
 
 import my.ir._
 import my.se._
