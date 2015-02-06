@@ -20,8 +20,6 @@ import scala.collection.mutable.ArrayBuffer
  *
  */
 
-import sl.ir._
-
 sealed abstract class DataflowNode extends HasId
 // A Var node corresponds to the output buffer of a nonvirtual block
 case class Var(override val id:Int) extends DataflowNode 
