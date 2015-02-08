@@ -9,21 +9,31 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.Stack
 
-/*
-   A Directed graph is a simple implementation of directed graph
-  (maybe cyclic). It is used in another class to model the semantic
-  model of Simulink block diagrams.
-*/
+/**
+  * Directed Graph
+  * 
+  * A Directed graph is a simple implementation of directed graph
+  * (maybe cyclic). It is used in another class to model the semantic
+  * model of Simulink block diagrams.
+  */
 
-/** Label operation is to implement the labeling mechanism to
-  * partition block diagrams as proposeb by Alongkrit and Mohamed */
+/** 
+  * Label operations
+  * 
+  * Label operation is to implement the labeling mechanism to
+  * partition block diagrams as proposeb by Alongkrit and Mohamed 
+  */
 abstract class LabelOp[Label] {
   type T = Label
   def lessThan(l:Label, r:Label):Boolean
   def max(l:Label, r:Label):Label
 }
 
-/** Set operation to analyze vectorized signals */
+/** 
+  * Set operations
+  * 
+  * Set operation to analyze vectorized signals 
+  */
 abstract class SetOp[SetType] {
   type T = SetType
   def isSubset(l:SetType, r:SetType): Boolean
@@ -32,24 +42,25 @@ abstract class SetOp[SetType] {
 }
 
 /** 
-  Vertex object consists of an id, a string for sid
-  and in- out- edges. The edges are ArrayBuffer, which are
-  mutable data members.
-  
-  To save memory, in the current implementation the sid field
-  is empty.
-
- */
+  * Vertex
+  * 
+  * Vertex object consists of an id, a string for sid
+  * and in- out- edges. The edges are ArrayBuffer, which are
+  * mutable data members.
+  * 
+  *  To save memory, in the current implementation the sid field
+  *  is empty.
+  */
 class Vertex(val id: Int, val sid: String) {
   def deepCopy = new Vertex(id, sid)
 }
 
 /** 
-  Edge object consists of id, and the two end vertices
- */
+  * Edge
+  * 
+  * Edge object consists of id, and the two end vertices
+  */
 class Edge(val id: Int,  val from:Vertex, val to:Vertex) 
-
-
 
 /**
   Directed graph implemented using edge list. The vertices
@@ -1043,6 +1054,11 @@ class TarjanDominators {
     }
   }
 
+  /**
+    * Dominance frontier
+    * 
+    * Used in the SSA algorithms
+    */
   def dominanceFrontier(n: Vertex, idom: HashMap[Vertex,Vertex],
     g: Graph) = {
     val c = new DominanceF(g, idom)
