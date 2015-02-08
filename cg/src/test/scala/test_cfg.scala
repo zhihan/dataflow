@@ -1,15 +1,15 @@
-import my.ir._
-import my.se._
-import my.ir.conversion._
+import me.zhihan.ir._
+import me.zhihan.se._
+import me.zhihan.ir.conversion._
 
 import org.antlr.runtime._
 import org.antlr.runtime.tree._
 
 import org.scalatest.FunSuite
 
-package my.ir.CFGTest {
+package me.zhihan.ir.CFGTest {
   class CFGTestSuite extends FunSuite {
-    test("Construct cfg") {
+  test("Construct cfg") {
       val a = """function((),(),main) 
       {
       if (@b) {
@@ -26,7 +26,7 @@ package my.ir.CFGTest {
       assert(cfg.graph.V.length == 10)
       assert(cfg.graph.E.length == 10)
    }
-    test("CFG for while loop") {
+  test("CFG for while loop") {
       val a = """function((),(),main) 
       {
       while (@b) {

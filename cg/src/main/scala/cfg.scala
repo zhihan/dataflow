@@ -1,5 +1,5 @@
-package my.ir
-import my.se._
+package me.zhihan.ir
+import me.zhihan.se._
 import scala.collection.mutable.Map
 import scala.collection.mutable.Set
 
@@ -39,7 +39,7 @@ class CFGMap {
   def getFirstStatement(v:Vertex) = block(v).head
  
   def dump(): String = {
-    val print = new Print("myir")
+    val print = new Print("me.zhihan.r")
     "{" + (for ((k,v) <- block) yield (k.id.toString + "->" + 
                                        (for (elem <- v) yield print.Stmt(elem)).mkString(" "))).mkString("\n") + "}"
   }
@@ -245,7 +245,7 @@ object VarDefine {
 }
 
 object CFGPrint {
-  val p = new Print("myir")
+  val p = new Print("me.zhihan.r")
   private def vLabel(v: Vertex, m:CFGMap) = {
     val statements = m.getStatements(v)
     val stmtStr = statements.map( s=> s match {

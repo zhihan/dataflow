@@ -1,5 +1,5 @@
-package my.ir.diff
-import my.ir._
+package me.zhihan.ir.diff
+import me.zhihan.ir._
 
 import scala.collection.mutable.Map
 import scala.collection.mutable.ListBuffer

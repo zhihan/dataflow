@@ -1,10 +1,10 @@
-import my.ir._
-import my.ir.conversion._
+import me.zhihan.ir._
+import me.zhihan.ir.conversion._
 import org.scalatest.FunSuite
 
-package my.ir.Test {
+package me.zhihan.ir.Test {
   class MyIRPrintSuite extends FunSuite {
-    test("Assignment can print") {
+  test("Assignment can print") {
       val x = Var("x",1)
       val b = Const(FloatValue(2.0))
       val s = Assignment(RefVar(x),  b)
@@ -13,7 +13,7 @@ package my.ir.Test {
       //println(out) // This should print out "x = float(2.0:float)"
       assert(out.length() > 5) 
     }
-    test("Procedure can print") {
+  test("Procedure can print") {
       val x = Var("x",1)
       val b = Const(FloatValue(2.0))
       val s = Assignment(RefVar(x), Deref(x))
@@ -27,48 +27,48 @@ package my.ir.Test {
       assert(out.length() > 10) 
     }
 
-    test("Print file myir format") {
+  test("Print file me.zhihan.r format") {
       val p = new ParseAndCreateIR()
       val filename = getClass.getResource("/simple.cgel").getFile()
       //println(filename)
       val (ast,_) = p.parseFile(filename)
       //println(ast)
-      val printer = new Print("myir")
+      val printer = new Print("me.zhihan.r")
       val out = printer.Procedure(ast)
       //println(out)
       assert(out.length > 10)
     }
-    test("Print myir format if") {
+  test("Print me.zhihan.r format if") {
       val p = new ParseAndCreateIR()
       val filename = getClass.getResource("/if.cgel").getFile()
       //println(filename)
       val (ast,_) = p.parseFile(filename)
       //println(ast)
-      val printer = new Print("myir")
+      val printer = new Print("me.zhihan.r")
       val out = printer.Procedure(ast)
       //println(out)
       assert(out.length > 10)
     }
 
-    test("Print myir format while") {
+  test("Print me.zhihan.r format while") {
       val p = new ParseAndCreateIR()
       val filename = getClass.getResource("/while.cgel").getFile()
       //println(filename)
       val (ast,_) = p.parseFile(filename)
       //println(ast)
-      val printer = new Print("myir")
+      val printer = new Print("me.zhihan.r")
       val out = printer.Procedure(ast)
       //println(out)
       assert(out.length > 10)
     }
 
-    test("Print myir format function-call") {
+  test("Print me.zhihan.r format function-call") {
       val p = new ParseAndCreateIR()
       val filename = getClass.getResource("/fcn.cgel").getFile()
       //println(filename)
       val (ast,_) = p.parseFile(filename)
       //println(ast)
-      val printer = new Print("myir")
+      val printer = new Print("me.zhihan.r")
       val out = printer.Procedure(ast)
 
       // We can parse the out as string

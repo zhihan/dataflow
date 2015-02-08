@@ -1,8 +1,8 @@
-package my.ir.defuse
+package me.zhihan.ir.defuse
 
 import scala.collection.mutable.Map
-import my.se._ // Graph
-import my.ir._ // IR
+import me.zhihan.se._ // Graph
+import me.zhihan.ir._ // IR
 
 
 class BooleanMapSet (mval : Map[Vertex,Boolean]) {

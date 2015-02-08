@@ -1,6 +1,4 @@
-package se.bus.test
-
-import my.se._
+package me.zhihan.se
 
 import org.scalatest.FunSuite
 

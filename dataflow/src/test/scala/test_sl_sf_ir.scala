@@ -1,8 +1,8 @@
-package sl.ir.sf.test
+package sl.ir.sf
 
 import sl.ir.sf._
 import sl.ir._
-import my.se._
+import me.zhihan.se._
 import scala.collection.mutable.ArrayBuffer
 
 import org.scalatest.FunSuite
@@ -154,7 +154,6 @@ class SFIRTest extends FunSuite {
     assert(s.length > 10)
   }
 
-
   test("StateflowObject tests") {
     val f = new StateflowFactory()
     val a = f.state("a")
@@ -166,7 +165,6 @@ class SFIRTest extends FunSuite {
     val t = f.defaultTransition(a)
     assert(!StateflowObject.isStateLike(t))
   }
-
 
   test("Hybrid SF/SL graph search") {
     val (objs, chart, sfDep, dataIds, inIds) = createTwoStatesAndData
@@ -182,6 +180,5 @@ class SFIRTest extends FunSuite {
     val reachSet = reach.reach(Array(use.id))
     val vars = reachSet.dfgReach.getVars
     assert(vars.size == 2)
-
   }
 }

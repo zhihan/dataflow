@@ -1,4 +1,4 @@
-package my.se
+package me.zhihan.se
 
 import java.util.Arrays
 

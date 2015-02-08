@@ -1,4 +1,4 @@
-package my.ir.pst
+package me.zhihan.ir.pst
 
 /**
   Program structure tree
@@ -6,8 +6,8 @@ package my.ir.pst
   Construct a PST from a program AST
 */
 
-import my.ir._
-import my.se._
+import me.zhihan.ir._
+import me.zhihan.se._
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Map
 
@@ -75,7 +75,7 @@ class ComputePst() {
   }
 
   def isMergeNode(v:Vertex) = {
-    // test string
+    // string
     v.sid == "merge" 
   }
 

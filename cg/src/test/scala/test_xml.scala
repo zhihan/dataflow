@@ -1,9 +1,9 @@
-import my.se._
+import me.zhihan.se._
 import org.scalatest.FunSuite 
 
-package my.se.test.XMLTest {
+package me.zhihan.se.XMLTest {
   class SimpleTestSuite extends FunSuite {
-    test("Test") {
+  test("Test") {
     }
   }
 }

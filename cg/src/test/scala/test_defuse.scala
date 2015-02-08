@@ -1,14 +1,14 @@
-import my.ir._
-import my.se._
-import my.ir.defuse._
+import me.zhihan.ir._
+import me.zhihan.se._
+import me.zhihan.ir.defuse._
 
 import scala.collection.mutable.Map
 
 import org.scalatest.FunSuite
 
-package my.ir.Test {
+package me.zhihan.ir.Test {
   class DefUseSuite extends FunSuite {
-    test("Test VarUse function") {
+  test("Test VarUse function") {
       val x = Var("x", 1)
       val y = Var("y", 2)
       val x_p_y = BinExp(OpPlus(),
@@ -19,7 +19,7 @@ package my.ir.Test {
       assert(u.length == 2)
     }
     
-    test("Test dataflow equation") {
+  test("Test dataflow equation") {
       val u = Var("u",1)
       val y = Var("y",2)
       val x = Var("x",3)

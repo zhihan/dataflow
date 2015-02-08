@@ -7,9 +7,9 @@ import scala.collection.mutable.Queue
 
 
 // My utility imports
-import my.se._ // Graph, Vertex, Edge
-import my.utility.HasId
-import my.utility.Gensym  
+import me.zhihan.se._ // Graph, Vertex, Edge
+import me.zhihan.utility.HasId
+import me.zhihan.utility.Gensym  
 import sl.ir._
 
 /** 
@@ -132,7 +132,6 @@ class SFDependence(val fromObj: Array[Int], val toObj: Array[Int])
       toObj.map(v=>objToVId(v)), g)
 
 }
-
 
 /**
   A utility class to create StateflowObject objects and keep

@@ -21,11 +21,11 @@ tokens {
 
 
 @header {
-package my.ir;
+package me.zhihan.ir;
 }
 
 @lexer::header {
-package my.ir;
+package me.zhihan.ir;
 }
 
 

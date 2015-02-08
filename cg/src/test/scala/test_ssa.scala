@@ -1,13 +1,13 @@
-import my.se._
-import my.ir._
-import my.ir.conversion._
+import me.zhihan.se._
+import me.zhihan.ir._
+import me.zhihan.ir.conversion._
 
 import java.io._
 import org.scalatest.FunSuite
 
-package my.ir.test.SSATest {
+package me.zhihan.ir.SSATest {
   class Suite extends FunSuite {
-    test("Convert to SSA") {
+  test("Convert to SSA") {
       val g = new Graph()
       val m = new CFGMap()
       val i = Var("i",1)
@@ -93,7 +93,7 @@ package my.ir.test.SSATest {
       // writer1.close()
     }
 
-    test("Insert phi function from AST") {
+  test("Insert phi function from AST") {
       val p = new ParseAndCreateIR()
       val filename = getClass.getResource("/ssa.cgel").getFile()
       val (ast, _) = p.parseFile(filename)

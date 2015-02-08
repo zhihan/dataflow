@@ -1,4 +1,4 @@
-package my.se
+package me.zhihan.se
 
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.DocumentBuilder
@@ -7,7 +7,7 @@ import org.w3c.dom.Node
 import org.w3c.dom.Element
 import java.io.File
 
-import my.se._
+import me.zhihan.se._
 
 class XML2Tree() {
   def getID(n: Element) = {

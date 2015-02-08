@@ -1,14 +1,14 @@
-import my.ir._
-import my.ir.sim._
-import my.ir.defuse._
+import me.zhihan.ir._
+import me.zhihan.ir.sim._
+import me.zhihan.ir.defuse._
 
-import my.ir.conversion._
+import me.zhihan.ir.conversion._
 
 import org.scalatest.FunSuite
 
-package my.ir.sim.Test {
+package me.zhihan.ir.sim.Test {
   class AnalysisSuite extends FunSuite {
-    test("Simple simstate analysis") {
+  test("Simple simstate analysis") {
       val a =  """function((),(),step) 
       {
         var(double, y);
@@ -25,7 +25,7 @@ package my.ir.sim.Test {
       assert(xname == List("x"))
     }
 
-    test("Simple output simstate insersion") {
+  test("Simple output simstate insersion") {
       val a =  """function((),(),step) 
       {
         var(double, y);
@@ -58,7 +58,7 @@ package my.ir.sim.Test {
       assert(prog.length > 10)
     }
 
-    test("Simple output generation") {
+  test("Simple output generation") {
       val a =  """function((),(),step) 
       {
         var(double, y);
@@ -80,7 +80,7 @@ package my.ir.sim.Test {
       assert(prog.length > 10)
     }
 
-    test("Simple update generation") {
+  test("Simple update generation") {
       val a =  """function((),(),step) 
       {
         var(double, y);
@@ -105,7 +105,7 @@ package my.ir.sim.Test {
       assert(prog.length > 10)
     }
 
-    test("Simple output and update with simstate insersion") {
+  test("Simple output and update with simstate insersion") {
       val a =  """function((),(),step) 
       {
         var(double, y);

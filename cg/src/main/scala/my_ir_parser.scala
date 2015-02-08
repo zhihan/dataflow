@@ -1,6 +1,6 @@
-package my.ir //
+package me.zhihan.ir 
 
-import my.utility._ // Gensym
+import me.zhihan.utility._ // Gensym
 
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Map

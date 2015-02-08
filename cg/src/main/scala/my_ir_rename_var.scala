@@ -1,6 +1,6 @@
-package my.ir
+package me.zhihan.ir
 
-import my.ir._
+import me.zhihan.ir._
 import scala.collection.mutable.Map
 
 object RenameVar{
