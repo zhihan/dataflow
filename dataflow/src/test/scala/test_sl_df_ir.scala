@@ -1,7 +1,6 @@
-package sl.ir.test
+package sl.ir
 
-import sl.ir._
-import my.se._
+import me.zhihan.se._
 import scala.collection.mutable.Map
 import org.scalatest.FunSuite
 
@@ -54,7 +53,7 @@ class DfGraphTest extends FunSuite {
     assert(v.size == 1)
   }
 
-   test("print simple DFG") {
+  test("print simple DFG") {
     val cfg = createSimpleGraph
     val s = cfg.toDotString
     // println(s)
@@ -78,7 +77,7 @@ class DfGraphTest extends FunSuite {
     //result.foreach{ vid => println(dfg.nodes( vid ))}
   }
 
-  test("Simple DFG proc reachability") {
+test("Simple DFG proc reachability") {
     val dfg = createSimpleGraph
     val y = dfg.getVarNodes("y") // Only one node
     val yId = y.map( v => v.id)
@@ -159,7 +158,6 @@ class DfGraphTest extends FunSuite {
     assert(result4.length == 0)    
   }
 
-  // 
   test("Backward reachability with dependence") {
     // y = copy(x)
     // copy <-- enable
@@ -249,9 +247,7 @@ class DfGraphTest extends FunSuite {
       new Inactive(null,null))
     val v4 = reachSet4.getVars
     assert(v4.contains(y.id))
-
   }
-
 
   test("Either reachability") {
     val dfg = new DataflowGraph()
@@ -797,5 +793,4 @@ class DfGraphTest extends FunSuite {
     assert(!reach.reachedVertices.contains(A.id))
     assert(V.contains(A.id))
   }
-
 }

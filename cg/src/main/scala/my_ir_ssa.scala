@@ -1,9 +1,9 @@
-package my.ir.ssa
+package me.zhihan.ir.ssa
 
 // Static single-assignment form
 
-import my.se._
-import my.ir._
+import me.zhihan.se._
+import me.zhihan.ir._
 
 class PlacePhi{
   // Place phi function

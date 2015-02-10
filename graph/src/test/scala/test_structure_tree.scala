@@ -1,6 +1,5 @@
-package sl.ir.test
+package me.zhihan.se
 
-import my.se._
 import org.scalatest.FunSuite
 
 class StructureTreeTest extends FunSuite {
@@ -30,14 +29,14 @@ class StructureTreeTest extends FunSuite {
     (t, (x, x1, x2, y, z))
   }
 
-  test("Print simple tree") {
+test("Print simple tree") {
     val (t,_) = createSimpleTree
     val s = t.toDotString
     // println(s)
     assert(s.length > 20)
   }
 
-  test("Get descendants") {
+test("Get descendants") {
     val (t, _) = createSimpleTree
     val d = t.getDescendantIDs(Array(t.id))
     assert(d.length == 6)
@@ -50,13 +49,13 @@ class StructureTreeTest extends FunSuite {
     assert(d3.length == 0)
   }
 
-  test("Get nonleaf descendants") {
+test("Get nonleaf descendants") {
     val (t,_) = createSimpleTree
     val ids = t.getAllNonleafDescendantIDs()
     assert(ids.length == 3)
   }
 
-  test("Get ancestors") {
+test("Get ancestors") {
     val (t,_) = createSimpleTree
     val c1 = t.children.head
     val c2 = c1.children.head
@@ -64,7 +63,7 @@ class StructureTreeTest extends FunSuite {
     assert(a.length == 2)
   }
 
-  test("Children tests") {
+test("Children tests") {
     val (t, _) = createSimpleTree
     val c1 = t.children.head
     assert(t.isChild(c1.id))
@@ -75,7 +74,7 @@ class StructureTreeTest extends FunSuite {
     assert(children.length == 2)
   }
 
-  test("Is descendant") {
+test("Is descendant") {
     val (t, _) = createSimpleTree
     val c1 = t.children.head
     assert(t.isDescendant(c1.id))
@@ -83,17 +82,16 @@ class StructureTreeTest extends FunSuite {
 
   }
 
-  test("Batch make") {
+test("Batch make") {
     val f = new TreeNodeFactory
     val t = f.makeTree(4, Array(2,3,4), Array(1,1,2))
     val s = t.toDotString
     assert(s.length > 20)
     //println(n.toDotString)
-    
   }
 
-  test("Ancestor subsets") {
-    val (t,(x,x1,x2, y,z)) = createSimpleTree
+test("Ancestor subsets") {
+    val (t,(x,x1,x2,y,z)) = createSimpleTree
     val tests = Array(x.id, x1.id, y.id, z.id)
     val as = t.computeAncestorSubset(tests)
     assert(as.length == 2)
@@ -104,7 +102,7 @@ class StructureTreeTest extends FunSuite {
     assert(as2.length == 0)
   }
 
-  test("Remove partial ancestors") {
+test("Remove partial ancestors") {
     val (t,(x,x1,x2, y,z)) = createSimpleTree
     val tests = Array(x.id, x1.id, y.id, z.id)
     val r = t.removePartiallyContainedAncestors(tests)

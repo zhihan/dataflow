@@ -1,7 +1,7 @@
-package sl.ir.test
+package sl.ir
 
 import sl.ir.graph._
-import my.se._
+import me.zhihan.se._
 import org.scalatest.FunSuite
 
 class VirtualGraphTest extends FunSuite {
@@ -107,7 +107,7 @@ class VirtualGraphTest extends FunSuite {
     }
   }
 
-  // Virtual block graph reachability test graph
+  // Virtual block graph reachability graph
   def testReachGraph = {
     val g = new VirtualBlockGraph()
     val names = Array("a", "b", "c", "d", "e")
@@ -126,7 +126,6 @@ class VirtualGraphTest extends FunSuite {
 
     val y = g.unreachable(null, null)
     assert(y.length == 5)
-
   }
 
   test("virtual block unreachable fwd"){
@@ -136,7 +135,6 @@ class VirtualGraphTest extends FunSuite {
 
     val y = g.fwdUnreachable(null)
     assert(y.length == 5)
-
   }
 
   test("virtual block unreachable bwd"){
@@ -146,7 +144,6 @@ class VirtualGraphTest extends FunSuite {
 
     val y = g.bwdUnreachable(null)
     assert(y.length == 5)
-
   }
 
   test("virtual block src contained in"){
@@ -161,7 +158,6 @@ class VirtualGraphTest extends FunSuite {
 
     val z = g.allSrcContainedIn(null, null)
     assert (z.length == 0)
-
   }
 
   test("virtual block dst contained in"){
@@ -176,7 +172,6 @@ class VirtualGraphTest extends FunSuite {
 
     val z = g.allDstContainedIn(null, null)
     assert (z.length == 0)
-
   }
 
   test("Named tree") {
@@ -203,7 +198,5 @@ class VirtualGraphTest extends FunSuite {
     assert(u.fullpath(root, c) == "/c")
     assert(u.fullpath(root, d) == "/d")
   }
-
-
 }
 

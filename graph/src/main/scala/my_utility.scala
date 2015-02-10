@@ -1,4 +1,4 @@
-package my.utility
+package me.zhihan.utility
 
 
 trait HasId 

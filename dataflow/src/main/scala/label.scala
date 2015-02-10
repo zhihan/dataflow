@@ -1,10 +1,10 @@
-package my.se
+package me.zhihan.se
 
 import scala.collection.immutable.Set
 import scala.collection.mutable.HashMap
 import scala.collection.JavaConversions._ 
 
-import my.se._
+import me.zhihan.se._
 
 
 

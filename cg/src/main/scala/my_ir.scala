@@ -1,10 +1,10 @@
 // My IR is a simple intermediate representation adapted from
 // CGIR and DVIR.
 
-package my.ir
+package me.zhihan.ir
 
 import scala.collection.mutable.Set
-import my.utility._ // Gensym
+import me.zhihan.utility._ // Gensym
 
 // Binary operations 
 // Every case class needs to implements 'is' method

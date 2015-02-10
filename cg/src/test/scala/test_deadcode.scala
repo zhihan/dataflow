@@ -1,12 +1,12 @@
-import my.ir._
+import me.zhihan.ir._
 
-import my.ir.conversion._
+import me.zhihan.ir.conversion._
 
 import org.scalatest.FunSuite
 
-package my.ir.Test {
+package me.zhihan.ir.Test {
   class DeadCodeSuite extends FunSuite {
-    test("Detect dead code") {
+  test("Detect dead code") {
       val a =  """function((),(),step) 
       {
         var(double, y);

@@ -1,6 +1,5 @@
 package me.zhihan.se
 
-import my.se._
 import scala.util.parsing.json._
 import org.scalatest.FunSuite
 

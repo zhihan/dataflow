@@ -1,7 +1,7 @@
-package sl.ir.dim.test
+package sl.ir.dim
 
 import sl.ir.src._
-import my.utility._
+import me.zhihan.utility._
 import scala.util.parsing.json.JSON
 import org.scalatest.FunSuite
 

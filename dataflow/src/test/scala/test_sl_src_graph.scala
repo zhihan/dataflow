@@ -1,7 +1,7 @@
-package sl.ir.src.test
+package sl.ir.src
 
 import sl.ir.src._
-import my.utility._
+import me.zhihan.utility._
 import scala.util.parsing.json.JSON
 import org.scalatest.FunSuite
 
@@ -20,6 +20,7 @@ class DimGraphTest extends FunSuite {
       }
     }
   }
+
   test("JSON parsing for outport") {
     val gensym = new Gensym()
     val x = Outport(1, gensym())

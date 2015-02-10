@@ -1,11 +1,10 @@
-package my.se
+package me.zhihan.se
 
 /** 
   A bus is a hierarchical data structure for propagating 
   dataflow dependence with the dataflow graph. 
   */
 
-import my.se._
 import scala.collection.immutable.Set // Set of indices
 import scala.collection.immutable.Range 
 import scala.annotation.tailrec
@@ -275,9 +274,9 @@ extends BusElement
     def rec(offset:Int, acc:List[Set[Int]], l:List[BusElement]):List[Set[Int]] = {
       l match {
         case h::t => {
-          val myl = leaves.filter( x => (x >= offset && x < offset + h.size)
+          val my = leaves.filter( x => (x >= offset && x < offset + h.size)
                                 ).map(x => x-offset)
-          rec(offset + h.size, myl :: acc, t)
+          rec(offset + h.size, my :: acc, t)
         }
         case Nil => acc.reverse
       }

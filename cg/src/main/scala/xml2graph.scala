@@ -1,4 +1,4 @@
-package my.se
+package me.zhihan.se
 
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.DocumentBuilder
@@ -11,7 +11,7 @@ import java.util.ArrayList
 import scala.collection.mutable.HashMap
 import scala.collection.JavaConversions._ 
 
-import my.se._
+import me.zhihan.se._
 
 class XML2Graph() {
   

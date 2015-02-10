@@ -1,12 +1,12 @@
-import my.ir._
-import my.ir.conversion._
-import my.ir.diff._
+import me.zhihan.ir._
+import me.zhihan.ir.conversion._
+import me.zhihan.ir.diff._
 
 import org.scalatest.FunSuite
 
-package my.ir.diff.Test {
+package me.zhihan.ir.diff.Test {
   class DiffTestSuite extends FunSuite {
-    test("Differentiate function") {
+  test("Differentiate function") {
       val a =  """function((),(),step) 
       {
         var(double, y);
@@ -29,7 +29,7 @@ package my.ir.diff.Test {
       assert(df.length > 1)
       
     }
-    test("Differentiate functions") {
+  test("Differentiate functions") {
       val a =  """function((),(),step) 
       {
         var(double, y);
@@ -55,7 +55,7 @@ package my.ir.diff.Test {
       }
     }
 
-    test("Differentiate simple expressions") {
+  test("Differentiate simple expressions") {
       val a =  """function((),(),step) 
       {
         var(double, y);
@@ -87,7 +87,7 @@ package my.ir.diff.Test {
         assert(df.length > 1)
       }
     }
-    test("Differentiate intrinsic functions") {
+  test("Differentiate intrinsic functions") {
       val a =  """function((),(),step) 
       {
         var(double, y);

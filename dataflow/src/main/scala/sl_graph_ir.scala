@@ -1,11 +1,11 @@
 /** Intermediate representation for Simulink graphic objects*/
 package sl.ir.graph
 
-import my.se._
+import me.zhihan.se._
 import scala.collection.mutable.Map
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.ArrayBuffer
-import my.utility._
+import me.zhihan.utility._
 
 /** There are two kinds of ports, inport accepts input signals
  * outport generate output signals. */

@@ -1,4 +1,4 @@
-package my.ir
+package me.zhihan.ir
 import org.stringtemplate.v4._
 
  //
@@ -9,7 +9,7 @@ class Print (format:String = "matlab")
    case "matlab" => 
      new STGroupFile(
        getClass.getResource("/MATLAB.stg").getFile())
-   case "myir" =>
+   case "me.zhihan.r" =>
      new STGroupFile(
        getClass.getResource("/myir.stg").getFile())
  }

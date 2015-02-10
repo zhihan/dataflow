@@ -1,16 +1,16 @@
-import my.ir._
-import my.se._
-import my.ir.pst._
-import my.ir.conversion._
+import me.zhihan.ir._
+import me.zhihan.se._
+import me.zhihan.ir.pst._
+import me.zhihan.ir.conversion._
 
 import org.antlr.runtime._
 import org.antlr.runtime.tree._
 
 import org.scalatest.FunSuite
 
-package my.ir.PstTest {
+package me.zhihan.ir.PstTest {
   class PstTestSuite extends FunSuite {
-    test("Basic region") {
+  test("Basic region") {
       val a = """function((),(), basic)
       {
 	=(y,@x);
@@ -28,7 +28,7 @@ package my.ir.PstTest {
       
     }
 
-    test("Chain region from AST") {
+  test("Chain region from AST") {
       val a = """function((),(), chain)
       {
 	=(y,@x);
@@ -51,7 +51,7 @@ package my.ir.PstTest {
 	r.regions(c.id) == BasicRegion()))
     }
 
-    test("Chain region from CFG") {
+  test("Chain region from CFG") {
       val a = """function((),(), chain)
       {
 	=(y,@x);
@@ -83,7 +83,7 @@ package my.ir.PstTest {
     }
   
 
-    test("Chain region for while loop") {
+  test("Chain region for while loop") {
       val a = """function((),(), chain)
       {
 	while(@b) {
@@ -110,7 +110,7 @@ package my.ir.PstTest {
 	r.regions(c.id) == BasicRegion()))
     } 
 
-   test("Pst while loop from AST") {
+ test("Pst while loop from AST") {
       val a = """function((),(), whilst)
       {
 	while(@b) {
@@ -135,7 +135,7 @@ package my.ir.PstTest {
 	r.regions(c.id) == BasicRegion()))
     }
 
-    test("While loop nested") {
+  test("While loop nested") {
       val a = """function((),(), chain)
       {
 	while(@b) {
@@ -174,7 +174,7 @@ package my.ir.PstTest {
 	     == WhileRegion())
     } 
  
-   test("While loop with if region") {
+ test("While loop with if region") {
       val a = """function((),(), chain)
       {
 	while(@b) {

@@ -1,4 +1,4 @@
-package my.ir.sim
+package me.zhihan.ir.sim
 
 
 /* Simulink domain makes several special assumptions
@@ -7,9 +7,9 @@ package my.ir.sim
  * 2) All variables are declared global
 */ 
 
-import my.ir._
-import my.se._
-import my.ir.defuse._
+import me.zhihan.ir._
+import me.zhihan.se._
+import me.zhihan.ir.defuse._
 import scala.collection.mutable.Map
 import scala.collection.mutable.Set
 
@@ -37,7 +37,7 @@ object Analysis {
   def getSimState(s: Step, y:List[Var]) = {
     val (stepCFG, map) = Utility.createCFGForList(s.body)
 
-    // Add a dummy initialize function
+    // Add a dumme.zhihan.initialize function
     map.add(stepCFG.entry, Noop(""))
     val g= stepCFG.graph
     val tops = g.succ(stepCFG.entry)

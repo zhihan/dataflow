@@ -1,6 +1,4 @@
-package my.utility.test
-
-import my.utility._
+package me.zhihan.utility
 
 import org.scalatest.FunSuite 
 import scala.collection.immutable.Set

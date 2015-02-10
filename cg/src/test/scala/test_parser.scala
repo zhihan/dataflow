@@ -1,5 +1,5 @@
-import my.ir._
-import my.ir.conversion._
+import me.zhihan.ir._
+import me.zhihan.ir.conversion._
 
 import org.antlr.runtime._
 import org.antlr.runtime.tree._
@@ -7,7 +7,7 @@ import org.antlr.runtime.tree._
 import org.scalatest.FunSuite
 import java.io._
 
-package my.ir.ParserTest {
+package me.zhihan.ir.ParserTest {
 
   // A simple use of visitor callbacks 
 
@@ -25,7 +25,7 @@ package my.ir.ParserTest {
 
 
   class ParserTestSuite extends FunSuite {
-    test("Parse and then print") {
+  test("Parse and then print") {
       val a = """function((),(),main) 
       {
         var(double, y);
@@ -53,7 +53,7 @@ package my.ir.ParserTest {
       assert(out.length() > 10)
     }
 
-    test("Parse if statement") {
+  test("Parse if statement") {
       val a = """function((),(),main) 
       {
       if (@b) {
@@ -81,7 +81,7 @@ package my.ir.ParserTest {
       assert(out.length() > 10)
     }
 
-    test("Parse while loop") {
+  test("Parse while loop") {
       val a = """function((),(),main) 
       {
         while (@b) {
@@ -106,7 +106,7 @@ package my.ir.ParserTest {
       // println(out)
       assert(out.length() > 10)
     }    
-    test("Parse function call") {
+  test("Parse function call") {
       val a = """function((),(),main) 
       {
         =(y, fcn()  );
@@ -138,13 +138,13 @@ package my.ir.ParserTest {
       val out = printer.Procedure(ast)
       // println(out) 
       assert(out.length > 10)
-      val printer2 = new Print("myir")
+      val printer2 = new Print("me.zhihan.r")
       val out2 = printer2.Procedure(ast)
       // println(out2) 
       assert(out2.length > 10)
 
     }
-    test("Parse unary function") {
+  test("Parse unary function") {
       val a = """function((),(),main) 
       {
         =(y, -(@x));
@@ -171,7 +171,7 @@ package my.ir.ParserTest {
       assert(out.length > 10)
       
     }
-    test("Parse const") {
+  test("Parse const") {
       val a = """function((),(),main) 
       {
         =(y, const(double,1.0));
@@ -200,7 +200,7 @@ package my.ir.ParserTest {
       assert(out.length > 10)
       
     }
-    test("Parse relational operator") {
+  test("Parse relational operator") {
       val a = """function((),(),main) 
       {
         =(y, ==(@x,@x));
@@ -231,7 +231,7 @@ package my.ir.ParserTest {
       assert(out.length > 10)
       
     }
-    test("Parse file") {
+  test("Parse file") {
       val p = new ParseAndCreateIR()
       val filename = getClass.getResource("/simple.cgel").getFile()
       //println(filename)

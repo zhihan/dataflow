@@ -1,5 +1,5 @@
 // Mutable bijective maps
-package my.utility
+package me.zhihan.utility
 
 import scala.collection.mutable.Map
 

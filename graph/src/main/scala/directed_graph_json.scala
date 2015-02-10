@@ -1,9 +1,5 @@
 package me.zhihan.se
 
-import my.se.Vertex
-import my.se.Edge
-import my.se.Graph
-
 import scala.collection.immutable.Map
 import net.liftweb.json._
 import net.liftweb.json.JsonDSL._

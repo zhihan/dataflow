@@ -29,7 +29,7 @@ lazy val cg = (project in file("cg")).
   settings(commonSettings: _*).
   settings(
     name := "cg",
-    libraryDependencies += "org.antlr" % "antlr" % "3.5"
+    libraryDependencies += "org.antlr" % "antlr" % "3.5.2"
   ).
   settings(sbtantlr.SbtAntlrPlugin.antlrSettings: _*)
 

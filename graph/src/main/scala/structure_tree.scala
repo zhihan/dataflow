@@ -1,10 +1,10 @@
-package my.se
+package me.zhihan.se
 
 import scala.collection.immutable.Set
 import scala.collection.immutable.Map
 import scala.collection.JavaConversions._ 
 
-import my.utility._ // Gensym
+import me.zhihan.utility._ // Gensym
 
 /* TreeNode
  * A Tree node in the program structure tree

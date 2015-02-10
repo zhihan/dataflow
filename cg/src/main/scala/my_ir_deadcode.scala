@@ -1,8 +1,8 @@
-package my.ir
+package me.zhihan.ir
 
-import my.ir._
-import my.se._
-import my.ir.defuse._
+import me.zhihan.ir._
+import me.zhihan.se._
+import me.zhihan.ir.defuse._
 import scala.collection.mutable.Set
 import scala.collection.mutable.Map
 import scala.collection.mutable.ListBuffer

@@ -1,7 +1,7 @@
 package sl.ir
 
-import my.se._
-import my.utility.HasId
+import me.zhihan.se._
+import me.zhihan.utility.HasId
 import scala.collection.immutable.Set
 import scala.collection.mutable.Map
 import scala.collection.mutable.ArrayBuffer
@@ -958,7 +958,7 @@ class DataflowBackVisitor(graph:Graph,
 
   val busReached = Map[Int, SubBus]()
 
-  // Test if a variable vertex is bus by testing its one and
+  // Test if a variable vertex is bus bying its one and
   // only writer.
   private def isVarBus(v:Vertex) = {
       DataflowUtil.isVarBus(inE, graph, v, busProcs)
