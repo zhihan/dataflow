@@ -1,8 +1,9 @@
+package my.se.test
+
 import my.se._
 import org.scalatest.FunSuite
 
-package my.se.test.GraphTest {
-  class SimpleTestSuite extends FunSuite {
+class GraphTest extends FunSuite {
 
     // Utility function
     def createLinGraph = {
@@ -187,5 +188,4 @@ package my.se.test.GraphTest {
       assert(s.length > 5)
     }
 
-  }
 }

@@ -3,7 +3,7 @@ package sl.ir.test
 import my.se._
 import org.scalatest.FunSuite
 
-class TreeTest extends FunSuite {
+class StructureTreeTest extends FunSuite {
   def createSimpleTree = {
     // t-+----x--+----x1 
     //   |       |

@@ -1,11 +1,10 @@
-package my.se.test.json
+package me.zhihan.se
 
 import my.se._
 import scala.util.parsing.json._
 import org.scalatest.FunSuite
 
-
-class GraphJSONTest extends FunSuite {
+class GraphJsonTest extends FunSuite {
   def createGraph = {
     val g = new Graph()
     val v1 = g.newVertex("a")
@@ -13,17 +12,17 @@ class GraphJSONTest extends FunSuite {
     val e = g.addEdge(v1, v2)
     g
   }
-  test("Serializing to JSON") {
+  test("Serializing to json") {
     val g = createGraph
-    val s = GraphJSON.toJSON(g)
+    val s = GraphJson.toJson(g)
     assert(s.length > 10)
   }
 
-  test("ParseJSON") {
+  test("Parse json file") {
     val g = createGraph
-    val s = GraphJSON.toJSON(g)
-    val g2 = GraphJSON.fromJSON(s)
-    val s2 = GraphJSON.toJSON(g2)
+    val s = GraphJson.toJson(g)
+    val g2 = GraphJson.fromJson(s)
+    val s2 = GraphJson.toJson(g2)
     assert(s == s2)
   }
 }
