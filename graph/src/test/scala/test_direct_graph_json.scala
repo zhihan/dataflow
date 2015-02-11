@@ -1,6 +1,5 @@
 package me.zhihan.se
 
-import scala.util.parsing.json._
 import org.scalatest.FunSuite
 
 class GraphJsonTest extends FunSuite {

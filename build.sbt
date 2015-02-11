@@ -4,7 +4,6 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.11.5",
   resolvers += "Sonatype Releases" at "http://oss.sonatype.org/content/repositories/releases",
   libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.1.7" % "test",
-  libraryDependencies += "org.scala-lang.modules" % "scala-parser-combinators_2.11" % "1.0.2",
   libraryDependencies += "commons-io" % "commons-io" % "2.4",
   libraryDependencies += "net.liftweb" % "lift-json_2.11" % "2.6"
 )

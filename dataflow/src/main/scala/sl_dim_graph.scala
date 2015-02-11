@@ -1,140 +1,82 @@
-
-package sl.ir.src // Src classes 
+package sl.ir.dim // Src classes 
 
 import me.zhihan.se._
 import scala.collection.mutable.Map
-import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.ArrayBuffer
+
 import me.zhihan.utility._
-import scala.util.parsing.json.JSON
-import scala.collection.immutable.{Map => IMap}
+
+import net.liftweb.json._
+import net.liftweb.json.JsonDSL._
 
 abstract sealed class Port 
 
-case class Inport(port:Int, override val id:Int) extends Port with HasId
+case class Inport(iport: Int, val id: Int) extends Port
 {
-  def json = "{\"input\":" + port + "," + 
-    "\"id\":" + id + "}"
+  def json: JObject =
+    ("id" -> id) ~
+  ("iport" -> iport)
+
+  def jsonString: String = compact(render(json))
 }
 
 object Inport {
-  def fromMap(m: IMap[String, Any]) = {
-    val port = m("input").asInstanceOf[Double].toInt
-    val id = m("id").asInstanceOf[Double].toInt
-    Inport(port, id)
-  }
+  implicit val formats = DefaultFormats
+  def fromObj(obj: JValue) = obj.extract[Inport]
 }
 
-case class Outport(port:Int, override val id:Int) extends Port with HasId
+case class Outport(oport:Int, val id:Int) extends Port 
 {
-  def json = "{\"output\":" + port + "," +
-    "\"id\":" + id + "}"
+  def json: JObject =
+    ("id" -> id) ~ ("oport" -> oport)
+  def jsonString: String =
+    compact(render(json))
 }
 
 object Outport {
-  def fromMap(m: scala.collection.immutable.Map[String, Any]) = {
-    val port = m("output").asInstanceOf[Double].toInt
-    val id = m("id").asInstanceOf[Double].toInt
-    Outport(port, id)
-  }
+  implicit val formats = DefaultFormats
+  def fromObj(obj: JValue) = obj.extract[Outport]
 }
 
-/**
-  Block consists of a set of input port and a set of output ports
-  */
-abstract sealed class Block extends HasId
+case class Block(
+  val inputs: List[Inport],
+  val outputs: List[Outport],
+  val id: Int,
+  val blockType: String,
+  val name: String)
 {
-  def json: String
-  def inputs: List[Inport]
-  def outputs: List[Outport]
-}
+  def json: JObject = 
+    ("blockType" -> blockType) ~
+  ("name" -> name) ~
+  ("inputs" -> inputs.map{_.json}) ~
+  ("outputs" -> outputs.map{_.json}) ~
+  ("id" -> id)
 
-/** Single-Input/Single-Output block
-  */
-case class SISOBlock(val input:Inport,
-  val output:Outport, val id:Int,
-  val blockType: String, val name:String ) extends Block
-{
-  override def json = 
-    "{" + "\"" + blockType + "\":" + "{\n" +
-    "\"name\":" + "\"" + name + "\",\n" + 
-    "\"inputs\": [" + input.json + "],\n" +
-    "\"outputs\": [" + output.json + "]\n" + 
-    "}" +
-    "\n}"
-
-  override lazy val inputs = List(input)
-  override lazy val outputs = List(output)
-}
-
-/** Single-Input/Mutli-Output block
-  */
-case class SIMOBlock( val input:Inport,
-  val output: List[Outport], val id: Int,
-  val blockType: String, val name: String) extends Block
-{
-  override def json = {
-    val inputStr = input.json
-    val outputStr = output.map(_.json).mkString(",\n")
-
-    "{" + "\"" + blockType + "\":" + "{\n" +
-    "\"name\":" + "\"" + name + "\",\n" +
-    "\"inputs\": [" + inputStr + "],\n" +
-    "\"outputs\": [" + outputStr + "]\n" +
-    "}" +
-    "\n}"
-  }
-  override lazy val inputs = List(input)
-  override def outputs = output
+  def jsonString: String = compact(render(json))
 }
 
 /** Companion object of block class */
 object Block {
-  /** Create a block object from parsed JSON map */
-  def fromMap(m:IMap[String, Any]):Block = {
-    val blockType = m.keySet.head
-    val content = m(blockType).asInstanceOf[
-      IMap[String, Any]]
-    val name = content("name").asInstanceOf[String]
-    val inputs = content("inputs").asInstanceOf[List[
-      IMap[String, Any]]]
-    val outputs = content("outputs").asInstanceOf[List[
-      IMap[String, Any]]]
-    if (inputs.size == 1 && outputs.size == 1) {
-      val i = Inport.fromMap(inputs.head)
-      val o = Outport.fromMap(outputs.head)
-      SISOBlock(i, o, 0, blockType, name)
-    } else {
-      // Not SISO
-      throw new RuntimeException("Cannot construct block")
-    }
-  }
+  implicit val formats = DefaultFormats
+  def fromObj(obj: JValue) = obj.extract[Block]
 }
 
 /**
   Each signal connect a source port to a destination
   inport. 
   */
-case class Signal(val source: Outport,
-  val destination: Inport, val name:String)
+case class Signal(val sourceId: Int,
+  val destinationId: Int, val name:String)
 {
-  def json: String = 
-    "{\"" + "signal" + "\":" + "{\n" +
-      "\"name\":" + "\"" + name + "\",\n" +
-      "\"source\":" + source.id + ",\n" +
-      "\"destination\":" + destination.id + "\n" +
-      "}\n" + "}"
-
+  def json: JObject =
+    ("sourceId" -> sourceId) ~
+  ("destinationId" -> destinationId) ~
+  ("name" -> name)
 }
 
 object Signal {
-  def fromMap(m:IMap[String, Any]) = {
-    val c = m("signal").asInstanceOf[IMap[String, Any]]
-    val name = c("name").asInstanceOf[String]
-    val source = c("source").asInstanceOf[Double].toInt
-    val destination = c("destination").asInstanceOf[Double].toInt
-    (name, source, destination)
-  }
+  implicit val formats = DefaultFormats
+  def fromObj(obj: JValue) = obj.extract[Signal]
 }
 
 
@@ -156,60 +98,37 @@ class Diagram {
     }
     m
   }
+
   /**
     Serialize the object to a JSON string
     */
-  def json = {
-    val s = blocks.map(_.json)
-    val sig = signals.map(_.json)
-
-    "{\"diagram\":" + "{\n" +
-      "\"blocks\":" + "[" +
-      s.mkString(",\n") + "]\n,\n" +
-      "\"signals\":" + "[" +
-      sig.mkString(",\n") + "]\n" +
-      "}\n" + "}"
-  }
-  /** Create a Diagram object from parsed JSON string
-    */
-  def fromMap(bdM: IMap[String, Any])  {
-    val content = bdM("diagram").asInstanceOf[IMap[String,Any]]
-    val blockMaps = content("blocks").asInstanceOf[List[IMap[String, Any]]]
-    blockMaps.foreach{ bM =>
-      val b = Block.fromMap(bM)
-      blocks.append(b)
-    }
-
-    val pm = portMap
-    val signalMaps = content("signals").asInstanceOf[List[IMap[String, Any]]]
-    signalMaps.foreach { sM =>
-      val (name, src, dst) = Signal.fromMap(sM)
-      (portMap(src),portMap(dst)) match {
-        case (o:Outport, i:Inport) => signals.append(Signal(o,i,name))
-        case (_,_) => throw new RuntimeException("Invalid signal") 
-      }
-    }
+  def json: JObject = {
+    val blks = blocks.map(_.json).toList
+    val sigs = signals.map(_.json).toList
+    ("blocks" -> blks) ~
+    ("signals" -> sigs)
   }
 
-  /** Parse the json string 
-    
-    NOTE Scala default implementation parse all number types
-    to double.
-    
-    */
-  def fromString(s:String) {
-    assert(blocks.isEmpty)
-    assert(signals.isEmpty)
+  def jsonString: String =
+    compact(render(json))
 
-    val m = JSON.parseFull(s)
-    m match {
-      case None => throw new RuntimeException("Cannot parse json")
-      case Some(x) => {
-        val bdM = x.asInstanceOf[IMap[String,Any]]
-        fromMap(bdM)
-      }
-    }
+}
+
+object Diagram {
+  case class DiagramJson(
+    val blocks: List[Block],
+    val signals: List[Signal]) {}
+
+  implicit val formats = DefaultFormats
+
+  def fromObj(obj: JValue) = {
+    val bj = obj.extract[DiagramJson]
+    val diagram = new Diagram()
+    diagram.blocks ++= bj.blocks
+    diagram.signals ++= bj.signals
+    diagram
   }
 
 }
+
 
